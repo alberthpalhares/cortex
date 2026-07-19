@@ -28,9 +28,10 @@ Apresente-se assim (adapte ao tom do usuário):
 
 > *"Olá! Eu sou o seu Agente Sócio e vou te ajudar a montar o **Córtex** do seu negócio — uma central de inteligência onde tudo que você já decidiu, aprendeu e planejou fica salvo e acessível por IA.*
 >
-> *Vou te fazer algumas perguntas sobre o seu negócio. Não precisa ser perfeito — a gente ajusta depois. O Córtex é vivo, cresce com o tempo.*
->
-> *Vamos começar pelo básico?"*
+> *Antes de começarmos as perguntas: **você já tem algum arquivo, PDF, planilha ou pasta com informações do seu negócio que quer que eu leia agora?** Se sim, me mostre onde está. Se não, podemos começar do zero."*
+
+- **Se o usuário indicar arquivos:** Leia os arquivos informados ANTES de prosseguir. Use as informações lidas para **pré-preencher** a entrevista. Não faça perguntas sobre o que já estiver claro nos documentos.
+- **Se o usuário não tiver arquivos:** Siga para o Bloco 1 normalmente.
 
 ---
 
@@ -163,23 +164,120 @@ Apresente-se assim (adapte ao tom do usuário):
 
 ---
 
-### ⚙️ Geração dos Arquivos
+### ⚙️ Geração dos Arquivos (OBRIGATÓRIO)
 
-Após concluir a entrevista:
+Após concluir TODOS os blocos da entrevista, você DEVE executar os passos abaixo **nesta ordem exata**. NÃO pule nenhum passo. Todos os caminhos abaixo são **relativos à raiz do workspace** (a pasta onde o usuário abriu a IDE).
 
-1. **Leia os templates** da pasta `C:\Users\alber\.agents\skills\cortex-onboarding\templates\`
-2. **Preencha cada template** com as respostas coletadas na entrevista
-3. **Gere o System Prompt Personalizado** usando o template em `resources/CORTEX_TEMPLATE.md`.
-   - Você deve salvar o mesmo conteúdo gerado em **4 arquivos diferentes** na raiz do projeto, garantindo compatibilidade com todas as IDEs:
-     - `GEMINI.md`
-     - `CLAUDE.md`
-     - `AGENTS.md`
-     - `.cursorrules` (neste, remova qualquer YAML, deixe apenas texto)
-4. **Gere o `META.md`** com o índice dos tópicos → arquivo
-5. **Inclua no META.md** a data do onboarding: `Onboarding realizado em: YYYY-MM-DD | Próxima revisão sugerida: [data + 6 meses]`
-6. **Não crie pilares opcionais** (07_Juridico, 08_Inventario, 09_Identidade_Visual) se o usuário indicou que não se aplicam
-7. **Grave todos os arquivos** na pasta raiz do workspace do usuário
-8. **Ao final, mostre:**
+---
+
+#### Passo 1: Criar a estrutura de pastas na RAIZ
+
+Crie TODAS estas pastas na **RAIZ do workspace do usuário** (o diretório principal, fora da pasta `.agents`). Use `mkdir` ou ferramentas nativas do sistema. Não presuma que elas existem:
+
+```
+./Pilares/
+./Memoria/
+./Frameworks/
+./Ativos/
+```
+
+#### Passo 2: Localizar os templates (APENAS LEITURA)
+
+Os templates de referência estão em `.agents/skills/cortex-onboarding/templates/`. 
+**REGRA DE OURO:** Estes arquivos são APENAS PARA LEITURA. Você **NUNCA** deve editar ou sobrescrever os arquivos dentro da pasta `.agents/skills/.../templates/`. Eles são moldes estáticos. Se você editar os templates, você destruirá o framework.
+
+Se o caminho relativo não funcionar, tente também:
+- `./agents/skills/cortex-onboarding/templates/` (para IDEs que não veem pastas ocultas)
+- O caminho absoluto da pasta do workspace + `.agents/skills/cortex-onboarding/templates/`
+
+#### Passo 3: Criar (ou Atualizar) os arquivos de Pilares
+
+Antes de criar um arquivo novo, a IA DEVE verificar se já existe um arquivo correspondente na pasta `./Pilares/` do workspace do usuário (mesmo que com nome ligeiramente diferente, ex: `01_estrategia_e_missao.md`).
+
+**Se o arquivo JÁ EXISTIR no workspace:**
+Não crie um novo. Leia o conteúdo do arquivo existente e **ATUALIZE-O** com as novas informações da entrevista, preservando o nome do arquivo que o usuário já tinha e as informações que já estavam lá e continuam válidas.
+
+**Se o arquivo NÃO EXISTIR no workspace:**
+Para CADA pilar que se aplica ao negócio, **copie o conteúdo do template correspondente** (da pasta de templates), **preencha com as respostas da entrevista** e salve na pasta `./Pilares/` do workspace:
+
+| Template fonte (Leitura) | Arquivo destino (Criação) | Obrigatório? |
+|---|---|---|
+| `templates/Pilares/01_Estrategia.md` | `./Pilares/01_Estrategia.md` | ✅ Sim |
+| `templates/Pilares/02_Cultura.md` | `./Pilares/02_Cultura.md` | ✅ Sim |
+| `templates/Pilares/03_Financeiro.md` | `./Pilares/03_Financeiro.md` | ✅ Sim |
+| `templates/Pilares/04_Comercial.md` | `./Pilares/04_Comercial.md` | ✅ Sim |
+| `templates/Pilares/05_Comunicacao.md` | `./Pilares/05_Comunicacao.md` | ✅ Sim |
+| `templates/Pilares/06_Operacao.md` | `./Pilares/06_Operacao.md` | ✅ Sim |
+| `templates/Pilares/07_Juridico.md` | `./Pilares/07_Juridico.md` | ⚠️ Somente se se aplica |
+| `templates/Pilares/08_Inventario.md` | `./Pilares/08_Inventario.md` | ⚠️ Somente se se aplica |
+| `templates/Pilares/09_Identidade_Visual.md` | `./Pilares/09_Identidade_Visual.md` | ⚠️ Somente se se aplica |
+
+**IMPORTANTE:** Nunca salve templates vazios. Remova os comentários HTML `<!-- -->` e substitua pelo conteúdo real. E lembre-se: use suas ferramentas de escrita de arquivo (`write_to_file`, `ctx_edit`, etc) para gravar no disco do usuário.
+
+#### Passo 4: Criar (ou Atualizar) os arquivos de Memória
+
+Mesma regra do passo anterior: se o arquivo já existir em `./Memoria/`, apenas atualize-o mesclando o conteúdo. Se não existir, crie a partir do template:
+
+| Template fonte (Leitura) | Arquivo destino (Criação) |
+|---|---|
+| `templates/Memoria/01_Decisoes.md` | `./Memoria/01_Decisoes.md` |
+| `templates/Memoria/02_Licoes.md` | `./Memoria/02_Licoes.md` |
+| `templates/Memoria/03_Projetos.md` | `./Memoria/03_Projetos.md` |
+| `templates/Memoria/04_Pessoas_Pendencias.md` | `./Memoria/04_Pessoas_Pendencias.md` |
+| `templates/Memoria/05_Registros_Gerais.md` | `./Memoria/05_Registros_Gerais.md` |
+
+Preencha `01_Decisoes.md` e `02_Licoes.md` com as respostas do Bloco 8 (Memória Inicial). Os demais podem ficar com a estrutura base (seções vazias mas com cabeçalhos).
+
+#### Passo 5: Criar o Frameworks
+
+Copie o arquivo `templates/Frameworks/BLOCOS_FUNDAMENTAIS.md` para `Frameworks/BLOCOS_FUNDAMENTAIS.md`. Este arquivo não precisa de edição — ele é usado internamente pelo Agente.
+
+#### Passo 6: Criar o META.md
+
+Crie o arquivo `Memoria/META.md` com o seguinte conteúdo (preenchido com os dados reais):
+
+```markdown
+# META — Índice do Córtex
+
+**Negócio:** [Nome do negócio]
+**Setor:** [Setor de atuação]
+**Onboarding realizado em:** [YYYY-MM-DD]
+**Próxima revisão sugerida:** [data + 6 meses no formato YYYY-MM-DD]
+
+## Mapa de Arquivos
+
+| Tópico | Arquivo |
+|--------|---------|
+| Estratégia, posicionamento, ICP, metas | `Pilares/01_Estrategia.md` |
+| Cultura, valores, equipe | `Pilares/02_Cultura.md` |
+| Custos fixos, margens, investimentos | `Pilares/03_Financeiro.md` |
+| Preços, produtos, descontos, pagamento | `Pilares/04_Comercial.md` |
+| Canais, tom de voz, conteúdo | `Pilares/05_Comunicacao.md` |
+| Fluxos de trabalho, ferramentas, POPs | `Pilares/06_Operacao.md` |
+| [Incluir 07, 08, 09 somente se foram criados] |
+| Decisões já tomadas | `Memoria/01_Decisoes.md` |
+| Erros, acertos e lições | `Memoria/02_Licoes.md` |
+| Projetos ativos e pipeline | `Memoria/03_Projetos.md` |
+| Stakeholders e tarefas pendentes | `Memoria/04_Pessoas_Pendencias.md` |
+| Anotações diversas | `Memoria/05_Registros_Gerais.md` |
+```
+
+#### Passo 7: Gerar o System Prompt (o "cérebro")
+
+Leia o template em `.agents/skills/cortex-onboarding/resources/CORTEX_TEMPLATE.md`. Preencha as variáveis (`{{NOME_NEGOCIO}}`, `{{SETOR}}`, `{{DATA_ONBOARDING}}`, etc.) com as informações reais da entrevista.
+
+**Salve o MESMO conteúdo gerado em 4 arquivos na RAIZ do workspace** (sobrescrevendo os arquivos de inicialização que já existem):
+
+| Arquivo | Compatível com |
+|---|---|
+| `GEMINI.md` | Gemini CLI, Google Antigravity |
+| `CLAUDE.md` | Claude Code |
+| `AGENTS.md` | OpenCode, Hermes, Roo Code |
+| `.cursorrules` | Cursor, Windsurf (neste, remova YAML frontmatter se houver) |
+
+#### Passo 8: Mensagem final
+
+Após criar TODOS os arquivos acima, mostre ao usuário:
 
 > *"✅ Seu Córtex está montado! Foram criados X pilares e 5 arquivos de memória.*
 >
@@ -199,3 +297,4 @@ Após concluir a entrevista:
 3. **Confirme cada bloco antes de avançar.** Mostre um resumo do que você entendeu e peça um "ok".
 4. **Respeite o tom do negócio.** Se for uma entidade sem fins lucrativos, não fale em "lucro" — fale em "sustentabilidade" e "impacto". Se for micro-empreendedor, fale como colega, não como consultor.
 5. **Registre a data do onboarding** no META.md para o ciclo de revisão.
+6. **TODOS os arquivos de Pilares e Memória devem ser criados.** A IA deve gerar cada arquivo individualmente. Não basta gerar só o system prompt — os dados do negócio ficam nos Pilares e Memória, o system prompt apenas instrui a IA a consultá-los.
