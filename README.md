@@ -18,18 +18,27 @@ O **Córtex** é um framework que transforma a IA em um **Sócio Inteligente** p
 ## Como instalar
 
 ### Pré-requisitos
-- Uma ferramenta de chat com IA que leia arquivos locais (ex: Google Antigravity, Gemini CLI, Claude Code, Cursor, etc.)
-- A pasta de skills do Córtex copiada para o seu computador
+- Uma ferramenta de chat com IA que leia arquivos locais (ex: Google Antigravity, Gemini CLI, Claude Code, Cursor, OpenCode, etc.)
+- Git instalado (opcional, mas recomendado)
 
-### Passo a passo
+### Passo a passo (Via Terminal - Recomendado)
 
-1. **Copie a pasta `cortex-onboarding`** para a pasta de skills da sua ferramenta de IA:
-   - Antigravity/Gemini: `C:\Users\SEU_USUARIO\.agents\skills\`
-   - Claude: siga o padrão de skills do Claude Code
+Abra o terminal na pasta onde quer gerenciar seu negócio e rode:
+```bash
+git clone https://github.com/alberthpalhares/cortex.git MeuNegocio
+cd MeuNegocio
+```
 
-2. **Copie também** as pastas `cortex-revisao`, `radar` e `registrar` para o mesmo local
+### Alternativa (Sem Terminal)
+1. Acesse o [repositório no GitHub](https://github.com/alberthpalhares/cortex)
+2. Clique no botão verde **"Code"** e depois em **"Download ZIP"**
+3. Extraia o ZIP na pasta do seu negócio
 
-3. **Abra um chat** com sua ferramenta de IA e diga:
+### Iniciando o Córtex
+
+Independentemente de como você baixou:
+1. Abra a pasta do seu negócio na sua ferramenta de IA (IDE)
+2. Diga no chat:
    > "Quero montar meu Córtex"
 
 4. **A IA vai conduzir uma entrevista** com você. São cerca de 25 perguntas divididas em 8 blocos. Dura cerca de 20-30 minutos.
