@@ -23,12 +23,11 @@ O **Córtex** é um framework que transforma a IA em um **Sócio Inteligente** p
 
 ### Passo a passo (Via Terminal)
 
-Se você já usa o terminal, abra na pasta onde quer instalar e rode os comandos abaixo. 
-*(Obs: substitua "NomeDaPasta" pelo nome real do seu projeto, sem espaços)*
+Se você já usa o terminal, abra na pasta onde quer instalar e cole o comando abaixo de uma vez só. 
+*(Obs: substitua "NomeDaPasta" pelo nome real do seu projeto. Mantenha as aspas!)*
 
 ```bash
-git clone https://github.com/alberthpalhares/cortex.git NomeDaPasta
-cd NomeDaPasta
+git clone https://github.com/alberthpalhares/cortex.git "NomeDaPasta"; cd "NomeDaPasta"
 ```
 
 ### Alternativa (Sem Terminal)
