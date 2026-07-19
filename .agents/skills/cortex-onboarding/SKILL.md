@@ -5,7 +5,7 @@ description: "Conduz uma entrevista inteligente para montar o Córtex de qualque
 
 # Skill: Córtex — Onboarding (Entrevista Inteligente)
 
-Você está prestes a conduzir a entrevista de montagem do **Córtex** — a Central de Inteligência de um negócio. Ao final desta entrevista, você terá gerado todos os arquivos de Pilares e Memória preenchidos, além do system prompt personalizado (`CORTEX.md`).
+Você está prestes a conduzir a entrevista de montagem do **Córtex** — a Central de Inteligência de um negócio. Ao final desta entrevista, você terá gerado todos os arquivos de Pilares e Memória preenchidos, além do system prompt personalizado.
 
 ## Filosofia da Entrevista
 
@@ -20,6 +20,21 @@ A maioria dos usuários não sabe responder perguntas como "Qual é o seu difere
 
 ---
 
+## Classificação do Tipo de Negócio
+
+Durante o Bloco 1, você deve identificar em qual categoria o negócio se encaixa. Isso impacta o vocabulário e a lógica dos blocos seguintes:
+
+| Tipo | Exemplos | Vocabulário |
+|---|---|---|
+| **Eu-presa / MEI** | Freelancer, fotógrafo, consultor solo | "Lucro", "cliente", "preço", "margem" |
+| **Pequena empresa** | Escritório com sócios, loja com funcionários | "Lucro", "equipe", "processo", "escala" |
+| **Entidade sem fins lucrativos** | Fotoclube, ONG, associação, projeto social | "Sustentabilidade", "impacto", "membros", "associados", "parceiros institucionais" |
+| **Negócio recorrente** | SaaS, academia, consultoria mensal, escola | "MRR", "churn", "assinantes", "planos", "retenção" |
+
+Adapte TODAS as perguntas dos blocos seguintes ao tipo identificado. Esta tabela é sua referência de tom.
+
+---
+
 ## Fluxo Completo da Entrevista
 
 ### 🟢 Abertura
@@ -30,25 +45,32 @@ Apresente-se assim (adapte ao tom do usuário):
 >
 > *Antes de começarmos as perguntas: **você já tem algum arquivo, PDF, planilha ou pasta com informações do seu negócio que quer que eu leia agora?** Se sim, me mostre onde está. Se não, podemos começar do zero."*
 
-- **Se o usuário indicar arquivos:** Leia os arquivos informados ANTES de prosseguir. Use as informações lidas para **pré-preencher** a entrevista. Não faça perguntas sobre o que já estiver claro nos documentos.
-- **Se o usuário não tiver arquivos:** Siga para o Bloco 1 normalmente.
+#### Se o usuário indicar arquivos:
+1. Leia TODOS os arquivos indicados ANTES de prosseguir.
+2. Após a leitura, apresente ao usuário um resumo do que você entendeu sobre o negócio.
+3. Diga: *"Baseado nesses documentos, já tenho uma boa base sobre o [nome]. Vou te mostrar bloco a bloco o que entendi e você só ajusta o que precisar. Vai ser bem mais rápido!"*
+4. A partir daqui, em cada bloco, em vez de fazer perguntas abertas, **mostre o que você já sabe** e peça validação/complemento.
+
+#### Se o usuário não tiver arquivos:
+Siga para o Bloco 1 normalmente.
 
 ---
 
 ### Bloco 1: Identidade (3 perguntas)
 
-**Objetivo:** Entender quem é a empresa, setor e porte.
+**Objetivo:** Entender quem é a empresa, setor, porte e **tipo de negócio** (ver tabela acima).
 
 1. *"Qual o nome do seu negócio? E em que área você atua?"*
-   - Exemplos: "PALHARES — Fotografia e Vídeo Corporativo", "Martins & Associados — Advocacia Tributária", "Clube Potiguar de Fotografia — Entidade sem fins lucrativos"
+   - Exemplos: "PALHARES — Fotografia e Vídeo Corporativo", "Martins & Associados — Advocacia Tributária", "Clube Potiguar de Fotografia — Entidade sem fins lucrativos", "FitPlus — Academia de bairro"
    
-2. *"Há quanto tempo você está nesse mercado? E como é a operação hoje — você toca tudo sozinho, tem sócios, equipe?"*
-   - Ajude: Se disser "sozinho", registre como "Modelo Eu-presa". Se disser "tenho 3 funcionários", registre modelo e tamanho.
+2. *"Há quanto tempo você está nesse mercado? E como é a operação hoje — você toca tudo sozinho, tem sócios, equipe, diretoria?"*
+   - Ajude: Se disser "sozinho", registre como "Modelo Eu-presa". Se disser "tenho 3 funcionários", registre modelo e tamanho. Se for entidade, pergunte sobre a diretoria e o número de membros.
 
 3. *"Se você tivesse que explicar o que faz em uma frase para alguém no elevador, o que diria?"*
    - Ajude: Se travar, sugira algo como: *"Talvez algo como: 'Ajudo [público] a resolver [problema] através de [serviço]'?"*
+   - Se for entidade: *"Talvez: 'Reunimos [tipo de pessoas] para [missão principal]'?"*
 
-**Ao final do bloco:** Mostre um resumo e peça confirmação.
+**Ao final do bloco:** Mostre um resumo, **confirme o tipo de negócio** e peça confirmação.
 
 ---
 
@@ -58,55 +80,74 @@ Apresente-se assim (adapte ao tom do usuário):
 
 1. *"O que faz os seus clientes te escolherem em vez do concorrente? O que você faz diferente?"*
    - Ajude: *"Pense naquilo que seus melhores clientes sempre elogiam. É a qualidade? O atendimento? A rapidez? O preço? A especialização?"*
-   - Exemplos: "Meu diferencial é que eu entendo o negócio do cliente, não sou apenas técnico", "Sou o único na cidade que faz X"
+   - Se for entidade: *"O que faz as pessoas quererem ser membros do [nome]? O que vocês oferecem que nenhum outro grupo oferece?"*
 
-2. *"Quem é o seu cliente ideal? Me descreva o perfil de quem paga bem e te dá prazer atender."*
-   - Ajude: *"Pense no seu melhor cliente dos últimos 12 meses. O que ele tem em comum com outros bons clientes? Faixa de renda? Profissão? Região?"*
-   - Se for entidade sem fins lucrativos: *"Quem é o membro/associado ideal? E quem são os parceiros institucionais?"*
+2. *"Quem é o seu público ideal?"*
+   - Para negócios: *"Me descreva o perfil de quem paga bem e te dá prazer atender."*
+   - Para entidades: *"Quem é o membro/associado ideal? E quem são os parceiros institucionais?"*
+   - Para recorrentes: *"Quem é o assinante que fica por anos e nunca cancela? O que ele tem em comum com outros bons clientes?"*
 
 3. *"Onde você quer estar daqui a 3 anos com esse negócio?"*
    - Ajude: *"Não precisa ser um plano formal. Exemplos: 'Quero parar de editar e contratar alguém', 'Quero dobrar o faturamento', 'Quero abrir uma filial', 'Quero ter tempo livre'"*
    - Se for entidade: *"O que a entidade quer ter alcançado daqui a 3 anos? Mais membros? Reconhecimento? Sede própria?"*
 
 4. *"Tem algo que você faz HOJE que não quer mais fazer? Ou algum tipo de trabalho/cliente que você recusa?"*
-   - Ajude: *"Isso é importante para a IA saber o que NÃO sugerir pra você. Ex: 'Não faço casamentos', 'Não atendo pessoa física', 'Não pego projetos com prazo menor que 15 dias'"*
+   - Ajude: *"Isso é importante para a IA saber o que NÃO sugerir pra você."*
 
 **Ao final do bloco:** Mostre um resumo e peça confirmação.
 
 ---
 
-### Bloco 3: Comercial (4 perguntas)
+### Bloco 3: Comercial e Sustentabilidade Financeira
 
-**Objetivo:** Mapear produtos, preços e regras de pagamento.
+**Objetivo:** Mapear como o dinheiro entra e as regras que o cercam.
+
+> ⚠️ **ATENÇÃO:** A forma deste bloco muda drasticamente conforme o tipo de negócio. Siga a ramificação correta:
+
+#### 3A — Para negócios com venda direta (Eu-presa, Pequena empresa):
 
 1. *"Me lista os seus principais produtos ou serviços. Se puder, separe em: produto de entrada (o mais barato), produto principal (o que mais vende) e produto premium (o mais caro)."*
-   - Ajude: *"Não precisa ter os 3. Muitos negócios têm só 1 ou 2. Me diz o que você oferece que eu te ajudo a organizar."*
-   - Se for entidade: *"Quais são as atividades, eventos ou serviços que a entidade oferece?"*
+   - Ajude: *"Não precisa ter os 3. Muitos negócios têm só 1 ou 2."*
 
 2. *"Me passa os valores ou faixas de preço de cada um. Pode ser aproximado."*
-   - Ajude: *"Se preferir não registrar valores exatos agora, podemos colocar faixas como 'R$ 500-1.000' ou 'a partir de R$ 2.000'"*
-   - Se for entidade sem fins lucrativos: *"Tem mensalidade? Taxa de inscrição? Valores de eventos?"*
 
-3. *"Como seus clientes pagam? Tem regra de sinal, parcelamento, prazo?"*
-   - Ajude: *"Exemplos: '50% de sinal e 50% na entrega', 'Pagamento só via PIX', 'Parcelo em até 12x', 'Faturamento 30 dias para empresas'"*
+3. *"Seus clientes pagam por projeto (pontual) ou de forma recorrente (mensal, plano, assinatura)?"*
+   - Se pontual: *"Como funciona o pagamento? Tem sinal? Parcelamento?"*
+   - Se recorrente: *"Quais são os planos? Qual o ticket médio mensal?"*
 
-4. *"Você dá desconto? Se sim, tem algum limite? Tipo 'nunca abaixo de X%'?"*
-   - Ajude: *"Se não tem política definida, tudo bem. A gente pode criar uma agora. O importante é que a IA saiba o seu piso para não sugerir promoções que te prejudiquem."*
+4. *"Você dá desconto? Se sim, tem algum limite?"*
+   - Ajude: *"O importante é que a IA saiba o seu piso para não sugerir promoções que te prejudiquem."*
+
+#### 3B — Para entidades sem fins lucrativos:
+
+1. *"De onde vem o dinheiro para manter a entidade funcionando? Mensalidades? Editais? Doações? Patrocínios? Eventos pagos?"*
+   - Ajude: *"Pode ter mais de uma fonte. Me conta todas."*
+
+2. *"Quanto custa manter a entidade por mês, aproximadamente? Quais são os custos fixos?"*
+   - Ajude: *"Pense em: aluguel de espaço, plataformas, seguros, materiais, eventos."*
+
+3. *"Tem alguma meta financeira? Por exemplo: 'Precisamos de X membros pagantes para cobrir os custos' ou 'Queremos aprovar 2 editais por ano'."*
+
+4. *"Tem alguma regra financeira definida? Ex: 'Nunca comprometemos mais de 30% do caixa em um único evento'."*
 
 ---
 
-### Bloco 4: Comunicação (3 perguntas)
+### Bloco 4: Comunicação e Identidade Visual (4 perguntas)
 
-**Objetivo:** Entender como o negócio se comunica com o mundo.
+**Objetivo:** Entender como o negócio se comunica com o mundo e se tem marca visual.
 
-1. *"Como seus clientes te encontram hoje? Indicação? Google? Instagram? Eventos?"*
-   - Ajude: *"Pense nos últimos 5 clientes. Como cada um chegou até você?"*
+1. *"Como seus clientes/membros te encontram hoje? Indicação? Google? Instagram? Eventos?"*
+   - Ajude: *"Pense nos últimos 5 clientes/membros. Como cada um chegou até você?"*
 
 2. *"Em quais canais você está presente? Site, Instagram, WhatsApp, LinkedIn, YouTube?"*
    - Ajude: *"Não precisa estar em todos. Me diz onde você já está ativo e onde gostaria de estar."*
 
 3. *"Se a IA fosse escrever um post ou um e-mail no seu nome, qual deveria ser o tom? Formal? Descontraído? Técnico? Inspiracional?"*
-   - Ajude: *"Exemplos: 'Profissional mas acessível', 'Formal e corporativo', 'Descontraído e educativo', 'Autoridade técnica sem ser arrogante'"*
+   - Ajude: *"Exemplos: 'Profissional mas acessível', 'Formal e corporativo', 'Descontraído e educativo'"*
+
+4. *"Você já tem um logo, cores definidas ou um manual de marca? Se sim, me conta os detalhes (quais cores, qual fonte, onde estão os arquivos)."*
+   - Se sim → Pilar `09_Identidade_Visual.md` será criado
+   - Se não: *"Sem problema. Quando surgir a necessidade, podemos adicionar esse pilar depois."*
 
 ---
 
@@ -117,8 +158,9 @@ Apresente-se assim (adapte ao tom do usuário):
 1. *"Quais são as principais ferramentas, softwares ou apps que você usa no dia a dia do negócio?"*
    - Ajude: *"Pense em tudo: agenda (Google Calendar?), comunicação (WhatsApp?), financeiro (planilha? app?), produção (Canva? Photoshop? Excel?), armazenamento (Google Drive? Dropbox?)"*
 
-2. *"Me descreve o passo a passo do seu serviço mais comum. Do momento que o cliente te procura até a entrega final."*
+2. *"Me descreve o passo a passo do seu serviço/atividade mais comum. Do início ao fim."*
    - Ajude: *"Exemplo: '1. Cliente entra em contato → 2. Faço orçamento → 3. Recebo sinal → 4. Executo → 5. Entrego → 6. Recebo restante'"*
+   - Se for entidade: *"Exemplo: '1. Membro propõe atividade → 2. Diretoria aprova → 3. Divulga → 4. Executa → 5. Registra'"*
 
 3. *"Tem algum equipamento, estoque ou material físico importante que você usa no trabalho? Ou é tudo digital?"*
    - Se responder sim: o pilar `08_Inventario.md` será criado
@@ -132,23 +174,25 @@ Apresente-se assim (adapte ao tom do usuário):
 
 1. *"Se eu fosse trabalhar com você amanhã, quais são as 3 regras que você me daria logo de cara?"*
    - Ajude: *"Pense no que te irrita quando alguém faz errado. Ex: 'Pontualidade é sagrada', 'Nunca prometa o que não pode cumprir', 'O cliente sempre recebe resposta no mesmo dia'"*
+   - Se for entidade: *"Se um novo membro entrasse hoje, quais são as 3 regras de ouro que ele precisa saber?"*
 
 2. *"Você trabalha com parceiros, freelancers ou fornecedores? Se sim, o que você exige deles?"*
    - Se disser não: *"Entendi, por enquanto é tudo na sua mão. Quando precisar contratar, essas regras já vão estar documentadas aqui."*
 
 3. *"Tem algo que é tolerância zero pra você? Aquilo que se acontecer, encerra a relação na hora?"*
-   - Exemplos: *"Desonestidade com cliente", "Não cumprir prazo sem avisar", "Falar mal da empresa"*
+   - Exemplos: *"Desonestidade com cliente", "Não cumprir prazo sem avisar", "Falar mal da entidade publicamente"*
 
 ---
 
 ### Bloco 7: Jurídico (2 perguntas, opcional)
 
 **Objetivo:** Registrar proteções legais e regulamentações. Pergunte antes:
-*"Você tem alguma questão jurídica importante no seu negócio? Contratos, regulamentações do setor, proteções legais?"*
+*"Você tem alguma questão jurídica importante no seu negócio? Contratos, regulamentações do setor, proteções legais, estatuto?"*
 - Se disser não ou "não sei": *"Sem problema. Podemos adicionar isso depois. Quando precisar de um contrato ou cláusula, o Córtex vai te lembrar que essa parte está em branco."* → Pular bloco.
 
-1. *"Você usa algum contrato padrão com clientes? Se sim, quais são as cláusulas mais importantes?"*
-2. *"Existe alguma regulamentação específica do seu setor que a IA precisa saber? Ex: LGPD, CRM, OAB, Anvisa, etc."*
+1. *"Você usa algum contrato ou termo padrão? Se sim, quais são as cláusulas mais importantes?"*
+   - Se for entidade: *"Vocês têm estatuto? Regimento interno? Algo que rege o funcionamento oficial?"*
+2. *"Existe alguma regulamentação específica do seu setor que a IA precisa saber? Ex: LGPD, CRM, OAB, Anvisa, Lei de Direitos Autorais, etc."*
 
 ---
 
@@ -158,15 +202,32 @@ Apresente-se assim (adapte ao tom do usuário):
 
 1. *"Tem alguma regra ou decisão que você já tomou e não quer esquecer? Pode ser sobre preço, política, fornecedor, qualquer coisa."*
    - Ajude: *"Ex: 'Decidi que nunca mais trabalho com o fornecedor X', 'Meu preço mínimo é R$ 500', 'Sempre peço sinal antes de começar'"*
+   - Se for entidade: *"Ex: 'Decidimos que não aceitamos mais de 50 membros', 'Todo evento precisa ter pelo menos 2 meses de antecedência'"*
 
 2. *"E alguma lição que aprendeu da maneira difícil? Um erro que não quer repetir?"*
-   - Ajude: *"Ex: 'Perdi um cliente porque demorei 3 dias pra responder', 'Fiz um trabalho sem contrato e me arrependi'"*
+   - Ajude: *"Ex: 'Perdi um cliente porque demorei 3 dias pra responder', 'Fizemos um evento sem patrocínio e tomamos prejuízo'"*
+
+---
+
+### Bloco 9: Pilares Extras (opcional, pergunta aberta)
+
+**Objetivo:** Capturar áreas específicas do negócio que não se encaixam nos 9 pilares padrão.
+
+*"Tem mais alguma área importante do seu negócio que a gente não cobriu? Algo específico do seu setor que merece um capítulo próprio?"*
+   - Ajude com exemplos baseados no setor: 
+     - Fotoclube: *"Ex: Histórico de Exposições, Registro Institucional, Calendário de Atividades"*
+     - Restaurante: *"Ex: Cardápio e Fornecedores de Insumos, Normas Sanitárias"*
+     - Escola: *"Ex: Grade Curricular, Perfil dos Alunos"*
+   - Se sim → crie pilares adicionais numerados a partir de `10_` (ex: `Pilares/10_Historico_Exposicoes.md`)
+   - Se não → prossiga para a geração de arquivos
 
 ---
 
 ### ⚙️ Geração dos Arquivos (OBRIGATÓRIO)
 
 Após concluir TODOS os blocos da entrevista, você DEVE executar os passos abaixo **nesta ordem exata**. NÃO pule nenhum passo. Todos os caminhos abaixo são **relativos à raiz do workspace** (a pasta onde o usuário abriu a IDE).
+
+> ⚠️ **REGRA MÁXIMA:** Você DEVE usar suas ferramentas de escrita de arquivo (`write_to_file`, `ctx_edit`, terminal `mkdir`, etc) para criar os arquivos FISICAMENTE no computador do usuário. NÃO basta exibir o conteúdo no chat. Se você apenas imprimir o texto na tela sem gravar no disco, a tarefa FALHOU.
 
 ---
 
@@ -192,9 +253,9 @@ Se o caminho relativo não funcionar, tente também:
 
 #### Passo 3: Criar a estrutura oficial de Pilares
 
-O Córtex possui uma estrutura padronizada e rígida. Se o usuário já tiver arquivos antigos no workspace (ex: `01_estrategia_e_missao.md`), **NÃO** atualize esses arquivos e **NÃO** preserve esses nomes. Eles servem **apenas como fonte de conhecimento**.
+O Córtex possui uma estrutura padronizada. Se o usuário já tiver arquivos antigos no workspace (ex: `01_estrategia_e_missao.md`), **NÃO** atualize esses arquivos e **NÃO** preserve esses nomes. Eles serviram **apenas como fonte de conhecimento** durante a entrevista. Agora você cria a estrutura oficial do Córtex.
 
-Para CADA pilar que se aplica ao negócio, **copie o conteúdo do template correspondente**, **preencha com as respostas da entrevista e com as informações migradas dos arquivos antigos do usuário**, e salve na pasta `./Pilares/` com o nome oficial:
+Para CADA pilar que se aplica ao negócio, **leia o template correspondente**, **preencha com as respostas da entrevista e com as informações migradas dos arquivos antigos do usuário**, e salve na pasta `./Pilares/` com o nome oficial:
 
 | Template fonte (Leitura) | Arquivo oficial do Córtex (Criação) | Obrigatório? |
 |---|---|---|
@@ -207,12 +268,13 @@ Para CADA pilar que se aplica ao negócio, **copie o conteúdo do template corre
 | `templates/Pilares/07_Juridico.md` | `./Pilares/07_Juridico.md` | ⚠️ Somente se se aplica |
 | `templates/Pilares/08_Inventario.md` | `./Pilares/08_Inventario.md` | ⚠️ Somente se se aplica |
 | `templates/Pilares/09_Identidade_Visual.md` | `./Pilares/09_Identidade_Visual.md` | ⚠️ Somente se se aplica |
+| *(sem template)* | `./Pilares/10_[Nome_Custom].md` | ⚠️ Pilares extras do Bloco 9 |
 
-**IMPORTANTE:** Nunca salve templates vazios. Remova os comentários HTML `<!-- -->` e substitua pelo conteúdo real. E lembre-se: use suas ferramentas de escrita de arquivo (`write_to_file`, `ctx_edit`, etc) para gravar no disco do usuário.
+**IMPORTANTE:** Nunca salve templates vazios. Remova os comentários HTML `<!-- -->` e substitua pelo conteúdo real. Use suas ferramentas de escrita de arquivo para gravar no disco do usuário.
 
 #### Passo 4: Criar os arquivos oficiais de Memória
 
-A mesma regra se aplica: ignore os nomes de arquivos antigos e crie a estrutura oficial, usando os antigos apenas como referência de conteúdo.
+Crie a estrutura oficial de Memória usando os templates como base e preenchendo com o conteúdo real:
 
 | Template fonte (Leitura) | Arquivo oficial do Córtex (Criação) |
 |---|---|
@@ -222,21 +284,22 @@ A mesma regra se aplica: ignore os nomes de arquivos antigos e crie a estrutura 
 | `templates/Memoria/04_Pessoas_Pendencias.md` | `./Memoria/04_Pessoas_Pendencias.md` |
 | `templates/Memoria/05_Registros_Gerais.md` | `./Memoria/05_Registros_Gerais.md` |
 
-Preencha `01_Decisoes.md` e `02_Licoes.md` com as respostas do Bloco 8 (Memória Inicial). Os demais podem ficar com a estrutura base (seções vazias mas com cabeçalhos).
+Preencha `01_Decisoes.md` e `02_Licoes.md` com as respostas do Bloco 8. Os demais podem ficar com a estrutura base (seções vazias mas com cabeçalhos).
 
 #### Passo 5: Criar o Frameworks
 
-Copie o arquivo `templates/Frameworks/BLOCOS_FUNDAMENTAIS.md` para `Frameworks/BLOCOS_FUNDAMENTAIS.md`. Este arquivo não precisa de edição — ele é usado internamente pelo Agente.
+Copie o arquivo `templates/Frameworks/BLOCOS_FUNDAMENTAIS.md` para `./Frameworks/BLOCOS_FUNDAMENTAIS.md`. Este arquivo não precisa de edição.
 
 #### Passo 6: Criar o META.md
 
-Crie o arquivo `Memoria/META.md` com o seguinte conteúdo (preenchido com os dados reais):
+Crie o arquivo `./Memoria/META.md` com o seguinte conteúdo (preenchido com os dados reais):
 
 ```markdown
 # META — Índice do Córtex
 
 **Negócio:** [Nome do negócio]
 **Setor:** [Setor de atuação]
+**Tipo:** [Eu-presa | Pequena empresa | Entidade sem fins lucrativos | Negócio recorrente]
 **Onboarding realizado em:** [YYYY-MM-DD]
 **Próxima revisão sugerida:** [data + 6 meses no formato YYYY-MM-DD]
 
@@ -244,13 +307,13 @@ Crie o arquivo `Memoria/META.md` com o seguinte conteúdo (preenchido com os dad
 
 | Tópico | Arquivo |
 |--------|---------|
-| Estratégia, posicionamento, ICP, metas | `Pilares/01_Estrategia.md` |
+| Estratégia, posicionamento, público-alvo, metas | `Pilares/01_Estrategia.md` |
 | Cultura, valores, equipe | `Pilares/02_Cultura.md` |
 | Custos fixos, margens, investimentos | `Pilares/03_Financeiro.md` |
 | Preços, produtos, descontos, pagamento | `Pilares/04_Comercial.md` |
 | Canais, tom de voz, conteúdo | `Pilares/05_Comunicacao.md` |
 | Fluxos de trabalho, ferramentas, POPs | `Pilares/06_Operacao.md` |
-| [Incluir 07, 08, 09 somente se foram criados] |
+| [Incluir 07, 08, 09, 10+ somente se foram criados] |
 | Decisões já tomadas | `Memoria/01_Decisoes.md` |
 | Erros, acertos e lições | `Memoria/02_Licoes.md` |
 | Projetos ativos e pipeline | `Memoria/03_Projetos.md` |
@@ -261,6 +324,8 @@ Crie o arquivo `Memoria/META.md` com o seguinte conteúdo (preenchido com os dad
 #### Passo 7: Gerar o System Prompt (o "cérebro")
 
 Leia o template em `.agents/skills/cortex-onboarding/resources/CORTEX_TEMPLATE.md`. Preencha as variáveis (`{{NOME_NEGOCIO}}`, `{{SETOR}}`, `{{DATA_ONBOARDING}}`, etc.) com as informações reais da entrevista.
+
+Se o negócio tiver pilares customizados (10+), adicione-os na seção `{{LISTA_PILARES}}` do template.
 
 **Salve o MESMO conteúdo gerado em 4 arquivos na RAIZ do workspace** (sobrescrevendo os arquivos de inicialização que já existem):
 
@@ -273,9 +338,25 @@ Leia o template em `.agents/skills/cortex-onboarding/resources/CORTEX_TEMPLATE.m
 
 #### Passo 8: Mensagem final
 
-Após criar TODOS os arquivos acima, mostre ao usuário:
+Após criar TODOS os arquivos acima, mostre ao usuário a lista completa do que foi criado:
 
-> *"✅ Seu Córtex está montado! Foram criados X pilares e 5 arquivos de memória.*
+> *"✅ Seu Córtex está montado! Aqui está tudo o que foi criado:*
+>
+> *📁 Pilares (X arquivos):*
+> - *`Pilares/01_Estrategia.md` — Posicionamento, público-alvo, metas*
+> - *`Pilares/02_Cultura.md` — Valores e regras de conduta*
+> - *[listar cada um]*
+>
+> *📁 Memória (5 arquivos):*
+> - *`Memoria/META.md` — Índice geral*
+> - *`Memoria/01_Decisoes.md` — X decisões registradas*
+> - *[listar cada um]*
+>
+> *📁 Frameworks (1 arquivo):*
+> - *`Frameworks/BLOCOS_FUNDAMENTAIS.md`*
+>
+> *🧠 System prompts (4 arquivos):*
+> - *`GEMINI.md`, `CLAUDE.md`, `AGENTS.md`, `.cursorrules`*
 >
 > *A partir de agora, você pode:*
 > - *Dizer **radar** para ver o panorama do negócio*
@@ -291,6 +372,8 @@ Após criar TODOS os arquivos acima, mostre ao usuário:
 1. **Nunca pule um bloco sem perguntar.** Mesmo os opcionais — pergunte se se aplica antes de pular.
 2. **Nunca deixe o usuário sem resposta.** Se ele travar, ofereça sugestões. Se ele disser "não sei", proponha uma versão provisória.
 3. **Confirme cada bloco antes de avançar.** Mostre um resumo do que você entendeu e peça um "ok".
-4. **Respeite o tom do negócio.** Se for uma entidade sem fins lucrativos, não fale em "lucro" — fale em "sustentabilidade" e "impacto". Se for micro-empreendedor, fale como colega, não como consultor.
+4. **Adapte-se ao tipo de negócio.** Use a tabela de classificação para ajustar vocabulário, tom e perguntas. Nunca fale "lucro" para uma ONG.
 5. **Registre a data do onboarding** no META.md para o ciclo de revisão.
-6. **TODOS os arquivos de Pilares e Memória devem ser criados.** A IA deve gerar cada arquivo individualmente. Não basta gerar só o system prompt — os dados do negócio ficam nos Pilares e Memória, o system prompt apenas instrui a IA a consultá-los.
+6. **TODOS os arquivos de Pilares e Memória devem ser CRIADOS FISICAMENTE.** Use suas ferramentas de escrita de arquivo. Não basta imprimir no chat.
+7. **Nunca edite os templates.** Os arquivos dentro de `.agents/skills/.../templates/` são somente leitura.
+8. **Arquivos existentes do usuário são FONTE, não DESTINO.** Se o workspace já tinha arquivos antigos, use-os como referência de conteúdo mas crie os novos arquivos com a nomenclatura oficial do Córtex.

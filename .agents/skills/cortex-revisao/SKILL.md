@@ -9,7 +9,7 @@ Esta skill conduz uma **revisão estruturada** da base de conhecimento do Córte
 
 ## Quando Acionar
 
-- O `META.md` contém a data do onboarding e a data sugerida para revisão
+- O `Memoria/META.md` contém a data do onboarding e a data sugerida para revisão
 - Se a data de revisão já passou ou está próxima (< 2 semanas), o Agente Sócio deve sugerir proativamente
 - O usuário também pode acionar manualmente a qualquer momento
 
@@ -27,8 +27,9 @@ A revisão NÃO refaz o onboarding do zero. Ela:
 
 ### Preparação
 
-1. Leia o `Memoria/META.md` para saber a data do último onboarding/revisão
-2. Leia cada arquivo de `Pilares/` que existe (pule os que não foram criados)
+1. Leia o `Memoria/META.md` para saber o nome do negócio e a data do último onboarding/revisão
+2. Liste todos os arquivos `.md` dentro de `Pilares/` para saber quais pilares existem (incluindo pilares customizados além dos 9 padrão)
+3. Leia cada arquivo de pilar encontrado
 
 ### Para Cada Pilar
 
@@ -47,9 +48,10 @@ Siga este roteiro:
 
 Após percorrer os pilares existentes:
 
-1. Pergunte: *"Surgiu alguma área nova no negócio que ainda não está registrada? Por exemplo: Jurídico? Inventário? Identidade Visual? Comunicação?"*
-2. Se sim → conduza um mini-onboarding apenas daquele pilar novo
-3. Se não → siga para a Memória
+1. Pergunte: *"Surgiu alguma área nova no negócio que ainda não está registrada?"*
+2. Dê exemplos baseados no que NÃO existe ainda (Jurídico? Inventário? Identidade Visual? Ou algo totalmente diferente?)
+3. Se sim → conduza um mini-onboarding apenas daquele pilar novo
+4. Se não → siga para a Memória
 
 ### Revisão Rápida da Memória
 
@@ -62,19 +64,19 @@ Após percorrer os pilares existentes:
 
 ### Fechamento
 
-1. **Atualize a data de revisão** no `META.md`:
+1. **Atualize a data de revisão** no `Memoria/META.md`:
    ```
    Última revisão: YYYY-MM-DD
    Próxima revisão sugerida: [data + 6 meses]
    ```
-2. **Atualize o `CORTEX.md`** (system prompt) se as datas de revisão estiverem hardcoded lá
+2. **Atualize TODOS os system prompts da raiz** (`GEMINI.md`, `CLAUDE.md`, `AGENTS.md`, `.cursorrules`) com as datas de revisão atualizadas, se estiverem hardcoded lá.
 3. **Mostre um resumo** do que foi alterado:
 
 > *"✅ Revisão do Córtex concluída!*
 >
 > *Alterações feitas:*
-> - *Pilar Comercial: Atualizado preço do serviço X de R$ 500 para R$ 650*
-> - *Pilar Cultura: Adicionado novo valor 'Resposta em até 4h'*
+> - *Pilar Comercial: Atualizado preço do serviço X*
+> - *Pilar Cultura: Adicionado novo valor*
 > - *3 pendências movidas para Resolvidas*
 > - *Projeto Y arquivado*
 >
@@ -86,3 +88,4 @@ Após percorrer os pilares existentes:
 2. **Seja rápido.** Se o pilar não mudou, gaste 10 segundos nele e siga.
 3. **Registre tudo.** Qualquer alteração feita deve ser refletida tanto no pilar quanto no META.md.
 4. **Sugira.** Se o usuário cresceu (contratou, mudou de modelo), sugira proativamente que novos pilares sejam adicionados.
+5. **Caminhos relativos.** Todos os caminhos são relativos à raiz do workspace. Nunca use caminhos absolutos.

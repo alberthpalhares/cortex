@@ -12,6 +12,7 @@ O **Córtex** é um framework que transforma a IA em um **Sócio Inteligente** p
 - 📝 **Registro rápido:** Diga "registra que decidi X" e a IA grava nos arquivos certos
 - 🧠 **Memória viva:** A IA nunca esquece suas regras de preço, lições e decisões
 - 🔄 **Revisão semestral:** A cada 6 meses, o sistema te convida a revisar o que mudou
+- 🏗️ **Pilares customizados:** Se o seu negócio tem áreas específicas que não se encaixam nos 9 pilares padrão, o Córtex cria pilares extras sob medida
 
 ---
 
@@ -42,15 +43,17 @@ Independentemente de como você baixou:
 2. Diga no chat:
    > "Quero montar meu Córtex"
 
-4. **A IA vai conduzir uma entrevista** com você. São cerca de 25 perguntas divididas em 8 blocos. Dura cerca de 20-30 minutos.
+3. **A IA vai conduzir uma entrevista** com você. São cerca de 25 perguntas divididas em 9 blocos. Dura cerca de 20-30 minutos.
 
-5. **Ao final**, a IA gera automaticamente:
+> 💡 **Já tem documentos sobre o negócio?** (PDFs, planilhas, arquivos antigos) — Não precisa organizar nada. Na abertura, o Agente vai te perguntar se você tem algo pronto e, se indicar onde estão, ele lê tudo e já pré-preenche a entrevista pra você. Vai ser bem mais rápido!
+
+4. **Ao final**, a IA gera automaticamente:
    - Todos os arquivos de Pilares (Estratégia, Comercial, Cultura, etc.)
    - Todos os arquivos de Memória (Decisões, Lições, Projetos, Pendências)
-   - O arquivo `CORTEX.md` (as instruções personalizadas da IA para o SEU negócio)
+   - O system prompt personalizado para a sua IA
    - O `META.md` (índice de tudo)
 
-6. **Pronto!** A partir de agora:
+5. **Pronto!** A partir de agora:
    - Diga **"radar"** para ver o panorama
    - Diga **"registra que..."** para anotar decisões ou lições
    - Pergunte qualquer coisa sobre o negócio
@@ -58,13 +61,28 @@ Independentemente de como você baixou:
 
 ---
 
+## Funciona em qualquer IDE
+
+O Córtex gera automaticamente system prompts compatíveis com múltiplas ferramentas:
+
+| Arquivo | Compatível com |
+|---|---|
+| `GEMINI.md` | Gemini CLI, Google Antigravity |
+| `CLAUDE.md` | Claude Code |
+| `AGENTS.md` | OpenCode, Hermes, Roo Code |
+| `.cursorrules` | Cursor, Windsurf |
+
+Você pode alternar entre ferramentas no mesmo projeto sem reconfigurar nada.
+
+---
+
 ## Estrutura de pastas gerada
 
 ```
 SeuNegocio/
-├── CORTEX.md                 ← Instruções da IA (gerado pelo onboarding)
+├── GEMINI.md / CLAUDE.md / AGENTS.md  ← System prompts (gerados pelo onboarding)
 ├── Pilares/
-│   ├── 01_Estrategia.md      ← Posicionamento, ICP, metas
+│   ├── 01_Estrategia.md      ← Posicionamento, público-alvo, metas
 │   ├── 02_Cultura.md         ← Valores, equipe, conduta
 │   ├── 03_Financeiro.md      ← Custos fixos, margens
 │   ├── 04_Comercial.md       ← Preços, pagamento, descontos
@@ -72,7 +90,8 @@ SeuNegocio/
 │   ├── 06_Operacao.md        ← Fluxos de trabalho, ferramentas
 │   ├── 07_Juridico.md        ← Contratos, regulamentações (opcional)
 │   ├── 08_Inventario.md      ← Equipamentos, estoque (opcional)
-│   └── 09_Identidade_Visual.md ← Manual de marca (opcional)
+│   ├── 09_Identidade_Visual.md ← Manual de marca (opcional)
+│   └── 10_[Custom].md        ← Pilares extras do seu setor (opcional)
 ├── Memoria/
 │   ├── META.md               ← Índice rápido (a IA lê primeiro)
 │   ├── 01_Decisoes.md        ← Regras já batidas
@@ -102,11 +121,13 @@ SeuNegocio/
 
 ## Para quem é
 
-- ✅ Micro-empreendedores (MEI, autônomos, freelancers)
-- ✅ Pequenas empresas com poucos sócios
-- ✅ Entidades sem fins lucrativos (associações, clubes, ONGs)
-- ✅ Profissionais liberais (advogados, médicos, consultores)
-- ✅ Qualquer pessoa que toma decisões de negócio e não quer esquecê-las
+O Córtex se adapta automaticamente ao tipo de negócio durante a entrevista:
+
+- ✅ **Eu-presas** — MEI, autônomos, freelancers
+- ✅ **Pequenas empresas** — com sócios e equipe
+- ✅ **Entidades sem fins lucrativos** — associações, clubes, ONGs, projetos sociais
+- ✅ **Negócios recorrentes** — academias, SaaS, consultorias mensais, escolas
+- ✅ **Profissionais liberais** — advogados, médicos, consultores
 
 ---
 
