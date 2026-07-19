@@ -190,17 +190,13 @@ Se o caminho relativo não funcionar, tente também:
 - `./agents/skills/cortex-onboarding/templates/` (para IDEs que não veem pastas ocultas)
 - O caminho absoluto da pasta do workspace + `.agents/skills/cortex-onboarding/templates/`
 
-#### Passo 3: Criar (ou Atualizar) os arquivos de Pilares
+#### Passo 3: Criar a estrutura oficial de Pilares
 
-Antes de criar um arquivo novo, a IA DEVE verificar se já existe um arquivo correspondente na pasta `./Pilares/` do workspace do usuário (mesmo que com nome ligeiramente diferente, ex: `01_estrategia_e_missao.md`).
+O Córtex possui uma estrutura padronizada e rígida. Se o usuário já tiver arquivos antigos no workspace (ex: `01_estrategia_e_missao.md`), **NÃO** atualize esses arquivos e **NÃO** preserve esses nomes. Eles servem **apenas como fonte de conhecimento**.
 
-**Se o arquivo JÁ EXISTIR no workspace:**
-Não crie um novo. Leia o conteúdo do arquivo existente e **ATUALIZE-O** com as novas informações da entrevista, preservando o nome do arquivo que o usuário já tinha e as informações que já estavam lá e continuam válidas.
+Para CADA pilar que se aplica ao negócio, **copie o conteúdo do template correspondente**, **preencha com as respostas da entrevista e com as informações migradas dos arquivos antigos do usuário**, e salve na pasta `./Pilares/` com o nome oficial:
 
-**Se o arquivo NÃO EXISTIR no workspace:**
-Para CADA pilar que se aplica ao negócio, **copie o conteúdo do template correspondente** (da pasta de templates), **preencha com as respostas da entrevista** e salve na pasta `./Pilares/` do workspace:
-
-| Template fonte (Leitura) | Arquivo destino (Criação) | Obrigatório? |
+| Template fonte (Leitura) | Arquivo oficial do Córtex (Criação) | Obrigatório? |
 |---|---|---|
 | `templates/Pilares/01_Estrategia.md` | `./Pilares/01_Estrategia.md` | ✅ Sim |
 | `templates/Pilares/02_Cultura.md` | `./Pilares/02_Cultura.md` | ✅ Sim |
@@ -214,11 +210,11 @@ Para CADA pilar que se aplica ao negócio, **copie o conteúdo do template corre
 
 **IMPORTANTE:** Nunca salve templates vazios. Remova os comentários HTML `<!-- -->` e substitua pelo conteúdo real. E lembre-se: use suas ferramentas de escrita de arquivo (`write_to_file`, `ctx_edit`, etc) para gravar no disco do usuário.
 
-#### Passo 4: Criar (ou Atualizar) os arquivos de Memória
+#### Passo 4: Criar os arquivos oficiais de Memória
 
-Mesma regra do passo anterior: se o arquivo já existir em `./Memoria/`, apenas atualize-o mesclando o conteúdo. Se não existir, crie a partir do template:
+A mesma regra se aplica: ignore os nomes de arquivos antigos e crie a estrutura oficial, usando os antigos apenas como referência de conteúdo.
 
-| Template fonte (Leitura) | Arquivo destino (Criação) |
+| Template fonte (Leitura) | Arquivo oficial do Córtex (Criação) |
 |---|---|
 | `templates/Memoria/01_Decisoes.md` | `./Memoria/01_Decisoes.md` |
 | `templates/Memoria/02_Licoes.md` | `./Memoria/02_Licoes.md` |
