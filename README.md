@@ -22,13 +22,25 @@ O **Córtex** é um framework que transforma a IA em um **Sócio Inteligente** p
 - Uma ferramenta de chat com IA que leia arquivos locais (ex: Google Antigravity, Gemini CLI, Claude Code, Cursor, OpenCode, etc.)
 - Git instalado (opcional, mas recomendado)
 
-### Passo a passo (Via Terminal)
+### Passo a Passo (Via Terminal)
 
-Se você já usa o terminal, abra na pasta onde quer instalar e cole o comando abaixo de uma vez só. 
-*(Obs: substitua "NomeDaPasta" pelo nome real do seu projeto. Mantenha as aspas!)*
+Abra o terminal na pasta onde deseja instalar e execute o comando correspondente ao seu sistema operacional:
 
+> 💡 **Obs:** Substitua `"NomeDaPasta"` pelo nome real da pasta do seu negócio (mantenha as aspas para evitar erros se o nome tiver espaços!).
+
+#### 🍎 macOS & 🐧 Linux (Bash / Zsh)
 ```bash
+git clone https://github.com/alberthpalhares/cortex.git "NomeDaPasta" && cd "NomeDaPasta"
+```
+
+#### 🪟 Windows (PowerShell)
+```powershell
 git clone https://github.com/alberthpalhares/cortex.git "NomeDaPasta"; cd "NomeDaPasta"
+```
+
+#### 🪟 Windows (Prompt de Comando / CMD)
+```cmd
+git clone https://github.com/alberthpalhares/cortex.git "NomeDaPasta" && cd "NomeDaPasta"
 ```
 
 ### Alternativa (Sem Terminal)
