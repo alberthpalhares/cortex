@@ -16,6 +16,25 @@ O **Córtex** é um framework que transforma a IA em um **Sócio Inteligente** p
 
 ---
 
+## Por que a IA precisa ser local?
+
+O Córtex **não funciona dentro do ChatGPT, Gemini ou Claude pelo navegador** (GPTs, Gems, Projects). Ele precisa de uma ferramenta de IA que rode no seu computador e tenha acesso ao seu disco local. Aqui está o porquê:
+
+| Capacidade | 🧠 Córtex (Local) | 🌐 GPT / Gem (Browser) |
+|---|---|---|
+| **Ler seus arquivos automaticamente** | ✅ Lê Pilares, Memória e Frameworks direto do disco | ❌ Você precisa copiar e colar ou fazer upload manual toda vez |
+| **Gravar decisões e lições** | ✅ Diga "registra que..." e a IA grava no arquivo certo | ❌ A IA responde, mas não salva nada. Você precisa anotar por conta |
+| **Memória entre sessões** | ✅ Permanente — os arquivos ficam no seu computador para sempre | ⚠️ Limitada — depende da memória do chat, que pode ser apagada ou esquecida |
+| **Radar de pendências** | ✅ A IA cruza projetos, pendências e prazos em tempo real | ❌ Não tem acesso aos seus dados atualizados |
+| **Atualização automática** | ✅ A IA edita os arquivos quando você autoriza | ❌ Você precisa re-enviar os arquivos toda vez que algo muda |
+| **Privacidade dos dados** | ✅ Tudo fica no seu disco, sem upload para nuvem | ⚠️ Seus dados ficam nos servidores da OpenAI, Google ou Anthropic |
+| **System prompt persistente** | ✅ O "cérebro" fica salvo em arquivo e nunca se perde | ⚠️ Pode ser sobrescrito por atualizações da plataforma |
+| **Multi-ferramenta** | ✅ Mesmo projeto funciona no Gemini CLI, Claude Code, Cursor, etc. | ❌ Preso a uma única plataforma (seu GPT não funciona no Claude) |
+
+> 💡 **Resumindo:** Um GPT ou Gem é como um estagiário que lê suas anotações uma vez e depois esquece. O Córtex é um sócio que tem acesso permanente ao escritório, lê os arquivos sempre que precisa, e ainda anota as coisas novas pra você.
+
+---
+
 ## Como instalar
 
 ### Pré-requisitos
