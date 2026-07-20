@@ -69,6 +69,7 @@ O Córtex gera automaticamente system prompts compatíveis com múltiplas ferram
 |---|---|
 | `GEMINI.md` | Gemini CLI, Google Antigravity |
 | `CLAUDE.md` | Claude Code |
+| `CODEX.md` | OpenAI Codex, Codex CLI, ChatGPT CLI |
 | `AGENTS.md` | OpenCode, Hermes, Roo Code |
 | `.cursorrules` | Cursor, Windsurf |
 
@@ -80,7 +81,7 @@ Você pode alternar entre ferramentas no mesmo projeto sem reconfigurar nada.
 
 ```
 SeuNegocio/
-├── GEMINI.md / CLAUDE.md / AGENTS.md  ← System prompts (gerados pelo onboarding)
+├── GEMINI.md / CLAUDE.md / CODEX.md / AGENTS.md  ← System prompts (gerados pelo onboarding)
 ├── Pilares/
 │   ├── 01_Estrategia.md      ← Posicionamento, público-alvo, metas
 │   ├── 02_Cultura.md         ← Valores, equipe, conduta

@@ -327,12 +327,13 @@ Leia o template em `.agents/skills/cortex-onboarding/resources/CORTEX_TEMPLATE.m
 
 Se o negócio tiver pilares customizados (10+), adicione-os na seção `{{LISTA_PILARES}}` do template.
 
-**Salve o MESMO conteúdo gerado em 4 arquivos na RAIZ do workspace** (sobrescrevendo os arquivos de inicialização que já existem):
+**Salve o MESMO conteúdo gerado em 5 arquivos na RAIZ do workspace** (sobrescrevendo os arquivos de inicialização que já existem):
 
 | Arquivo | Compatível com |
 |---|---|
 | `GEMINI.md` | Gemini CLI, Google Antigravity |
 | `CLAUDE.md` | Claude Code |
+| `CODEX.md` | OpenAI Codex, Codex CLI, ChatGPT CLI |
 | `AGENTS.md` | OpenCode, Hermes, Roo Code |
 | `.cursorrules` | Cursor, Windsurf (neste, remova YAML frontmatter se houver) |
 
@@ -355,8 +356,8 @@ Após criar TODOS os arquivos acima, mostre ao usuário a lista completa do que 
 > *📁 Frameworks (1 arquivo):*
 > - *`Frameworks/BLOCOS_FUNDAMENTAIS.md`*
 >
-> *🧠 System prompts (4 arquivos):*
-> - *`GEMINI.md`, `CLAUDE.md`, `AGENTS.md`, `.cursorrules`*
+> *🧠 System prompts (5 arquivos):*
+> - *`GEMINI.md`, `CLAUDE.md`, `CODEX.md`, `AGENTS.md`, `.cursorrules`*
 >
 > *A partir de agora, você pode:*
 > - *Dizer **radar** para ver o panorama do negócio*

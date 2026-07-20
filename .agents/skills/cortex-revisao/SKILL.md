@@ -69,7 +69,7 @@ Após percorrer os pilares existentes:
    Última revisão: YYYY-MM-DD
    Próxima revisão sugerida: [data + 6 meses]
    ```
-2. **Atualize TODOS os system prompts da raiz** (`GEMINI.md`, `CLAUDE.md`, `AGENTS.md`, `.cursorrules`) com as datas de revisão atualizadas, se estiverem hardcoded lá.
+2. **Atualize TODOS os system prompts da raiz** (`GEMINI.md`, `CLAUDE.md`, `CODEX.md`, `AGENTS.md`, `.cursorrules`) com as datas de revisão atualizadas, se estiverem hardcoded lá.
 3. **Mostre um resumo** do que foi alterado:
 
 > *"✅ Revisão do Córtex concluída!*
