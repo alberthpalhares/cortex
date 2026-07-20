@@ -288,7 +288,7 @@ Preencha `01_Decisoes.md` e `02_Licoes.md` com as respostas do Bloco 8. Os demai
 
 #### Passo 5: Criar o Frameworks
 
-Copie o arquivo `templates/Frameworks/BLOCOS_FUNDAMENTAIS.md` para `./Frameworks/BLOCOS_FUNDAMENTAIS.md`. Este arquivo não precisa de edição.
+Copie o arquivo `templates/Frameworks/PROTOCOLO_AUTONOMIA.md` para `./Frameworks/PROTOCOLO_AUTONOMIA.md`. Este arquivo não precisa de edição.
 
 #### Passo 6: Criar o META.md
 
@@ -354,7 +354,7 @@ Após criar TODOS os arquivos acima, mostre ao usuário a lista completa do que 
 > - *[listar cada um]*
 >
 > *📁 Frameworks (1 arquivo):*
-> - *`Frameworks/BLOCOS_FUNDAMENTAIS.md`*
+> - *`Frameworks/PROTOCOLO_AUTONOMIA.md`*
 >
 > *🧠 System prompts (5 arquivos):*
 > - *`GEMINI.md`, `CLAUDE.md`, `CODEX.md`, `AGENTS.md`, `.cursorrules`*

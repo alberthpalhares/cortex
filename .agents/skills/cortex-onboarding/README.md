@@ -71,7 +71,7 @@ SeuNegocio/
 │   ├── 04_Pessoas_Pendencias.md ← Pendências e stakeholders
 │   └── 05_Registros_Gerais.md ← Anotações diversas
 ├── Frameworks/
-│   └── BLOCOS_FUNDAMENTAIS.md ← Motor de engenharia de prompt
+│   └── PROTOCOLO_AUTONOMIA.md ← Protocolo de Ação Automática da IA
 └── Ativos/                    ← Seus logos, templates, etc.
 ```
 
