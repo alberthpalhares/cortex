@@ -112,6 +112,7 @@ Você pode alternar entre ferramentas no mesmo projeto sem reconfigurar nada.
 
 ```
 SeuNegocio/
+├── CHANGELOG.md               ← Histórico de versões e melhorias do framework
 ├── GEMINI.md / CLAUDE.md / CODEX.md / AGENTS.md  ← System prompts (gerados pelo onboarding)
 ├── Pilares/
 │   ├── 01_Estrategia.md      ← Posicionamento, público-alvo, metas
