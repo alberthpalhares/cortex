@@ -11,6 +11,7 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 ### Adicionado
 - **Instalador NPX CLI (`npx cortex-ai init` / `npx cortex init`):** Utilitário CLI nativo em Node.js ([bin/cli.js](file:///e:/60-69%20PROJETOS/62%20Projetos%20conclu%C3%ADdos/62.10%20C%C3%B3rtex/bin/cli.js)) para inicializar a estrutura completa do Córtex em qualquer diretório com um único comando.
 - **Configuração de Pacote NPM (`cortex-ai`):** Arquivo [package.json](file:///e:/60-69%20PROJETOS/62%20Projetos%20conclu%C3%ADdos/62.10%20C%C3%B3rtex/package.json) configurado com o nome de pacote `cortex-ai` e atalhos de binários `cortex`, `cortex-ai` e `cortex-framework`.
+- **Guia de Contribuição Open-Source:** Criado [CONTRIBUTING.md](file:///e:/60-69%20PROJETOS/62%20Projetos%20conclu%C3%ADdos/62.10%20C%C3%B3rtex/CONTRIBUTING.md) estabelecendo as diretrizes de desenvolvimento da comunidade, regras de economia de tokens e passo a passo para Pull Requests.
 
 ## [0.3.0] - 2026-07-20
 

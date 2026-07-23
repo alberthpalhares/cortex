@@ -174,6 +174,14 @@ O Córtex se adapta automaticamente ao tipo de negócio durante a entrevista:
 
 ---
 
+## Como contribuir
+
+Quer ajudar a evoluir o Córtex? Aceitamos contribuições de novas skills, templates de pilares para setores específicos, novos frameworks estratégicos e melhorias no CLI.
+
+Leia o nosso [Guia de Contribuição (CONTRIBUTING.md)](CONTRIBUTING.md) para saber como enviar o seu Pull Request.
+
+---
+
 ## Créditos
 
 Criado por **Alberth Klinsmann** — Mercadólogo e Produtor Audiovisual.
