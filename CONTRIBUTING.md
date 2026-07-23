@@ -13,7 +13,7 @@ Buscamos contribuidores que compartilhem da nossa missão: **democratizar a inte
 ### Quem pode contribuir
 - **Designers de IA & Prompt Engineers:** Entendem a estrutura de system prompts, instruções concisas e orquestração de assistentes.
 - **Empreendedores & Especialistas de Nicho:** Trazem frameworks reais de mercado (vendas, finanças, jurídico, marketing, operações).
-- **Desenvolvedores:** Criam automações, skills agnósticas e melhorias para o CLI (`npx cortex init`).
+- **Desenvolvedores:** Criam automações, skills agnósticas e melhorias para a CLI (`npx cortex init`).
 
 Antes de começar, leia o [README.md](README.md) para entender a arquitetura do projeto.
 
@@ -29,62 +29,102 @@ npx cortex init
 
 **Arquivos Markdown locais são a fonte da verdade por design.**
 
-### O que aceitamos
+---
 
-- 🛠️ **Novas Skills Agnósticas (`.agents/skills/`):** Habilidades operacionais reutilizáveis (ex: auditoria de SEO, gerador de propostas comerciais, análise de métricas, integração com WhatsApp).
-- 🏛️ **Pilares Específicos por Setor (`Pilares/`):** Templates customizados de pilares para nichos do mercado (ex: *Saúde & Clínicas, Imobiliárias, E-commerce, Advocacia, Infoprodutos*).
-- 📐 **Novos Frameworks Estratégicos (`Frameworks/`):** Métodos e protocolos de gestão (ex: *OKRs, Matriz Eisenhower, Planejamento de Lançamentos, Funil de Vendas*).
-- 💻 **Suporte a Novas IDEs / Assistentes CLI:** Adição de system prompts para novas ferramentas de IA local.
-- 🚀 **Melhorias no CLI (`bin/cli.js`):** Correções e aprimoramentos para o instalador `npx cortex init`.
-- 📚 **Documentação & Exemplos:** Melhorias no README, guias e exemplos de uso.
+## 🔒 Segurança e Privacidade em Primeiro Lugar
 
-### Impacto no consumo de tokens
+Segurança é um requisito inegociável no Córtex. Ao submeter qualquer código, skill ou template:
 
-> ⚠️ **IMPORTANTE:** Cada skill, pilar ou framework adicionado ao projeto é carregado na janela de contexto da IA. Mantenha todas as instruções **curtas, diretas e extremamente objetivas**. Evite textos prolixos para economizar tokens e garantir respostas rápidas.
+1. **NUNCA inclua chaves de API, senhas ou segredos:** Todas as credenciais devem ser solicitadas dinamicamente ao usuário ou lidas de variáveis de ambiente locais.
+2. **Respeite os limites do disco local:** Skills não devem tentar ler ou alterar arquivos fora do diretório do projeto do usuário sem consentimento explícito.
+3. **NENHUM envio oculto de dados:** É proibido incluir scripts de telemetria, rastreamento ou envio de dados do negócio para servidores de terceiros.
+
+---
+
+## 🛠️ Padrão e Anatomia de Skills (`.agents/skills/`)
+
+Skills são o principal formato de contribuição no Córtex. Elas devem ser salvas na pasta `.agents/skills/<nome-da-skill>/SKILL.md`.
+
+### Estrutura obrigatória de uma Skill:
+
+```markdown
+---
+name: nome-da-skill-kebab-case
+description: Descrição curta em 1 ou 2 frases sobre o que a skill faz e quando acioná-la.
+---
+
+# Nome da Skill
+
+## Quando Usar
+Descreva os gatilhos de linguagem natural que acionam esta skill (ex: "gerar proposta", "analisar concorrente").
+
+## Instruções para a IA
+1. Passo 1 curto e objetivo.
+2. Passo 2 com regras de formatação.
+
+## Formato de Saída
+Defina a estrutura esperada do resultado gerado.
+```
+
+### Economia de Tokens (Context Overhead)
+> ⚠️ **IMPORTANTE:** Cada skill adicionada é carregada no contexto da IA. Mantenha as instruções **curtas, diretas e extremamente objetivas**. Prefira bullet points a parágrafos longos.
+
+---
+
+## 💻 Compatibilidade Multi-IDE
+
+O Córtex é compatível com múltiplos assistentes de IA local ([AGENTS.md](AGENTS.md), [GEMINI.md](GEMINI.md), [CLAUDE.md](CLAUDE.md), [CODEX.md](CODEX.md), [.cursorrules](.cursorrules)).
+
+- Se você alterar regras de inicialização ou o system prompt base, certifique-se de replicar a alteração em todos os arquivos de instrução correspondentes para manter a sincronia.
+
+---
+
+## O que aceitamos
+
+- 🛠️ **Novas Skills Agnósticas (`.agents/skills/`):** Habilidades operacionais reutilizáveis.
+- 🏛️ **Pilares Específicos por Setor (`Pilares/`):** Templates customizados de pilares para nichos (ex: *Saúde & Clínicas, Imobiliárias, E-commerce, Advocacia, Infoprodutos*).
+- 📐 **Novos Frameworks Estratégicos (`Frameworks/`):** Métodos e protocolos de gestão (ex: *OKRs, Matriz Eisenhower, Funil de Vendas*).
+- 🚀 **Melhorias no CLI (`bin/cli.js`):** Aprimoramentos para o instalador `npx cortex init`.
+- 📚 **Documentação & Exemplos:** Melhorias no README, guias e traduções.
 
 ---
 
 ## O que NÃO se encaixa
 
-Antes de iniciar uma contribuição, pergunte-se: *"Isso mantém o Córtex simples, local e acessível para qualquer pessoa?"*
-
-Exemplos do que **não aceitamos**:
-
 - ❌ Substituir arquivos Markdown por bancos de dados pesados (PostgreSQL, SQLite, Redis, etc.).
 - ❌ Exigir servidores externos ou dependências pagas obrigatórias para o funcionamento básico.
-- ❌ Adicionar frameworks complexos de Node.js no CLI que inflem a instalação.
+- ❌ Adicionar frameworks complexos no CLI que inflem a instalação.
 
 ---
 
 ## Como enviar sua contribuição (Passo a Passo)
 
-1. **Faça um Fork** deste repositório para o seu GitHub.
-2. **Crie uma Branch** para a sua funcionalidade:
+1. **Abra uma Issue primeiro:** Para mudanças grandes ou novas skills complexas, [abra uma issue](https://github.com/alberthpalhares/cortex/issues) para discutir com a comunidade antes de começar.
+2. **Faça um Fork** deste repositório para o seu GitHub.
+3. **Crie uma Branch** para a sua funcionalidade:
    ```bash
    git checkout -b feature/minha-nova-skill
    ```
-3. **Faça as alterações e teste localmente** na sua IDE com o Córtex.
-4. **Faça o Commit** das suas mudanças com mensagens claras:
+4. **Faça as alterações e teste localmente** na sua IDE.
+5. **Faça o Commit** das suas mudanças com mensagens claras (padrão Conventional Commits):
    ```bash
-   git commit -m "feat: adiciona skill de analise-de-concorrentes"
+   git commit -m "feat(skill): adiciona skill de proposta-comercial"
    ```
-5. **Envie para o seu Fork (Push):**
+6. **Envie para o seu Fork (Push):**
    ```bash
    git push origin feature/minha-nova-skill
    ```
-6. **Abra um Pull Request (PR)** detalhando o que foi adicionado e como testar.
+7. **Abra um Pull Request (PR)** detalhando as mudanças e como testar.
 
 ---
 
 ## Ideias de Contribuição para Começar
 
-Se você quer contribuir mas não sabe por onde começar, aqui estão algumas ideias que a comunidade adoraria receber:
-
 **Skills Recomendadas (`.agents/skills/`):**
-- `post-social-media`: Gerador de posts para Instagram/LinkedIn com tom de voz do Pilar de Comunicação.
-- `proposta-comercial`: Gerador automático de propostas em PDF/Markdown com base nas regras do Pilar Comercial.
+- `post-social-media`: Gerador de posts para redes sociais alinhado ao Pilar de Comunicação.
+- `proposta-comercial`: Gerador automático de propostas comerciais em PDF/Markdown.
 - `analisador-dre`: Leitor e diagnosticador de demonstrativos financeiros (DRE/Planilhas).
-- `pesquisa-mercado`: Skill de Deep Research para mapeamento de concorrentes.
+- `pesquisa-mercado`: Skill de Deep Research para mapeamento de concorrência.
 
 ---
 
