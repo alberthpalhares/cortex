@@ -1,10 +1,11 @@
 {
-  "name": "cortex-framework",
+  "name": "cortex-ai",
   "version": "0.4.0",
   "description": "O cérebro estratégico do seu negócio impulsionado por IA local e autônoma.",
   "main": "bin/cli.js",
   "bin": {
     "cortex": "bin/cli.js",
+    "cortex-ai": "bin/cli.js",
     "cortex-framework": "bin/cli.js"
   },
   "keywords": [

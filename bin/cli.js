@@ -28,7 +28,7 @@ function printHelp() {
 ${bold}${cyan}🧠 Córtex CLI — Central de Inteligência do Seu Negócio${reset} (v${VERSION})
 
 ${bold}USO:${reset}
-  $ npx cortex-framework init [nome-da-pasta]
+  $ npx cortex-ai init [nome-da-pasta]
   $ npx cortex init [nome-da-pasta]
 
 ${bold}COMANDOS:${reset}
@@ -37,8 +37,8 @@ ${bold}COMANDOS:${reset}
   ${green}--version, -v${reset}  Exibe a versão atual do CLI.
 
 ${bold}EXEMPLOS:${reset}
-  $ npx cortex-framework init
-  $ npx cortex-framework init MinhaEmpresa
+  $ npx cortex-ai init
+  $ npx cortex-ai init MinhaEmpresa
   $ npx cortex init "Meu Negocio"
 `);
 }
