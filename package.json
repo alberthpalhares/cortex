@@ -1,0 +1,48 @@
+{
+  "name": "cortex-framework",
+  "version": "0.4.0",
+  "description": "O cérebro estratégico do seu negócio impulsionado por IA local e autônoma.",
+  "main": "bin/cli.js",
+  "bin": {
+    "cortex": "bin/cli.js",
+    "cortex-framework": "bin/cli.js"
+  },
+  "keywords": [
+    "cortex",
+    "ai",
+    "gemini",
+    "claude",
+    "cursor",
+    "codex",
+    "framework",
+    "business-intelligence",
+    "agentic-ai"
+  ],
+  "author": "Alberth Klinsmann",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alberthpalhares/cortex.git"
+  },
+  "bugs": {
+    "url": "https://github.com/alberthpalhares/cortex/issues"
+  },
+  "homepage": "https://github.com/alberthpalhares/cortex#readme",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "files": [
+    "bin",
+    ".agents",
+    "Frameworks",
+    "Memoria",
+    "Pilares",
+    "Ativos",
+    "AGENTS.md",
+    "GEMINI.md",
+    "CLAUDE.md",
+    "CODEX.md",
+    ".cursorrules",
+    "README.md"
+  ]
+}

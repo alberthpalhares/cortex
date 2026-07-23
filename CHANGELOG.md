@@ -6,6 +6,12 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-07-22
+
+### Adicionado
+- **Instalador NPX CLI (`npx cortex-framework init`):** Utilitário CLI nativo em Node.js ([bin/cli.js](file:///e:/60-69%20PROJETOS/62%20Projetos%20conclu%C3%ADdos/62.10%20C%C3%B3rtex/bin/cli.js)) para inicializar a estrutura completa do Córtex em qualquer diretório com um único comando.
+- **Configuração de Pacote NPM:** Arquivo [package.json](file:///e:/60-69%20PROJETOS/62%20Projetos%20conclu%C3%ADdos/62.10%20C%C3%B3rtex/package.json) configurado com os binários `cortex` e `cortex-framework` para distribuição pública via npm.
+
 ## [0.3.0] - 2026-07-20
 
 ### Adicionado

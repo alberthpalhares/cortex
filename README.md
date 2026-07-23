@@ -38,14 +38,24 @@ O Córtex **não funciona dentro do ChatGPT, Gemini ou Claude pelo navegador** (
 ## Como instalar
 
 ### Pré-requisitos
-- Uma ferramenta de chat com IA que leia arquivos locais (ex: Google Antigravity, Gemini CLI, Claude Code, Cursor, OpenCode, etc.)
-- Git instalado (opcional, mas recomendado)
+- Node.js instalado (recomendado) ou Git
+- Uma ferramenta de chat com IA que leia arquivos locais (ex: Google Antigravity, Gemini CLI, Claude Code, Cursor, OpenCode, Codex, etc.)
 
-### Passo a Passo (Via Terminal)
+---
 
-Abra o terminal na pasta onde deseja instalar e execute o comando correspondente ao seu sistema operacional:
+### Método 1: Via NPX (Recomendado 🚀)
 
-> 💡 **Obs:** Substitua `"NomeDaPasta"` pelo nome real da pasta do seu negócio (mantenha as aspas para evitar erros se o nome tiver espaços!).
+Abra o terminal (Windows, macOS ou Linux) e execute:
+
+```bash
+npx cortex-framework init "NomeDaPasta"
+```
+
+> 💡 **Obs:** Se já estiver dentro da pasta do seu negócio, basta rodar `npx cortex-framework init`.
+
+---
+
+### Método 2: Via Git Clone
 
 #### 🍎 macOS & 🐧 Linux (Bash / Zsh)
 ```bash
