@@ -45,13 +45,13 @@ O Córtex **não funciona dentro do ChatGPT, Gemini ou Claude pelo navegador** (
 
 ### Método 1: Via NPX (Recomendado 🚀)
 
-Abra o terminal (Windows, macOS ou Linux) e execute:
+Abra o terminal na pasta do seu negócio e execute:
 
 ```bash
-npx cortex-ai init "NomeDaPasta"
+npx cortex init
 ```
 
-> 💡 **Obs:** Você também pode usar `npx cortex init "NomeDaPasta"`. Se já estiver dentro da pasta do seu negócio, basta rodar `npx cortex-ai init`.
+> 💡 **Dica:** Se quiser criar uma nova pasta para o negócio, basta passar o nome no final: `npx cortex init MinhaEmpresa`.
 
 ---
 
