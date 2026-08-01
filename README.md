@@ -187,7 +187,16 @@ O framework (`.agents/`) e os dados do seu negócio (`Pilares/`, `Memoria/`, `At
 | `revisar córtex` | Inicia a revisão semestral dos pilares |
 | `saúde do córtex` | Raio-x do que ainda falta preencher |
 | `consolidar memória` | Arquiva itens antigos sem apagar histórico |
+| `gerar proposta para [cliente]` | Monta uma proposta comercial pronta para envio |
+| `analisar DRE` | Cruza uma planilha financeira com suas metas de margem |
+| `pesquisar concorrência` | Mapeia concorrentes e atualiza o Panorama Competitivo |
 | `ajuda` | Lista todos os comandos disponíveis |
+
+---
+
+## Veja um Córtex pronto
+
+Quer ver como fica um Córtex maduro antes de montar o seu? [`examples/estudio-lumen/`](examples/estudio-lumen/) é um negócio fictício (um estúdio de fotografia e vídeo corporativo) com todos os Pilares, a Memória e o "cérebro" completos — inclusive com o Panorama Competitivo e as skills de proposta comercial em ação.
 
 ---
 

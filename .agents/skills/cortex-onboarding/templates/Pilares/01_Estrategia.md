@@ -8,3 +8,6 @@
 
 ## Objetivos Estratégicos (Visão de 3 Anos)
 <!-- Onde a empresa deve estar daqui a 3 anos? Quais são as metas principais? -->
+
+## Panorama Competitivo
+<!-- Preenchido pela skill "pesquisa-mercado", ou manualmente se você já conhece bem seus concorrentes. Fica em branco até a primeira pesquisa. -->

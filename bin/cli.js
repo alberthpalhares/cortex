@@ -14,7 +14,7 @@ const red = '\x1b[31m';
 const dim = '\x1b[2m';
 
 const PKG_PATH = path.join(__dirname, '..', 'package.json');
-let VERSION = '0.8.0';
+let VERSION = '0.9.0';
 try {
   const pkg = JSON.parse(fs.readFileSync(PKG_PATH, 'utf8'));
   VERSION = pkg.version || VERSION;
@@ -23,13 +23,8 @@ try {
 const args = process.argv.slice(2);
 const command = args[0];
 
-// Camada de FRAMEWORK: código e templates que o CLI pode atualizar com segurança.
-// NUNCA inclui Pilares/, Memoria/, Ativos/, Frameworks/ (raiz) ou os system prompts
-// de raiz (AGENTS.md, CLAUDE.md, CODEX.md, GEMINI.md, .cursorrules) — depois do
-// onboarding, esses arquivos guardam o "cérebro" e os dados do negócio do usuário.
 const FRAMEWORK_ITEMS = ['.agents'];
 
-// Camada de DADOS DO USUÁRIO: nunca tocada por `cortex update`.
 const USER_DATA_ITEMS = [
   'Frameworks',
   'Memoria',
@@ -45,8 +40,6 @@ const USER_DATA_ITEMS = [
 const CORTEX_META_DIR = '.cortex';
 const CORTEX_VERSION_FILE = 'version.json';
 
-// Os 5 arquivos de raiz que, a partir da fonte única, viram ponteiros para
-// Frameworks/CEREBRO.md em vez de guardar o conteúdo completo do system prompt.
 const POINTER_ROOT_FILES = ['GEMINI.md', 'CLAUDE.md', 'CODEX.md', 'AGENTS.md', '.cursorrules'];
 const CEREBRO_PATH = path.join('Frameworks', 'CEREBRO.md');
 
@@ -164,7 +157,6 @@ function readVersionFile(targetDir) {
   }
 }
 
-// Lista recursivamente todos os arquivos (caminhos relativos) dentro de um diretório.
 function listFilesRecursive(dir, base) {
   base = base || dir;
   let results = [];
@@ -181,10 +173,6 @@ function listFilesRecursive(dir, base) {
   return results;
 }
 
-// Compara a camada de framework do template (pacote instalado) com a do projeto
-// alvo e classifica cada arquivo em: novos, alterados, sem mudança e preservados
-// (arquivos do usuário dentro de .agents/ que não existem no template — ex: skills
-// customizadas que o usuário criou por conta própria).
 function diffFrameworkLayer(templateDir, targetDir) {
   const novos = [];
   const alterados = [];
@@ -217,7 +205,6 @@ function diffFrameworkLayer(templateDir, targetDir) {
       targetFiles.delete(relPath);
     }
 
-    // O que sobrou em targetFiles existe no projeto do usuário mas não no template.
     for (const relPath of targetFiles) {
       preservados.push(path.join(item, relPath));
     }
@@ -263,7 +250,6 @@ async function runInit() {
     }
   }
 
-  // Lista de itens a serem copiados do template para a pasta de destino
   const itemsToCopy = [
     '.agents',
     'Frameworks',

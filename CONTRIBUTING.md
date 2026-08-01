@@ -122,9 +122,10 @@ O Córtex é compatível com múltiplos assistentes de IA local ([AGENTS.md](AGE
 
 **Skills Recomendadas (`.agents/skills/`):**
 - `post-social-media`: Gerador de posts para redes sociais alinhado ao Pilar de Comunicação.
-- `proposta-comercial`: Gerador automático de propostas comerciais em PDF/Markdown.
-- `analisador-dre`: Leitor e diagnosticador de demonstrativos financeiros (DRE/Planilhas).
-- `pesquisa-mercado`: Skill de Deep Research para mapeamento de concorrência.
+- `analisador-contrato`: Leitor de contratos que aponta cláusulas fora do padrão registrado em `07_Juridico.md`.
+- `onboarding-cliente`: Roteiro de boas-vindas para clientes recorrentes, reaproveitando Comunicação + Identidade Visual.
+
+> ✅ `proposta-comercial`, `analisador-dre` e `pesquisa-mercado` já existem em `.agents/skills/` — confira o [Córtex de exemplo](examples/estudio-lumen/) para ver todas as skills em ação num negócio fictício.
 
 ---
 
