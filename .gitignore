@@ -26,6 +26,9 @@
 node_modules/
 *.log
 
+# Documentos internos (não fazem parte do framework público)
+/AUDITORIA.md
+
 # Arquivos de sistema operacional
 .DS_Store
 Thumbs.db
