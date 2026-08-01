@@ -26,6 +26,9 @@ Esta skill responde rapidamente "o que dá para fazer aqui" sem exigir que o usu
 🔄 `revisar córtex` — inicia a revisão semestral dos pilares
 🩺 `saúde do córtex` — raio-x do que está faltando preencher
 🗄️ `consolidar memória` — arquiva itens antigos sem apagar histórico
+🧾 `gerar proposta para [cliente]` — monta uma proposta comercial pronta para envio
+📊 `analisar DRE` — cruza uma planilha financeira com suas metas de margem
+🔍 `pesquisar concorrência` — mapeia concorrentes e atualiza o Panorama Competitivo
 💬 Pergunte qualquer coisa sobre o negócio — eu consulto os seus Pilares e Memória antes de responder
 
 👉 [Se souber algo do contexto — ex: uma revisão atrasada ou pendências críticas — sugira isso como próximo passo aqui]

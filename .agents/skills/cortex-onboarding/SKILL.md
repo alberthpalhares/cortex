@@ -123,6 +123,8 @@ Faça só estas 4 perguntas, uma de cada vez:
 
 **Ao final do bloco:** Mostre um resumo e peça confirmação.
 
+> 💡 A seção "Panorama Competitivo" de `Pilares/01_Estrategia.md` normalmente fica em branco neste momento — ela é preenchida depois pela skill `pesquisa-mercado`. Só a preencha aqui se o usuário já trouxer informação concreta sobre concorrentes espontaneamente.
+
 ---
 
 ### Bloco 3: Comercial e Sustentabilidade Financeira
