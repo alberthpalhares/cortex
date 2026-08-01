@@ -14,7 +14,7 @@ const red = '\x1b[31m';
 const dim = '\x1b[2m';
 
 const PKG_PATH = path.join(__dirname, '..', 'package.json');
-let VERSION = '0.6.0';
+let VERSION = '0.7.0';
 try {
   const pkg = JSON.parse(fs.readFileSync(PKG_PATH, 'utf8'));
   VERSION = pkg.version || VERSION;
@@ -45,6 +45,34 @@ const USER_DATA_ITEMS = [
 const CORTEX_META_DIR = '.cortex';
 const CORTEX_VERSION_FILE = 'version.json';
 
+// Os 5 arquivos de raiz que, a partir da fonte única, viram ponteiros para
+// Frameworks/CEREBRO.md em vez de guardar o conteúdo completo do system prompt.
+const POINTER_ROOT_FILES = ['GEMINI.md', 'CLAUDE.md', 'CODEX.md', 'AGENTS.md', '.cursorrules'];
+const CEREBRO_PATH = path.join('Frameworks', 'CEREBRO.md');
+
+function buildPointerContent(nomeNegocio) {
+  const titulo = nomeNegocio ? `Córtex — ${nomeNegocio}` : 'Córtex';
+  return `# ${titulo}
+
+> Este arquivo é um **ponteiro**. A fonte única de instruções está em \`Frameworks/CEREBRO.md\`.
+
+**INSTRUÇÃO PARA A IA:** Leia agora o arquivo \`Frameworks/CEREBRO.md\` na raiz deste workspace e trate TODO o conteúdo dele como suas instruções de sistema para este negócio. Releia esse arquivo sempre que a conversa reiniciar ou o contexto for limpo. NUNCA duplique o conteúdo aqui — qualquer atualização do "cérebro" deve ser feita em \`Frameworks/CEREBRO.md\`, nunca neste arquivo.
+`;
+}
+
+function readBusinessName(targetDir) {
+  const metaPath = path.join(targetDir, 'Memoria', 'META.md');
+  if (!fs.existsSync(metaPath)) return null;
+  try {
+    const content = fs.readFileSync(metaPath, 'utf8');
+    const match = content.match(/\*\*Neg[oó]cio:\*\*\s*(.+)/);
+    if (match && match[1] && !match[1].includes('[Nome do negócio]')) {
+      return match[1].trim();
+    }
+  } catch (e) {}
+  return null;
+}
+
 function printHelp() {
   console.log(`
 ${bold}${cyan}🧠 Córtex CLI — Central de Inteligência do Seu Negócio${reset} (v${VERSION})
@@ -53,11 +81,14 @@ ${bold}USO:${reset}
   $ npx @aksp/cortex init [nome-da-pasta]
   $ npx cortex init [nome-da-pasta]
   $ npx cortex update [pasta]
+  $ npx cortex sync [pasta]
 
 ${bold}COMANDOS:${reset}
   ${green}init [pasta]${reset}   Inicializa a estrutura do Córtex na pasta especificada ou na pasta atual.
   ${green}update [pasta]${reset} Atualiza APENAS a camada de framework (.agents/skills) para a versão instalada do CLI.
                   Nunca toca em Pilares/, Memoria/, Ativos/, Frameworks/ ou nos system prompts de raiz.
+  ${green}sync [pasta]${reset}   Regenera os 5 ponteiros de raiz (GEMINI.md, CLAUDE.md, CODEX.md, AGENTS.md, .cursorrules)
+                  a partir de Frameworks/CEREBRO.md. Use se algum ponteiro for sobrescrito ou corrompido.
   ${green}--help, -h${reset}     Exibe esta mensagem de ajuda.
   ${green}--version, -v${reset}  Exibe a versão atual do CLI.
 
@@ -66,6 +97,7 @@ ${bold}EXEMPLOS:${reset}
   $ npx @aksp/cortex init MinhaEmpresa
   $ npx cortex init "Meu Negocio"
   $ npx cortex update
+  $ npx cortex sync
 `);
 }
 
@@ -359,11 +391,61 @@ ${dim}Pilares/, Memoria/, Ativos/, Frameworks/ e os system prompts de raiz não 
 `);
 }
 
+async function runSync() {
+  const targetArg = args[1] && !args[1].startsWith('-') ? args[1] : '.';
+  const targetDir = path.resolve(process.cwd(), targetArg);
+  const isForce = args.includes('--force') || args.includes('-f');
+
+  console.log(`\n${bold}${cyan}🧠 Sincronizando ponteiros do Córtex...${reset}\n`);
+
+  if (!fs.existsSync(targetDir)) {
+    console.log(`${red}Pasta não encontrada:${reset} ${targetDir}`);
+    process.exit(1);
+  }
+
+  const cerebroPath = path.join(targetDir, CEREBRO_PATH);
+  if (!fs.existsSync(cerebroPath)) {
+    console.log(`${red}Não encontrei ${CEREBRO_PATH}.${reset}`);
+    console.log(`  ${dim}Este comando só se aplica a Córtex montados a partir da v0.7.0, com fonte única do system prompt.${reset}`);
+    console.log(`  ${dim}Se o seu Córtex é mais antigo (conteúdo duplicado nos 5 arquivos de raiz), rode "revisar córtex" no chat com sua IA para migrar.${reset}\n`);
+    process.exit(1);
+  }
+
+  const nomeNegocio = readBusinessName(targetDir);
+  const pointerContent = buildPointerContent(nomeNegocio);
+
+  console.log(`  ${dim}Fonte:${reset} ${CEREBRO_PATH}`);
+  console.log(`${bold}Ponteiros a regenerar:${reset}`);
+  POINTER_ROOT_FILES.forEach((f) => console.log(`   ${cyan}•${reset} ${f}`));
+  console.log('');
+
+  if (!isForce) {
+    const confirmed = await askConfirmation(`  Sobrescrever esses ${POINTER_ROOT_FILES.length} arquivos com o ponteiro padrão? (s/N): `);
+    if (!confirmed) {
+      console.log(`\n${red}Sincronização cancelada. Nenhum arquivo foi alterado.${reset}\n`);
+      return;
+    }
+  }
+
+  for (const file of POINTER_ROOT_FILES) {
+    fs.writeFileSync(path.join(targetDir, file), pointerContent);
+    console.log(`   ${green}✓${reset} ${file}`);
+  }
+
+  console.log(`
+${bold}${green}🎉 Ponteiros sincronizados!${reset}
+
+${dim}Todos os 5 arquivos de raiz agora apontam para ${CEREBRO_PATH}. O conteúdo completo do system prompt continua vivendo só lá.${reset}
+`);
+}
+
 async function main() {
   if (!command || command === 'init') {
     await runInit();
   } else if (command === 'update') {
     await runUpdate();
+  } else if (command === 'sync') {
+    await runSync();
   } else if (command === '--help' || command === '-h' || command === 'help') {
     printHelp();
   } else if (command === '--version' || command === '-v' || command === 'version') {

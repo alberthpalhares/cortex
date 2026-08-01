@@ -94,19 +94,20 @@ Independentemente de como você baixou:
 2. Diga no chat:
    > "Quero montar meu Córtex"
 
-3. **A IA vai conduzir uma entrevista** com você. São cerca de 25 perguntas divididas em 9 blocos. Dura cerca de 20-30 minutos.
+3. **A IA oferece dois ritmos:** o **Completo** (~25 perguntas em 9 blocos, 20-30 min) ou o **Rápido** (4 perguntas, ~5 min — gera um Córtex funcional na hora e deixa o resto para completar depois).
 
 > 💡 **Já tem documentos sobre o negócio?** (PDFs, planilhas, arquivos antigos) — Não precisa organizar nada. Na abertura, o Agente vai te perguntar se você tem algo pronto e, se indicar onde estão, ele lê tudo e já pré-preenche a entrevista pra você. Vai ser bem mais rápido!
 
 4. **Ao final**, a IA gera automaticamente:
    - Todos os arquivos de Pilares (Estratégia, Comercial, Cultura, etc.)
    - Todos os arquivos de Memória (Decisões, Lições, Projetos, Pendências)
-   - O system prompt personalizado para a sua IA
+   - O system prompt personalizado, na fonte única `Frameworks/CEREBRO.md`
    - O `META.md` (índice de tudo)
 
 5. **Pronto!** A partir de agora:
    - Diga **"radar"** para ver o panorama
    - Diga **"registra que..."** para anotar decisões ou lições
+   - Diga **"saúde do córtex"** para ver o que ainda falta preencher (útil depois do modo Rápido)
    - Pergunte qualquer coisa sobre o negócio
    - Em 6 meses, diga **"revisar córtex"** para atualizar
 
@@ -114,9 +115,9 @@ Independentemente de como você baixou:
 
 ## Funciona em qualquer IDE
 
-O Córtex gera automaticamente system prompts compatíveis com múltiplas ferramentas:
+O conteúdo completo do system prompt vive em um único lugar — `Frameworks/CEREBRO.md` — e os 5 arquivos abaixo são ponteiros curtos que instruem cada ferramenta a lê-lo. Isso elimina o risco de os arquivos divergirem entre si:
 
-| Arquivo | Compatível com |
+| Arquivo (ponteiro) | Compatível com |
 |---|---|
 | `GEMINI.md` | Gemini CLI, Google Antigravity |
 | `CLAUDE.md` | Claude Code |
@@ -124,7 +125,7 @@ O Córtex gera automaticamente system prompts compatíveis com múltiplas ferram
 | `AGENTS.md` | OpenCode, Hermes, Roo Code |
 | `.cursorrules` | Cursor, Windsurf |
 
-Você pode alternar entre ferramentas no mesmo projeto sem reconfigurar nada.
+Você pode alternar entre ferramentas no mesmo projeto sem reconfigurar nada. Se algum ponteiro for sobrescrito ou corrompido, rode `npx @aksp/cortex sync` para regenerá-los a partir de `Frameworks/CEREBRO.md`.
 
 ---
 
@@ -135,7 +136,7 @@ SeuNegocio/
 ├── CHANGELOG.md               ← Histórico de versões e melhorias do framework
 ├── .gitignore                  ← Protege Pilares/Memoria/Ativos de irem para um repositório Git
 ├── .cortex/version.json        ← Versão do framework instalada (usado por `cortex update`)
-├── GEMINI.md / CLAUDE.md / CODEX.md / AGENTS.md  ← System prompts (gerados pelo onboarding)
+├── GEMINI.md / CLAUDE.md / CODEX.md / AGENTS.md / .cursorrules  ← Ponteiros para Frameworks/CEREBRO.md
 ├── Pilares/
 │   ├── 01_Estrategia.md      ← Posicionamento, público-alvo, metas
 │   ├── 02_Cultura.md         ← Valores, equipe, conduta
@@ -155,7 +156,8 @@ SeuNegocio/
 │   ├── 04_Pessoas_Pendencias.md ← Pendências e stakeholders
 │   └── 05_Registros_Gerais.md ← Anotações diversas
 ├── Frameworks/
-│   └── PROTOCOLO_AUTONOMIA.md ← Protocolo de Ação Automática da IA
+│   ├── PROTOCOLO_AUTONOMIA.md ← Protocolo de Ação Automática da IA
+│   └── CEREBRO.md             ← Fonte única do system prompt (os 5 arquivos acima só apontam pra cá)
 └── Ativos/                    ← Seus logos, templates, etc.
 ```
 
@@ -163,7 +165,10 @@ SeuNegocio/
 
 ## Mantendo o Córtex atualizado
 
-O framework (`.agents/`) e os dados do seu negócio (`Pilares/`, `Memoria/`, `Ativos/`, `Frameworks/` e os system prompts de raiz) são camadas separadas. Rodar `npx @aksp/cortex update` na pasta do seu negócio traz skills novas e correções sem nunca sobrescrever o que você já preencheu — com backup automático de `.agents/` antes de qualquer mudança.
+O framework (`.agents/`) e os dados do seu negócio (`Pilares/`, `Memoria/`, `Ativos/`, `Frameworks/` e os system prompts de raiz) são camadas separadas.
+
+- `npx @aksp/cortex update` — traz skills novas e correções do framework sem nunca sobrescrever o que você já preencheu, com backup automático de `.agents/` antes de qualquer mudança.
+- `npx @aksp/cortex sync` — regenera os 5 ponteiros de raiz a partir de `Frameworks/CEREBRO.md`, caso algum deles seja sobrescrito ou corrompido.
 
 ---
 
@@ -177,6 +182,7 @@ O framework (`.agents/`) e os dados do seu negócio (`Pilares/`, `Memoria/`, `At
 | `pendência: ...` | Adiciona uma tarefa pendente |
 | `resolvido: ...` | Move uma pendência para "resolvidas" |
 | `revisar córtex` | Inicia a revisão semestral dos pilares |
+| `saúde do córtex` | Raio-x do que ainda falta preencher |
 | `ajuda` | Lista todos os comandos disponíveis |
 
 ---

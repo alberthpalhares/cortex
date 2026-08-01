@@ -70,7 +70,9 @@ Após percorrer os pilares existentes:
    Próxima revisão sugerida: [data real de hoje + 6 meses]
    ```
 2. **Confira o Mapa de Arquivos do `Memoria/META.md` contra a lista real de arquivos em `Pilares/` e `Memoria/`.** Qualquer arquivo que exista no disco e não esteja no mapa deve ser adicionado agora — esta é a última chance da revisão de corrigir um META desatualizado.
-3. **Atualize TODOS os system prompts da raiz** (`GEMINI.md`, `CLAUDE.md`, `CODEX.md`, `AGENTS.md`, `.cursorrules`) com as datas de revisão atualizadas, se estiverem hardcoded lá.
+3. **Atualize o system prompt:**
+   - Se `Frameworks/CEREBRO.md` existir (Córtex montado a partir da v0.7.0), é ele o ÚNICO arquivo a editar — atualize as datas de revisão e qualquer conteúdo que tenha mudado lá. Os 5 arquivos de raiz são só ponteiros; não precisam de edição a menos que estejam corrompidos (nesse caso, rode `npx @aksp/cortex sync`).
+   - Se `Frameworks/CEREBRO.md` **não** existir (Córtex mais antigo, com o conteúdo completo duplicado nos 5 arquivos de raiz), pergunte ao usuário: *"Seu Córtex ainda usa o formato antigo, com o cérebro duplicado em 5 arquivos. Quer que eu migre para o formato novo — um arquivo único (`Frameworks/CEREBRO.md`) com ponteiros nos outros 5? Isso evita que eles fiquem dessincronizados no futuro."* Se sim: copie o conteúdo de qualquer um dos 5 arquivos de raiz (eles devem ser idênticos) para `Frameworks/CEREBRO.md`, atualize-o com o que mudou nesta revisão, e substitua os 5 arquivos de raiz pelo ponteiro curto descrito na skill `cortex-onboarding` (Passo 7). Se não, apenas atualize os 5 arquivos normalmente, mantendo-os idênticos entre si.
 4. **Mostre um resumo** do que foi alterado:
 
 > *"✅ Revisão do Córtex concluída!*
@@ -90,3 +92,4 @@ Após percorrer os pilares existentes:
 3. **Registre tudo.** Qualquer alteração feita deve ser refletida tanto no pilar quanto no META.md.
 4. **Sugira.** Se o usuário cresceu (contratou, mudou de modelo), sugira proativamente que novos pilares sejam adicionados.
 5. **Caminhos relativos.** Todos os caminhos são relativos à raiz do workspace. Nunca use caminhos absolutos.
+6. **Aponte lacunas.** Se encontrar marcadores `<!-- REVISAR -->` sobrando de um onboarding rápido (Quickstart) ou anterior, aproveite a revisão para completá-los junto com o usuário, ou sugira rodar a skill `saude` para um raio-x completo do que falta.

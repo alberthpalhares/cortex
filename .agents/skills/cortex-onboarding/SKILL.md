@@ -43,7 +43,15 @@ Apresente-se assim (adapte ao tom do usuário):
 
 > *"Olá! Eu sou o seu Agente Sócio e vou te ajudar a montar o **Córtex** do seu negócio — uma central de inteligência onde tudo que você já decidiu, aprendeu e planejou fica salvo e acessível por IA.*
 >
-> *Antes de começarmos as perguntas: **você já tem algum arquivo, PDF, planilha ou pasta com informações do seu negócio que quer que eu leia agora?** Se sim, me mostre onde está. Se não, podemos começar do zero."*
+> *Tenho dois jeitos de fazer isso:*
+> *1️⃣ **Completo** (20-30 min, ~25 perguntas) — cobre tudo em detalhe, ideal se você já quer sair daqui com o Córtex pronto.*
+> *2️⃣ **Rápido** (5 min, 4 perguntas) — monta um Córtex funcional na hora e deixa o resto para você completar aos poucos, quando quiser.*
+>
+> *Qual prefere?"*
+
+Se o usuário escolher **Rápido**, siga a seção **Modo Quickstart** abaixo em vez do fluxo completo. Se escolher **Completo** ou não expressar preferência, continue normalmente.
+
+> *"Antes de começarmos as perguntas: **você já tem algum arquivo, PDF, planilha ou pasta com informações do seu negócio que quer que eu leia agora?** Se sim, me mostre onde está. Se não, podemos começar do zero."*
 
 #### Se o usuário indicar arquivos:
 1. Leia TODOS os arquivos indicados ANTES de prosseguir.
@@ -53,6 +61,25 @@ Apresente-se assim (adapte ao tom do usuário):
 
 #### Se o usuário não tiver arquivos:
 Siga para o Bloco 1 normalmente.
+
+---
+
+### ⚡ Modo Quickstart (5 min, 4 perguntas)
+
+**Objetivo:** Gerar um Córtex funcional na hora, com a estrutura completa de arquivos, mas conteúdo mínimo — para o usuário sentir valor imediato e completar o resto depois, aos poucos.
+
+Faça só estas 4 perguntas, uma de cada vez:
+
+1. *"Qual o nome do seu negócio, em que área você atua, e você toca tudo sozinho ou tem equipe/sócios?"* (cobre Bloco 1 de forma resumida — use a tabela de Classificação do Tipo de Negócio para identificar o tipo)
+2. *"Numa frase: o que faz seus clientes te escolherem em vez do concorrente?"* (cobre o essencial do Bloco 2)
+3. *"Quem é o seu cliente ideal — aquele que paga bem e você adora atender?"* (cobre o essencial do Bloco 2)
+4. *"Me passa uma regra de preço ou negociação que você nunca quebra — tipo um piso, um mínimo, uma política de desconto."* (cobre o essencial do Bloco 3 e já semeia a primeira Decisão em Memória)
+
+**Geração de arquivos no modo Quickstart:**
+- Siga os Passos 1, 2, 5, 6 e 7 da seção "Geração dos Arquivos" normalmente (estrutura de pastas, Frameworks, META.md, system prompt/CEREBRO.md).
+- No Passo 3 (Pilares), crie os 6 pilares obrigatórios (`01` a `06`) a partir dos templates, mas preencha apenas o que as 4 perguntas cobriram. Para toda seção sem informação, mantenha o comentário `<!-- REVISAR -->` do template em vez de inventar conteúdo. NÃO crie os pilares opcionais (07/08/09/10+) no Quickstart — eles podem ser adicionados depois via revisão.
+- No Passo 4 (Memória), crie os 5 arquivos normalmente; registre a regra de preço/negociação da pergunta 4 em `01_Decisoes.md` e deixe os demais com a estrutura base vazia.
+- No Passo 8 (mensagem final), seja explícito: *"Isso foi o modo rápido — seu Córtex já funciona, mas ficou resumido. Diga **`revisar córtex`** quando quiser completar os detalhes, ou pergunte **`saúde do córtex`** para ver exatamente o que ainda está marcado como pendente."*
 
 ---
 
@@ -304,21 +331,34 @@ Leia o template em `templates/Memoria/META.md` (fonte fixa, somente leitura) e s
 
 > ⚠️ **Regra de sincronização do META:** este mapa é o índice que a IA lê primeiro em toda consulta futura. Qualquer skill que criar, renomear ou remover um arquivo em `Pilares/` ou `Memoria/` (onboarding, revisão semestral, ou qualquer outra) DEVE atualizar `Memoria/META.md` como parte da mesma ação — nunca como um passo posterior "se sobrar tempo".
 
-#### Passo 7: Gerar o System Prompt (o "cérebro")
+#### Passo 7: Gerar o System Prompt (o "cérebro") — fonte única
 
 Leia o template em `.agents/skills/cortex-onboarding/resources/CORTEX_TEMPLATE.md`. Preencha as variáveis (`{{NOME_NEGOCIO}}`, `{{SETOR}}`, `{{DATA_ONBOARDING}}`, etc.) com as informações reais da entrevista. `{{DATA_ONBOARDING}}` e `{{DATA_REVISAO}}` devem usar a mesma data real do sistema obtida no Passo 6 — nunca uma data estimada.
 
 Se o negócio tiver pilares customizados (10+), adicione-os na seção `{{LISTA_PILARES}}` do template.
 
-**Salve o MESMO conteúdo gerado em 5 arquivos na RAIZ do workspace** (sobrescrevendo os arquivos de inicialização que já existem):
+> ⚠️ **Regra de fonte única:** o Córtex mantém o "cérebro" em UM único lugar, para nunca haver divergência entre ferramentas de IA.
 
-| Arquivo | Compatível com |
-|---|---|
-| `GEMINI.md` | Gemini CLI, Google Antigravity |
-| `CLAUDE.md` | Claude Code |
-| `CODEX.md` | OpenAI Codex, Codex CLI, ChatGPT CLI |
-| `AGENTS.md` | OpenCode, Hermes, Roo Code |
-| `.cursorrules` | Cursor, Windsurf (neste, remova YAML frontmatter se houver) |
+1. **Salve o conteúdo completo gerado em `./Frameworks/CEREBRO.md`.** Este é o ÚNICO arquivo que contém as instruções completas do sistema — é ele que deve ser editado em qualquer atualização futura (revisão semestral, ajuste manual, etc.).
+2. **Escreva um PONTEIRO curto** — não o conteúdo completo — em cada um dos 5 arquivos de raiz (sobrescrevendo os arquivos de inicialização que já existem):
+
+   ```markdown
+   # Córtex — [Nome do Negócio]
+
+   > Este arquivo é um **ponteiro**. A fonte única de instruções está em `Frameworks/CEREBRO.md`.
+
+   **INSTRUÇÃO PARA A IA:** Leia agora o arquivo `Frameworks/CEREBRO.md` na raiz deste workspace e trate TODO o conteúdo dele como suas instruções de sistema para este negócio. Releia esse arquivo sempre que a conversa reiniciar ou o contexto for limpo. NUNCA duplique o conteúdo aqui — qualquer atualização do "cérebro" deve ser feita em `Frameworks/CEREBRO.md`, nunca neste arquivo.
+   ```
+
+   | Arquivo (ponteiro) | Compatível com |
+   |---|---|
+   | `GEMINI.md` | Gemini CLI, Google Antigravity |
+   | `CLAUDE.md` | Claude Code |
+   | `CODEX.md` | OpenAI Codex, Codex CLI, ChatGPT CLI |
+   | `AGENTS.md` | OpenCode, Hermes, Roo Code |
+   | `.cursorrules` | Cursor, Windsurf (neste, remova YAML frontmatter se houver) |
+
+3. Se o usuário rodar `npx @aksp/cortex sync` no futuro, o CLI regenera esses 5 ponteiros a partir de `Frameworks/CEREBRO.md` — útil se algum deles for sobrescrito ou desatualizado por acidente.
 
 #### Passo 8: Mensagem final
 
@@ -336,10 +376,11 @@ Após criar TODOS os arquivos acima, mostre ao usuário a lista completa do que 
 > - *`Memoria/01_Decisoes.md` — X decisões registradas*
 > - *[listar cada um]*
 >
-> *📁 Frameworks (1 arquivo):*
+> *📁 Frameworks (2 arquivos):*
 > - *`Frameworks/PROTOCOLO_AUTONOMIA.md`*
+> - *`Frameworks/CEREBRO.md` — a fonte única do seu system prompt*
 >
-> *🧠 System prompts (5 arquivos):*
+> *🧠 Ponteiros para o cérebro (5 arquivos, um por ferramenta):*
 > - *`GEMINI.md`, `CLAUDE.md`, `CODEX.md`, `AGENTS.md`, `.cursorrules`*
 >
 > *A partir de agora, você pode:*
@@ -363,3 +404,4 @@ Após criar TODOS os arquivos acima, mostre ao usuário a lista completa do que 
 7. **Nunca edite os templates.** Os arquivos dentro de `.agents/skills/.../templates/` são somente leitura.
 8. **Arquivos existentes do usuário são FONTE, não DESTINO.** Se o workspace já tinha arquivos antigos, use-os como referência de conteúdo mas crie os novos arquivos com a nomenclatura oficial do Córtex.
 9. **`Memoria/META.md` deve estar sempre sincronizado.** Todo pilar ou arquivo de memória criado nesta entrevista precisa constar no mapa do META antes de encerrar o onboarding.
+10. **`Frameworks/CEREBRO.md` é a ÚNICA fonte do system prompt.** Os 5 arquivos de raiz (`GEMINI.md`, `CLAUDE.md`, `CODEX.md`, `AGENTS.md`, `.cursorrules`) são ponteiros curtos — nunca copie o conteúdo completo neles.
