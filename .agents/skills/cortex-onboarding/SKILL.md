@@ -292,38 +292,21 @@ Copie o arquivo `templates/Frameworks/PROTOCOLO_AUTONOMIA.md` para `./Frameworks
 
 #### Passo 6: Criar o META.md
 
-Crie o arquivo `./Memoria/META.md` com o seguinte conteúdo (preenchido com os dados reais):
+**Antes de tudo, obtenha a data real do sistema** (via terminal/ferramenta de data disponível). NUNCA estime ou "chute" a data — ela é usada para calcular a próxima revisão semestral e para o Radar avaliar atrasos.
 
-```markdown
-# META — Índice do Córtex
+Leia o template em `templates/Memoria/META.md` (fonte fixa, somente leitura) e salve o conteúdo preenchido com os dados reais em `./Memoria/META.md`:
 
-**Negócio:** [Nome do negócio]
-**Setor:** [Setor de atuação]
-**Tipo:** [Eu-presa | Pequena empresa | Entidade sem fins lucrativos | Negócio recorrente]
-**Onboarding realizado em:** [YYYY-MM-DD]
-**Próxima revisão sugerida:** [data + 6 meses no formato YYYY-MM-DD]
+- `Onboarding realizado em`: a data real de hoje.
+- `Última revisão`: "Nenhuma ainda".
+- `Próxima revisão sugerida`: data real de hoje + 6 meses.
+- Mapa de Arquivos: inclua APENAS as linhas de Pilares que você efetivamente criou (07/08/09/10+ somente se se aplicam).
+- Seção "Pilares Customizados": liste cada pilar 10+ criado no Bloco 9, se houver.
 
-## Mapa de Arquivos
-
-| Tópico | Arquivo |
-|--------|---------|
-| Estratégia, posicionamento, público-alvo, metas | `Pilares/01_Estrategia.md` |
-| Cultura, valores, equipe | `Pilares/02_Cultura.md` |
-| Custos fixos, margens, investimentos | `Pilares/03_Financeiro.md` |
-| Preços, produtos, descontos, pagamento | `Pilares/04_Comercial.md` |
-| Canais, tom de voz, conteúdo | `Pilares/05_Comunicacao.md` |
-| Fluxos de trabalho, ferramentas, POPs | `Pilares/06_Operacao.md` |
-| [Incluir 07, 08, 09, 10+ somente se foram criados] |
-| Decisões já tomadas | `Memoria/01_Decisoes.md` |
-| Erros, acertos e lições | `Memoria/02_Licoes.md` |
-| Projetos ativos e pipeline | `Memoria/03_Projetos.md` |
-| Stakeholders e tarefas pendentes | `Memoria/04_Pessoas_Pendencias.md` |
-| Anotações diversas | `Memoria/05_Registros_Gerais.md` |
-```
+> ⚠️ **Regra de sincronização do META:** este mapa é o índice que a IA lê primeiro em toda consulta futura. Qualquer skill que criar, renomear ou remover um arquivo em `Pilares/` ou `Memoria/` (onboarding, revisão semestral, ou qualquer outra) DEVE atualizar `Memoria/META.md` como parte da mesma ação — nunca como um passo posterior "se sobrar tempo".
 
 #### Passo 7: Gerar o System Prompt (o "cérebro")
 
-Leia o template em `.agents/skills/cortex-onboarding/resources/CORTEX_TEMPLATE.md`. Preencha as variáveis (`{{NOME_NEGOCIO}}`, `{{SETOR}}`, `{{DATA_ONBOARDING}}`, etc.) com as informações reais da entrevista.
+Leia o template em `.agents/skills/cortex-onboarding/resources/CORTEX_TEMPLATE.md`. Preencha as variáveis (`{{NOME_NEGOCIO}}`, `{{SETOR}}`, `{{DATA_ONBOARDING}}`, etc.) com as informações reais da entrevista. `{{DATA_ONBOARDING}}` e `{{DATA_REVISAO}}` devem usar a mesma data real do sistema obtida no Passo 6 — nunca uma data estimada.
 
 Se o negócio tiver pilares customizados (10+), adicione-os na seção `{{LISTA_PILARES}}` do template.
 
@@ -363,8 +346,9 @@ Após criar TODOS os arquivos acima, mostre ao usuário a lista completa do que 
 > - *Dizer **radar** para ver o panorama do negócio*
 > - *Dizer **registra que...** para anotar uma decisão ou lição*
 > - *Perguntar qualquer coisa sobre o seu negócio que eu consulto os seus arquivos*
+> - *Dizer **ajuda** a qualquer momento para ver a lista de comandos disponíveis*
 >
-> *Lembre-se: em [data + 6 meses], vou sugerir uma revisão do Córtex para atualizar o que mudou. 🔄"*
+> *Lembre-se: em [data real + 6 meses], vou sugerir uma revisão do Córtex para atualizar o que mudou. 🔄"*
 
 ---
 
@@ -374,7 +358,8 @@ Após criar TODOS os arquivos acima, mostre ao usuário a lista completa do que 
 2. **Nunca deixe o usuário sem resposta.** Se ele travar, ofereça sugestões. Se ele disser "não sei", proponha uma versão provisória.
 3. **Confirme cada bloco antes de avançar.** Mostre um resumo do que você entendeu e peça um "ok".
 4. **Adapte-se ao tipo de negócio.** Use a tabela de classificação para ajustar vocabulário, tom e perguntas. Nunca fale "lucro" para uma ONG.
-5. **Registre a data do onboarding** no META.md para o ciclo de revisão.
+5. **Obtenha a data real do sistema antes de registrar qualquer data.** Nunca estime. Ela alimenta o `META.md` e o ciclo de revisão semestral.
 6. **TODOS os arquivos de Pilares e Memória devem ser CRIADOS FISICAMENTE.** Use suas ferramentas de escrita de arquivo. Não basta imprimir no chat.
 7. **Nunca edite os templates.** Os arquivos dentro de `.agents/skills/.../templates/` são somente leitura.
 8. **Arquivos existentes do usuário são FONTE, não DESTINO.** Se o workspace já tinha arquivos antigos, use-os como referência de conteúdo mas crie os novos arquivos com a nomenclatura oficial do Córtex.
+9. **`Memoria/META.md` deve estar sempre sincronizado.** Todo pilar ou arquivo de memória criado nesta entrevista precisa constar no mapa do META antes de encerrar o onboarding.

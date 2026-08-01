@@ -50,7 +50,7 @@ Após percorrer os pilares existentes:
 
 1. Pergunte: *"Surgiu alguma área nova no negócio que ainda não está registrada?"*
 2. Dê exemplos baseados no que NÃO existe ainda (Jurídico? Inventário? Identidade Visual? Ou algo totalmente diferente?)
-3. Se sim → conduza um mini-onboarding apenas daquele pilar novo
+3. Se sim → conduza um mini-onboarding apenas daquele pilar novo e **adicione-o imediatamente ao Mapa de Arquivos do `Memoria/META.md`** (e à seção "Pilares Customizados" se for numerado 10+). Não deixe para o passo de Fechamento.
 4. Se não → siga para a Memória
 
 ### Revisão Rápida da Memória
@@ -64,13 +64,14 @@ Após percorrer os pilares existentes:
 
 ### Fechamento
 
-1. **Atualize a data de revisão** no `Memoria/META.md`:
+1. **Obtenha a data real do sistema** (via terminal/ferramenta de data disponível) — nunca estime. Atualize a data de revisão no `Memoria/META.md`:
    ```
-   Última revisão: YYYY-MM-DD
-   Próxima revisão sugerida: [data + 6 meses]
+   Última revisão: [data real de hoje]
+   Próxima revisão sugerida: [data real de hoje + 6 meses]
    ```
-2. **Atualize TODOS os system prompts da raiz** (`GEMINI.md`, `CLAUDE.md`, `CODEX.md`, `AGENTS.md`, `.cursorrules`) com as datas de revisão atualizadas, se estiverem hardcoded lá.
-3. **Mostre um resumo** do que foi alterado:
+2. **Confira o Mapa de Arquivos do `Memoria/META.md` contra a lista real de arquivos em `Pilares/` e `Memoria/`.** Qualquer arquivo que exista no disco e não esteja no mapa deve ser adicionado agora — esta é a última chance da revisão de corrigir um META desatualizado.
+3. **Atualize TODOS os system prompts da raiz** (`GEMINI.md`, `CLAUDE.md`, `CODEX.md`, `AGENTS.md`, `.cursorrules`) com as datas de revisão atualizadas, se estiverem hardcoded lá.
+4. **Mostre um resumo** do que foi alterado:
 
 > *"✅ Revisão do Córtex concluída!*
 >

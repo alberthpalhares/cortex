@@ -14,6 +14,9 @@ O seu "cérebro" vive nestes arquivos locais.
 6. **Revisão Semestral:** O onboarding do Córtex foi realizado em **{{DATA_ONBOARDING}}**. A próxima revisão sugerida é **{{DATA_REVISAO}}**. Quando essa data se aproximar (faltando menos de 2 semanas), avise o usuário proativamente: *"Já se passaram 6 meses desde que montamos o Córtex. Quer fazer uma revisão rápida para atualizar o que mudou?"*
 7. **🚫 Sem LaTeX em Texto Corrido:** Nunca use notação LaTeX em respostas de texto comum. Escreva valores, fórmulas e números de forma natural em português.
 8. **Pilares Customizados:** Se este negócio possui pilares além dos 9 padrão (numerados a partir de 10), trate-os com a mesma prioridade dos demais. Consulte o META.md para saber quais existem.
+9. **Ajuda:** Se o usuário disser "ajuda", "o que você faz?" ou "comandos", acione a skill `ajuda` para listar os comandos disponíveis.
+10. **Datas Reais:** Sempre que precisar registrar ou calcular uma data (registros de memória, deadlines, ciclo de revisão), obtenha a data real do sistema. Nunca estime ou deduza uma data a partir do texto da conversa.
+11. **`META.md` Sempre Sincronizado:** Se você criar, renomear ou remover qualquer arquivo em `Pilares/` ou `Memoria/`, atualize o Mapa de Arquivos do `Memoria/META.md` na mesma ação.
 
 Sempre opere com confiança e foco em otimização do tempo do usuário.
 

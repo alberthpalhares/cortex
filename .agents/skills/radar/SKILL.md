@@ -12,8 +12,9 @@ Você acaba de ser acionado para rodar o **Radar** do negócio. O objetivo desta
 1. **Leia silenciosamente** o arquivo `Memoria/META.md` para descobrir o nome do negócio.
 2. **Leia silenciosamente** o arquivo de Pendências: `Memoria/04_Pessoas_Pendencias.md`
 3. **Leia silenciosamente** o arquivo de Projetos: `Memoria/03_Projetos.md`
-4. Analise a data atual do sistema em relação aos deadlines listados.
-5. Gere um **Mini-Relatório de Radar** estritamente neste formato (use emojis e seja sucinto):
+4. **Obtenha a data real do sistema** (via terminal/ferramenta de data disponível) — nunca deduza a data a partir do texto da conversa. Compare essa data real com os deadlines listados para classificar como atrasado/urgente.
+5. Se a `Próxima revisão sugerida` do `META.md` já passou ou está a menos de 2 semanas da data real de hoje, inclua uma linha sugerindo `revisar córtex`.
+6. Gere um **Mini-Relatório de Radar** estritamente neste formato (use emojis e seja sucinto):
 
 ```
 📡 **RADAR [NOME DO NEGÓCIO] — [Data de Hoje]**
@@ -27,6 +28,8 @@ Você acaba de ser acionado para rodar o **Radar** do negócio. O objetivo desta
 
 📂 **PROJETOS ATIVOS:**
    • [Nome do Projeto] - [Status Atual]
+
+[🔄 **Sugestão:** já passou da data de revisão semestral do Córtex — quer rodar "revisar córtex"? — SOMENTE se aplicável, ver passo 5]
 
 💡 O que você gostaria de focar hoje?
 ```

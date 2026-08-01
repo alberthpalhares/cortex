@@ -41,6 +41,8 @@ O Córtex **não funciona dentro do ChatGPT, Gemini ou Claude pelo navegador** (
 - Node.js instalado (recomendado) ou Git
 - Uma ferramenta de chat com IA que leia arquivos locais (ex: Google Antigravity, Gemini CLI, Claude Code, Cursor, OpenCode, Codex, etc.)
 
+> 🔒 **Privacidade:** prefira o Método 1 (NPX) — ele copia o framework sem o histórico Git. Se usar `git clone`, lembre-se de que o Córtex já inclui um `.gitignore` que impede `Pilares/`, `Memoria/` e `Ativos/` (os dados do seu negócio) de serem versionados por acidente.
+
 ---
 
 ### Método 1: Via NPX (Recomendado 🚀)
@@ -48,10 +50,10 @@ O Córtex **não funciona dentro do ChatGPT, Gemini ou Claude pelo navegador** (
 Abra o terminal na pasta do seu negócio e execute:
 
 ```bash
-npx cortex init
+npx @aksp/cortex init
 ```
 
-> 💡 **Dica:** Se quiser criar uma nova pasta para o negócio, basta passar o nome no final: `npx cortex init MinhaEmpresa`.
+> 💡 **Dica:** Se quiser criar uma nova pasta para o negócio, basta passar o nome no final: `npx @aksp/cortex init MinhaEmpresa`.
 
 ---
 
@@ -123,6 +125,7 @@ Você pode alternar entre ferramentas no mesmo projeto sem reconfigurar nada.
 ```
 SeuNegocio/
 ├── CHANGELOG.md               ← Histórico de versões e melhorias do framework
+├── .gitignore                  ← Protege Pilares/Memoria/Ativos de irem para um repositório Git
 ├── GEMINI.md / CLAUDE.md / CODEX.md / AGENTS.md  ← System prompts (gerados pelo onboarding)
 ├── Pilares/
 │   ├── 01_Estrategia.md      ← Posicionamento, público-alvo, metas
@@ -159,6 +162,7 @@ SeuNegocio/
 | `pendência: ...` | Adiciona uma tarefa pendente |
 | `resolvido: ...` | Move uma pendência para "resolvidas" |
 | `revisar córtex` | Inicia a revisão semestral dos pilares |
+| `ajuda` | Lista todos os comandos disponíveis |
 
 ---
 

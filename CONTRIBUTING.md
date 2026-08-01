@@ -13,7 +13,7 @@ Buscamos contribuidores que compartilhem da nossa missão: **democratizar a inte
 ### Quem pode contribuir
 - **Designers de IA & Prompt Engineers:** Entendem a estrutura de system prompts, instruções concisas e orquestração de assistentes.
 - **Empreendedores & Especialistas de Nicho:** Trazem frameworks reais de mercado (vendas, finanças, jurídico, marketing, operações).
-- **Desenvolvedores:** Criam automações, skills agnósticas e melhorias para a CLI (`npx cortex init`).
+- **Desenvolvedores:** Criam automações, skills agnósticas e melhorias para a CLI (`npx @aksp/cortex init`).
 
 Antes de começar, leia o [README.md](README.md) para entender a arquitetura do projeto.
 
@@ -24,7 +24,7 @@ Antes de começar, leia o [README.md](README.md) para entender a arquitetura do 
 O Córtex foi desenhado para ser **100% local, privado e leve**. Ele roda com um único comando:
 
 ```bash
-npx cortex init
+npx @aksp/cortex init
 ```
 
 **Arquivos Markdown locais são a fonte da verdade por design.**
@@ -84,7 +84,7 @@ O Córtex é compatível com múltiplos assistentes de IA local ([AGENTS.md](AGE
 - 🛠️ **Novas Skills Agnósticas (`.agents/skills/`):** Habilidades operacionais reutilizáveis.
 - 🏛️ **Pilares Específicos por Setor (`Pilares/`):** Templates customizados de pilares para nichos (ex: *Saúde & Clínicas, Imobiliárias, E-commerce, Advocacia, Infoprodutos*).
 - 📐 **Novos Frameworks Estratégicos (`Frameworks/`):** Métodos e protocolos de gestão (ex: *OKRs, Matriz Eisenhower, Funil de Vendas*).
-- 🚀 **Melhorias no CLI (`bin/cli.js`):** Aprimoramentos para o instalador `npx cortex init`.
+- 🚀 **Melhorias no CLI (`bin/cli.js`):** Aprimoramentos para o instalador `npx @aksp/cortex init`.
 - 📚 **Documentação & Exemplos:** Melhorias no README, guias e traduções.
 
 ---

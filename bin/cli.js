@@ -14,7 +14,7 @@ const red = '\x1b[31m';
 const dim = '\x1b[2m';
 
 const PKG_PATH = path.join(__dirname, '..', 'package.json');
-let VERSION = '0.4.0';
+let VERSION = '0.5.0';
 try {
   const pkg = JSON.parse(fs.readFileSync(PKG_PATH, 'utf8'));
   VERSION = pkg.version || VERSION;
@@ -28,7 +28,7 @@ function printHelp() {
 ${bold}${cyan}🧠 Córtex CLI — Central de Inteligência do Seu Negócio${reset} (v${VERSION})
 
 ${bold}USO:${reset}
-  $ npx cortex-ai init [nome-da-pasta]
+  $ npx @aksp/cortex init [nome-da-pasta]
   $ npx cortex init [nome-da-pasta]
 
 ${bold}COMANDOS:${reset}
@@ -37,8 +37,8 @@ ${bold}COMANDOS:${reset}
   ${green}--version, -v${reset}  Exibe a versão atual do CLI.
 
 ${bold}EXEMPLOS:${reset}
-  $ npx cortex-ai init
-  $ npx cortex-ai init MinhaEmpresa
+  $ npx @aksp/cortex init
+  $ npx @aksp/cortex init MinhaEmpresa
   $ npx cortex init "Meu Negocio"
 `);
 }
@@ -120,7 +120,8 @@ async function runInit() {
     'GEMINI.md',
     'CLAUDE.md',
     'CODEX.md',
-    '.cursorrules'
+    '.cursorrules',
+    '.gitignore'
   ];
 
   console.log(`  ${dim}Copiando arquivos do framework...${reset}`);

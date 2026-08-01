@@ -24,10 +24,12 @@ Antes de escrever, formate mentalmente a entrada de acordo com os padrões já e
 - **Projetos:** Inicie com `- **[STATUS]** **[Nome do Projeto]**...` (Status como `[BRIEFING]`, `[EXECUÇÃO]`, `[ENTREGA]`, `[CONCLUÍDO]`).
 
 ## 3. Fluxo de Ação Silenciosa
-1. Leia o arquivo destino (caminho relativo).
-2. Identifique a seção/cabeçalho onde o item se encaixa melhor.
-3. Use suas ferramentas de escrita de arquivo para injetar a nova linha sem modificar o resto.
-4. Se faltar informação (ex: "prazo" de uma pendência), insira a data atual aproximada e avise o usuário.
-5. Após o registro feito com sucesso, retorne ao usuário apenas a linha formatada que foi inserida, acompanhada de um ✅.
+1. Obtenha a **data real do sistema** (via terminal/ferramenta de data disponível) antes de formatar qualquer carimbo `[YYYY-MM-DD]`. Nunca estime ou "chute" a data — o Radar e a revisão semestral dependem dela estar correta.
+2. Leia o arquivo destino (caminho relativo).
+3. Identifique a seção/cabeçalho onde o item se encaixa melhor.
+4. Use suas ferramentas de escrita de arquivo para injetar a nova linha sem modificar o resto.
+5. Se faltar um **deadline** de pendência (data futura, não o carimbo de criação), **pergunte ao usuário** em vez de inventar uma data — um deadline errado quebra o Radar. Se o usuário não souber, registre sem deadline usando `- ⏳ **[SEM PRAZO]** [Texto]`.
+6. Se o registro criar um arquivo novo em `Pilares/` ou `Memoria/` que ainda não conste no mapa de `Memoria/META.md`, atualize o META como parte da mesma ação.
+7. Após o registro feito com sucesso, retorne ao usuário apenas a linha formatada que foi inserida, acompanhada de um ✅.
 
-*Não pergunte se pode fazer. Não peça confirmação, apenas faça a alteração no arquivo imediatamente e mostre como ficou.*
+*Não pergunte se pode fazer o registro em si. Não peça confirmação para gravar — apenas faça a alteração no arquivo imediatamente e mostre como ficou. A única pergunta permitida é por um deadline faltante (passo 5).*

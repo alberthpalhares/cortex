@@ -1,0 +1,31 @@
+# ============================================================
+# Córtex — .gitignore
+#
+# Este arquivo é copiado para todo projeto inicializado com
+# `npx @aksp/cortex init`. Ele protege por padrão os DADOS DO
+# SEU NEGÓCIO (Pilares, Memória, Ativos) de irem parar em um
+# repositório Git — inclusive um público.
+#
+# O Córtex é local-first e privado por design. Se você quiser
+# versionar seus próprios dados propositalmente (ex: em um repo
+# PRIVADO seu, como backup), remova ou ajuste as linhas abaixo.
+# ============================================================
+
+# Dados do negócio (o "cérebro" gerado pelo onboarding)
+/Pilares/*
+/Memoria/*
+/Ativos/*
+
+# Mantém a estrutura de pastas versionada mesmo vazia
+!/Pilares/.gitkeep
+!/Memoria/.gitkeep
+!/Ativos/.gitkeep
+
+# Artefatos de build / cache locais
+/graphify-out/
+node_modules/
+*.log
+
+# Arquivos de sistema operacional
+.DS_Store
+Thumbs.db

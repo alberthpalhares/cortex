@@ -1,6 +1,6 @@
 {
-  "name": "cortex-ai",
-  "version": "0.4.0",
+  "name": "@aksp/cortex",
+  "version": "0.5.0",
   "description": "O cérebro estratégico do seu negócio impulsionado por IA local e autônoma.",
   "main": "bin/cli.js",
   "bin": {
@@ -44,6 +44,7 @@
     "CLAUDE.md",
     "CODEX.md",
     ".cursorrules",
+    ".gitignore",
     "README.md",
     "CONTRIBUTING.md"
   ]
