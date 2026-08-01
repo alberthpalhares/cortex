@@ -55,6 +55,14 @@ npx @aksp/cortex init
 
 > 💡 **Dica:** Se quiser criar uma nova pasta para o negócio, basta passar o nome no final: `npx @aksp/cortex init MinhaEmpresa`.
 
+Depois de montado, sempre que sair uma versão nova do framework, atualize as skills sem tocar nos seus dados:
+
+```bash
+npx @aksp/cortex update
+```
+
+`update` atualiza **apenas** `.agents/` (as skills e templates do framework) — nunca mexe em `Pilares/`, `Memoria/`, `Ativos/`, `Frameworks/` ou nos seus system prompts de raiz. Antes de aplicar qualquer mudança, ele mostra o que vai mudar e cria um backup automático de `.agents/`.
+
 ---
 
 ### Método 2: Via Git Clone
@@ -126,6 +134,7 @@ Você pode alternar entre ferramentas no mesmo projeto sem reconfigurar nada.
 SeuNegocio/
 ├── CHANGELOG.md               ← Histórico de versões e melhorias do framework
 ├── .gitignore                  ← Protege Pilares/Memoria/Ativos de irem para um repositório Git
+├── .cortex/version.json        ← Versão do framework instalada (usado por `cortex update`)
 ├── GEMINI.md / CLAUDE.md / CODEX.md / AGENTS.md  ← System prompts (gerados pelo onboarding)
 ├── Pilares/
 │   ├── 01_Estrategia.md      ← Posicionamento, público-alvo, metas
@@ -149,6 +158,12 @@ SeuNegocio/
 │   └── PROTOCOLO_AUTONOMIA.md ← Protocolo de Ação Automática da IA
 └── Ativos/                    ← Seus logos, templates, etc.
 ```
+
+---
+
+## Mantendo o Córtex atualizado
+
+O framework (`.agents/`) e os dados do seu negócio (`Pilares/`, `Memoria/`, `Ativos/`, `Frameworks/` e os system prompts de raiz) são camadas separadas. Rodar `npx @aksp/cortex update` na pasta do seu negócio traz skills novas e correções sem nunca sobrescrever o que você já preencheu — com backup automático de `.agents/` antes de qualquer mudança.
 
 ---
 

@@ -84,7 +84,7 @@ O Córtex é compatível com múltiplos assistentes de IA local ([AGENTS.md](AGE
 - 🛠️ **Novas Skills Agnósticas (`.agents/skills/`):** Habilidades operacionais reutilizáveis.
 - 🏛️ **Pilares Específicos por Setor (`Pilares/`):** Templates customizados de pilares para nichos (ex: *Saúde & Clínicas, Imobiliárias, E-commerce, Advocacia, Infoprodutos*).
 - 📐 **Novos Frameworks Estratégicos (`Frameworks/`):** Métodos e protocolos de gestão (ex: *OKRs, Matriz Eisenhower, Funil de Vendas*).
-- 🚀 **Melhorias no CLI (`bin/cli.js`):** Aprimoramentos para o instalador `npx @aksp/cortex init`.
+- 🚀 **Melhorias no CLI (`bin/cli.js`):** Aprimoramentos para `npx @aksp/cortex init` e `npx @aksp/cortex update`.
 - 📚 **Documentação & Exemplos:** Melhorias no README, guias e traduções.
 
 ---
