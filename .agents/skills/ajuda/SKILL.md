@@ -25,6 +25,7 @@ Esta skill responde rapidamente "o que dá para fazer aqui" sem exigir que o usu
 💡 `lição: ...` — registra um aprendizado
 🔄 `revisar córtex` — inicia a revisão semestral dos pilares
 🩺 `saúde do córtex` — raio-x do que está faltando preencher
+🗄️ `consolidar memória` — arquiva itens antigos sem apagar histórico
 💬 Pergunte qualquer coisa sobre o negócio — eu consulto os seus Pilares e Memória antes de responder
 
 👉 [Se souber algo do contexto — ex: uma revisão atrasada ou pendências críticas — sugira isso como próximo passo aqui]

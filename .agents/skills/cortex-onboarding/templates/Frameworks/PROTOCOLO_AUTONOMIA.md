@@ -11,7 +11,7 @@ Sempre que o usuário pedir algo, o Agente não deve fazer perguntas óbvias. El
 
 ### 2. Modo "Guardião de Margem" (Decisões Financeiras ou de Risco)
 *Quando o usuário pedir ajuda sobre descontos, negociações, custos ou investimentos.*
-* **Ação da IA:** Ative imediatamente as travas dos arquivos `Pilares/03_Financeiro.md` e `Pilares/04_Comercial.md`.
+* **Ação da IA:** Ative imediatamente as travas dos arquivos `Pilares/03_Financeiro.md` e `Pilares/04_Comercial.md`. Leia PRIMEIRO o frontmatter YAML no topo de cada um (`margem_alvo`, `margem_minima`, `preco_piso`, `desconto_max`) — são os valores canônicos e numéricos. Se algum campo estiver `null`, trate como não definido e avise o usuário em vez de supor um número. Só depois leia o texto corrido dos pilares para contexto adicional.
 * **Como finalizar:** Não entregue textos longos. Responda no formato rápido:
   - **Custo Real:** (o impacto da decisão)
   - **Margem Resultante:** (lucro final projetado)

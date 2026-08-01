@@ -14,7 +14,7 @@ const red = '\x1b[31m';
 const dim = '\x1b[2m';
 
 const PKG_PATH = path.join(__dirname, '..', 'package.json');
-let VERSION = '0.7.0';
+let VERSION = '0.8.0';
 try {
   const pkg = JSON.parse(fs.readFileSync(PKG_PATH, 'utf8'));
   VERSION = pkg.version || VERSION;

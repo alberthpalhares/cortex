@@ -22,6 +22,7 @@ Antes de escrever, formate mentalmente a entrada de acordo com os padrões já e
 - **Pendências:** Inicie com `- 🔴 **[DEADLINE YYYY-MM-DD]** [Texto]` se tiver data, ou `- ⏳ **[AGUARDANDO]** [Texto]` se depender de terceiros.
 - **Resolvidos:** Mova/Adicione na seção "Pendências Resolvidas" com `- ✅ [Texto]`.
 - **Projetos:** Inicie com `- **[STATUS]** **[Nome do Projeto]**...` (Status como `[BRIEFING]`, `[EXECUÇÃO]`, `[ENTREGA]`, `[CONCLUÍDO]`).
+- **Revogar uma decisão:** se o usuário disser que uma decisão antiga não vale mais, NÃO apague a linha original em `Memoria/01_Decisoes.md`. Insira o prefixo `[REVOGADA em YYYY-MM-DD: motivo/nova decisão]` no início da linha existente. A skill `consolidar` move decisões revogadas para `Memoria/_Arquivo/` na próxima consolidação (ver `Frameworks/PROTOCOLO_MEMORIA.md`).
 
 ## 3. Fluxo de Ação Silenciosa
 1. Obtenha a **data real do sistema** (via terminal/ferramenta de data disponível) antes de formatar qualquer carimbo `[YYYY-MM-DD]`. Nunca estime ou "chute" a data — o Radar e a revisão semestral dependem dela estar correta.

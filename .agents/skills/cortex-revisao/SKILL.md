@@ -62,6 +62,10 @@ Após percorrer os pilares existentes:
 5. Pergunte: *"Algum projeto mudou de status ou pode ser arquivado?"*
 6. Atualize conforme necessário
 
+### Consolidação da Memória (Protocolo de Memória Viva)
+
+Aplique agora o `Frameworks/PROTOCOLO_MEMORIA.md`: siga o fluxo da skill `consolidar` para identificar itens elegíveis para arquivamento (mais de 12 meses), decisões já marcadas `[REVOGADA ...]` prontas para mover, e duplicatas. Mostre o resumo do lote e peça confirmação antes de aplicar, exatamente como a skill `consolidar` descreve. Se não houver nada elegível, pule esta etapa silenciosamente e siga para o Fechamento.
+
 ### Fechamento
 
 1. **Obtenha a data real do sistema** (via terminal/ferramenta de data disponível) — nunca estime. Atualize a data de revisão no `Memoria/META.md`:
@@ -82,6 +86,7 @@ Após percorrer os pilares existentes:
 > - *Pilar Cultura: Adicionado novo valor*
 > - *3 pendências movidas para Resolvidas*
 > - *Projeto Y arquivado*
+> - *4 itens antigos movidos para Memoria/_Arquivo/2025.md (se aplicável)*
 >
 > *Próxima revisão sugerida: [data]. Até lá, continue usando o radar e registrando suas decisões! 🧠"*
 

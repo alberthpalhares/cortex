@@ -157,9 +157,12 @@ SeuNegocio/
 │   └── 05_Registros_Gerais.md ← Anotações diversas
 ├── Frameworks/
 │   ├── PROTOCOLO_AUTONOMIA.md ← Protocolo de Ação Automática da IA
+│   ├── PROTOCOLO_MEMORIA.md   ← Como a Memória é arquivada com o tempo, sem perder histórico
 │   └── CEREBRO.md             ← Fonte única do system prompt (os 5 arquivos acima só apontam pra cá)
 └── Ativos/                    ← Seus logos, templates, etc.
 ```
+
+`Memoria/_Arquivo/AAAA.md` aparece automaticamente assim que a skill `consolidar` arquivar o primeiro item — não é criado no onboarding.
 
 ---
 
@@ -183,6 +186,7 @@ O framework (`.agents/`) e os dados do seu negócio (`Pilares/`, `Memoria/`, `At
 | `resolvido: ...` | Move uma pendência para "resolvidas" |
 | `revisar córtex` | Inicia a revisão semestral dos pilares |
 | `saúde do córtex` | Raio-x do que ainda falta preencher |
+| `consolidar memória` | Arquiva itens antigos sem apagar histórico |
 | `ajuda` | Lista todos os comandos disponíveis |
 
 ---

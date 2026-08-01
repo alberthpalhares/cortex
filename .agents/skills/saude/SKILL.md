@@ -20,7 +20,7 @@ Esta skill não julga o conteúdo do negócio — ela audita a **estrutura** do 
    - Arquivos no disco que não estão no mapa → `⚠️ Não indexado`
    - Os 6 pilares obrigatórios (`01` a `06`) que não existem → `🔴 Faltando (obrigatório)`
 
-5. **Leia cada arquivo em `Pilares/`** e conte quantos marcadores `<!-- REVISAR -->` ou seções em branco (título seguido só de comentário HTML) cada um tem.
+5. **Leia cada arquivo em `Pilares/`** e conte quantos marcadores `<!-- REVISAR -->` ou seções em branco (título seguido só de comentário HTML) cada um tem. Em `Pilares/03_Financeiro.md` e `Pilares/04_Comercial.md`, verifique também o frontmatter YAML no topo: cada campo (`margem_alvo`, `margem_minima`, `preco_piso`, `desconto_max`) que ainda estiver `null` conta como uma pendência — é um dado que o Modo "Guardião de Margem" precisa e ainda não tem.
 
 6. **Verifique a camada do system prompt:**
    - Se `Frameworks/CEREBRO.md` existir → formato atual (fonte única). Confirme que os 5 arquivos de raiz existem.

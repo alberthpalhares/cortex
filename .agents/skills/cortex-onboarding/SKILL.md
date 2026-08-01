@@ -145,6 +145,8 @@ Faça só estas 4 perguntas, uma de cada vez:
 4. *"Você dá desconto? Se sim, tem algum limite?"*
    - Ajude: *"O importante é que a IA saiba o seu piso para não sugerir promoções que te prejudiquem."*
 
+> 💡 Ao gerar `Pilares/03_Financeiro.md` e `Pilares/04_Comercial.md` no Passo 3, preencha o frontmatter YAML no topo de cada um (`margem_alvo`, `margem_minima`, `preco_piso`, `desconto_max`) com os números reais coletados aqui e no Bloco 2/3B. Se algum valor não foi informado, deixe-o como `null` e marque a seção de texto correspondente com `<!-- REVISAR -->` em vez de inventar um número.
+
 #### 3B — Para entidades sem fins lucrativos:
 
 1. *"De onde vem o dinheiro para manter a entidade funcionando? Mensalidades? Editais? Doações? Patrocínios? Eventos pagos?"*
@@ -315,7 +317,9 @@ Preencha `01_Decisoes.md` e `02_Licoes.md` com as respostas do Bloco 8. Os demai
 
 #### Passo 5: Criar o Frameworks
 
-Copie o arquivo `templates/Frameworks/PROTOCOLO_AUTONOMIA.md` para `./Frameworks/PROTOCOLO_AUTONOMIA.md`. Este arquivo não precisa de edição.
+Copie os arquivos abaixo. Nenhum dos dois precisa de edição — são protocolos fixos:
+- `templates/Frameworks/PROTOCOLO_AUTONOMIA.md` → `./Frameworks/PROTOCOLO_AUTONOMIA.md`
+- `templates/Frameworks/PROTOCOLO_MEMORIA.md` → `./Frameworks/PROTOCOLO_MEMORIA.md`
 
 #### Passo 6: Criar o META.md
 
@@ -326,7 +330,7 @@ Leia o template em `templates/Memoria/META.md` (fonte fixa, somente leitura) e s
 - `Onboarding realizado em`: a data real de hoje.
 - `Última revisão`: "Nenhuma ainda".
 - `Próxima revisão sugerida`: data real de hoje + 6 meses.
-- Mapa de Arquivos: inclua APENAS as linhas de Pilares que você efetivamente criou (07/08/09/10+ somente se se aplicam).
+- Mapa de Arquivos: inclua APENAS as linhas de Pilares que você efetivamente criou (07/08/09/10+ somente se se aplicam). O template já vem com a coluna "Seção (âncora)" preenchida para os 6 pilares obrigatórios e os 5 arquivos de Memória — mantenha essas âncoras. Para pilares customizados (10+), adicione uma linha de âncora apenas se o pilar tiver uma seção que valha a pena consultar isoladamente; senão, use "—".
 - Seção "Pilares Customizados": liste cada pilar 10+ criado no Bloco 9, se houver.
 
 > ⚠️ **Regra de sincronização do META:** este mapa é o índice que a IA lê primeiro em toda consulta futura. Qualquer skill que criar, renomear ou remover um arquivo em `Pilares/` ou `Memoria/` (onboarding, revisão semestral, ou qualquer outra) DEVE atualizar `Memoria/META.md` como parte da mesma ação — nunca como um passo posterior "se sobrar tempo".
@@ -376,8 +380,9 @@ Após criar TODOS os arquivos acima, mostre ao usuário a lista completa do que 
 > - *`Memoria/01_Decisoes.md` — X decisões registradas*
 > - *[listar cada um]*
 >
-> *📁 Frameworks (2 arquivos):*
+> *📁 Frameworks (3 arquivos):*
 > - *`Frameworks/PROTOCOLO_AUTONOMIA.md`*
+> - *`Frameworks/PROTOCOLO_MEMORIA.md`*
 > - *`Frameworks/CEREBRO.md` — a fonte única do seu system prompt*
 >
 > *🧠 Ponteiros para o cérebro (5 arquivos, um por ferramenta):*
@@ -405,3 +410,4 @@ Após criar TODOS os arquivos acima, mostre ao usuário a lista completa do que 
 8. **Arquivos existentes do usuário são FONTE, não DESTINO.** Se o workspace já tinha arquivos antigos, use-os como referência de conteúdo mas crie os novos arquivos com a nomenclatura oficial do Córtex.
 9. **`Memoria/META.md` deve estar sempre sincronizado.** Todo pilar ou arquivo de memória criado nesta entrevista precisa constar no mapa do META antes de encerrar o onboarding.
 10. **`Frameworks/CEREBRO.md` é a ÚNICA fonte do system prompt.** Os 5 arquivos de raiz (`GEMINI.md`, `CLAUDE.md`, `CODEX.md`, `AGENTS.md`, `.cursorrules`) são ponteiros curtos — nunca copie o conteúdo completo neles.
+11. **Frontmatter dos pilares financeiro/comercial é numérico, não texto.** `margem_alvo`, `margem_minima`, `preco_piso` e `desconto_max` devem ser números (ou `null`), nunca frases — é o que o Modo "Guardião de Margem" lê primeiro.

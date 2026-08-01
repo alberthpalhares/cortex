@@ -14,6 +14,7 @@ Você acaba de ser acionado para rodar o **Radar** do negócio. O objetivo desta
 3. **Leia silenciosamente** o arquivo de Projetos: `Memoria/03_Projetos.md`
 4. **Obtenha a data real do sistema** (via terminal/ferramenta de data disponível) — nunca deduza a data a partir do texto da conversa. Compare essa data real com os deadlines listados para classificar como atrasado/urgente.
 5. Se a `Próxima revisão sugerida` do `META.md` já passou ou está a menos de 2 semanas da data real de hoje, inclua uma linha sugerindo `revisar córtex`.
+5.5. Dê uma olhada rápida no tamanho de `Memoria/01_Decisoes.md` e `Memoria/02_Licoes.md` (contagem aproximada de linhas). Se algum estiver grande (mais de ~80 linhas), inclua uma linha sugerindo `consolidar memória` (skill `consolidar`) — não é preciso abrir os arquivos por completo para isso, uma leitura rápida basta.
 6. Gere um **Mini-Relatório de Radar** estritamente neste formato (use emojis e seja sucinto):
 
 ```
@@ -30,6 +31,7 @@ Você acaba de ser acionado para rodar o **Radar** do negócio. O objetivo desta
    • [Nome do Projeto] - [Status Atual]
 
 [🔄 **Sugestão:** já passou da data de revisão semestral do Córtex — quer rodar "revisar córtex"? — SOMENTE se aplicável, ver passo 5]
+[🗄️ **Sugestão:** a Memória está grande — quer rodar "consolidar memória"? — SOMENTE se aplicável, ver passo 5.5]
 
 💡 O que você gostaria de focar hoje?
 ```
