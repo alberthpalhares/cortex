@@ -1,6 +1,6 @@
 {
   "name": "@aksp/cortex",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "O cérebro estratégico do seu negócio impulsionado por IA local e autônoma.",
   "main": "bin/cli.js",
   "bin": {

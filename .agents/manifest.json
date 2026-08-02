@@ -1,5 +1,5 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "files": [
     ".agents/cortex/brain.framework.md",
     ".agents/skills/ajuda/SKILL.md",

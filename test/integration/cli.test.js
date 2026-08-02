@@ -348,3 +348,114 @@ test('doctor detecta cérebro legado (sem camadas)', () => {
   assert.ok(out.includes('Formato antigo') || out.includes('sem camadas') || out.includes('legado'),
     'deve reportar que o cérebro está em formato antigo');
 });
+
+// ── Caminhos de erro ──────────────────────────────────────────────
+
+test('sync sem CEREBRO.md deve sair com erro', () => {
+  const dir = mkTmpDir();
+  let result = runCli(['init', '.', '--force'], dir);
+  assert.equal(result.status, 0, result.stderr);
+
+  // Remove CEREBRO.md se existir (init não cria por padrão, mas por via das dúvidas)
+  const cerebroPath = path.join(dir, 'Frameworks', 'CEREBRO.md');
+  if (fs.existsSync(cerebroPath)) fs.rmSync(cerebroPath);
+
+  result = runCli(['sync', '.', '--force'], dir);
+  assert.notEqual(result.status, 0, 'sync sem CEREBRO.md deve sair com erro');
+});
+
+test('update sem .agents/ deve sair com erro', () => {
+  const dir = mkTmpDir();
+  let result = runCli(['init', '.', '--force'], dir);
+  assert.equal(result.status, 0, result.stderr);
+
+  fs.rmSync(path.join(dir, '.agents'), { recursive: true, force: true });
+
+  result = runCli(['update', '.', '--force'], dir);
+  assert.notEqual(result.status, 0, 'update sem .agents/ deve sair com erro');
+});
+
+test('doctor alias "checkup" funciona', () => {
+  const dir = mkTmpDir();
+  let result = runCli(['init', '.', '--force'], dir);
+  assert.equal(result.status, 0, result.stderr);
+
+  // Sem META.md — deve reportar erro
+  result = runCli(['checkup', '.'], dir);
+  assert.notEqual(result.status, 0);
+  assert.ok((result.stdout + result.stderr).includes('ainda não foi montado'));
+});
+
+test('doctor alias "diagnostico" funciona', () => {
+  const dir = mkTmpDir();
+  let result = runCli(['init', '.', '--force'], dir);
+  assert.equal(result.status, 0, result.stderr);
+
+  result = runCli(['diagnostico', '.'], dir);
+  assert.notEqual(result.status, 0);
+  assert.ok((result.stdout + result.stderr).includes('ainda não foi montado'));
+});
+
+test('sync --targets=all gera todos os targets', () => {
+  const dir = mkTmpDir();
+  let result = runCli(['init', '.', '--force'], dir);
+  assert.equal(result.status, 0, result.stderr);
+
+  fs.mkdirSync(path.join(dir, 'Frameworks'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'Frameworks', 'CEREBRO.md'), '# Cérebro de teste\n');
+
+  result = runCli(['sync', '.', '--force', '--targets=all'], dir);
+  assert.equal(result.status, 0, result.stderr);
+
+  for (const f of ['AGENTS.md', 'CLAUDE.md', 'GEMINI.md', 'CODEX.md', '.cursorrules']) {
+    assert.ok(fs.existsSync(path.join(dir, f)), `${f} deveria existir com --targets=all`);
+  }
+});
+
+test('doctor mostra opcionais não configurados (07/08/09)', () => {
+  const dir = mkTmpDir();
+  let result = runCli(['init', '.', '--force'], dir);
+  assert.equal(result.status, 0, result.stderr);
+
+  // Cria META.md só com os obrigatórios + 01_Estrategia no disco
+  fs.writeFileSync(
+    path.join(dir, 'Memoria', 'META.md'),
+    '# META\n\n**Negócio:** Teste\n\n## Mapa de Arquivos\n\n' +
+    '| Tópico | Arquivo | Seção |\n|--------|---------|-------|\n' +
+    '| Estratégia | `Pilares/01_Estrategia.md` | — |\n' +
+    '| Cultura | `Pilares/02_Cultura.md` | — |\n' +
+    '| Comunicação | `Pilares/05_Comunicacao.md` | — |\n' +
+    '| Operação | `Pilares/06_Operacao.md` | — |\n'
+  );
+  for (const p of ['01_Estrategia.md', '02_Cultura.md', '05_Comunicacao.md', '06_Operacao.md']) {
+    fs.writeFileSync(path.join(dir, 'Pilares', p), `# ${p}\n\nConteúdo.\n`);
+  }
+
+  result = runCli(['doctor', '.'], dir);
+  assert.equal(result.status, 0, result.stderr);
+
+  const out = result.stdout;
+  // A linha é "ℹ️  Pilares opcionais não configurados:" — busca por trechos da mensagem
+  assert.ok(
+    out.includes('opcionais') || out.includes('Opcional') || out.includes('03_Financeiro.md'),
+    'deve mencionar pilares opcionais não configurados'
+  );
+});
+
+test('update --force aplica sem pedir confirmação', () => {
+  const dir = mkTmpDir();
+  let result = runCli(['init', '.', '--force'], dir);
+  assert.equal(result.status, 0, result.stderr);
+
+  // Modifica uma skill para simular atualização pendente
+  const radarPath = path.join(dir, '.agents', 'skills', 'radar', 'SKILL.md');
+  fs.writeFileSync(radarPath, '# versão antiga');
+
+  // Com --force não deve pedir stdin — sai com status 0
+  result = runCli(['update', '.', '--force'], dir);
+  assert.equal(result.status, 0, result.stderr);
+
+  // A skill deve ter sido atualizada
+  const updated = fs.readFileSync(radarPath, 'utf8');
+  assert.notEqual(updated, '# versão antiga', '--force deve aplicar a atualização');
+});

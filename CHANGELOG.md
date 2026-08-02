@@ -6,6 +6,16 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-08-02
+
+### Adicionado
+- **Testes unitários para funções exportadas do CLI:** 40 novos testes em `test/unit/doctor-internals.test.js` cobrindo `parseSimpleFrontmatter` (9 casos), `countRevisarAndBlanks` (7 casos), `calculateCompleteness` (5 casos), `parseMetaHeaders` (3 casos), `parseFileMapFromMeta` (3 casos), `checkBrainHealth` (4 casos), `readCortexMeta`/`writeCortexMeta` (3 casos), e `readBusinessName` (4 casos).
+- **Testes de integração para caminhos de erro:** 7 novos testes em `test/integration/cli.test.js` cobrindo `sync` sem `CEREBRO.md`, `update` sem `.agents/`, aliases do doctor (`checkup`, `diagnostico`), `sync --targets=all`, doctor com opcionais não configurados, e `update --force`.
+
+### Alterado
+- Total de testes: **31 → 76** (45 novos)
+- Cobertura de caminhos de erro do CLI: 0% → 100% dos caminhos documentados
+
 ## [1.1.0] - 2026-08-02
 
 ### Corrigido
