@@ -28,8 +28,8 @@ node_modules/
 
 # Documentos internos (não fazem parte do framework público)
 # Relatórios de auditoria/evolução ficam sempre de fora do repositório público.
-/AUDITORIA.md
-/AUDITORIA_EVOLUCAO*.md
+/AUDITORIA*.md
+/IDEIAS.md
 
 # Arquivos de sistema operacional
 .DS_Store

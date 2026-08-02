@@ -1,6 +1,6 @@
 ---
 name: cortex-onboarding
-description: "Runs a guided interview to build any business's Córtex from scratch. The AI leads the user, suggests answers, and generates all files automatically. Trigger with: 'montar meu córtex', 'criar córtex', or 'onboarding'."
+description: "Runs a guided interview to build any business's Córtex from scratch, or continues an incomplete one. The AI leads the user, suggests answers, and generates all files automatically. Trigger with: 'montar meu córtex', 'criar córtex', 'onboarding', 'continuar onboarding', or 'completar meu córtex'."
 ---
 
 # Skill: Córtex — Onboarding (Entrevista Inteligente)
@@ -15,7 +15,7 @@ Most users don't know how to answer questions like "What's your competitive edge
 1. **Translate jargon into plain language.** Instead of "Qual é o seu ICP?", ask: *"Me conta: quem é aquele cliente dos sonhos, que paga bem, não reclama e sempre volta?"*
 2. **Offer concrete examples.** Whenever you ask a question, give 2-3 example answers from different businesses to help the user get unstuck.
 3. **Suggest answers when you can.** If the user said they're a tax lawyer, you can already infer the ICP probably involves mid-sized companies. Present the suggestion and ask for confirmation.
-4. **Never leave a question blank.** If the user says "não sei", help them think it through. If they still don't know, record a provisional version marked `<!-- REVISAR -->` and move on.
+4. **Never leave a question blank.** If the user says "não sei", help them think it through. If they still don't know, record a provisional version and insert a `<!-- REVISAR -->` marker so the continuation mode and `cortex doctor` can flag it later.
 5. **Max 3-5 questions per block.** Respect their time. Be efficient.
 
 ---
@@ -64,6 +64,43 @@ Proceed to Block 1 normally.
 
 ---
 
+### 🔄 Modo Continuação (resume an incomplete Córtex)
+
+**Trigger:** "continuar onboarding", "completar meu córtex", or any phrase that implies the user wants to finish filling in an already-started Córtex.
+
+**Detection:** Before starting the normal interview flow, check whether `Memoria/META.md` already exists and has real content (a business name filled in, not the template placeholder `[Nome do negócio]`).
+
+If a Córtex already exists, do NOT restart the interview from scratch. Instead:
+
+1. **Read `Memoria/META.md`** to understand what's already been set up — business name, type, pillars created.
+
+2. **Run the `saude` skill's structural check** (or call `npx @aksp/cortex doctor` if available) to discover:
+   - Missing mandatory pillars (01, 02, 05, 06)
+   - Pilares with `<!-- REVISAR -->` markers
+   - Frontmatter fields still set to `null`
+   - Inconsistencies in the META.md file map
+
+3. **Present the user with a summary of what's incomplete:**
+   > *"Seu Córtex já está parcialmente montado — o [Nome do Negócio]. Aqui está o que ainda falta completar:*
+   > - *🔴 Pilares obrigatórios faltando: [lista, se houver]*
+   > - *📝 Itens marcados como REVISAR: [resumo, se houver]*
+   > - *⚠️ Campos numéricos ainda não preenchidos: [lista, se houver]*
+   >
+   > *Por onde quer começar? Posso te guiar bloco a bloco ou você pode escolher um pilar específico."*
+
+4. **Guide the user through ONLY the incomplete blocks.** Skip blocks whose pillars already exist and have no `REVISAR` markers or `null` fields. For each incomplete block:
+   - Show what already exists in that pillar (read the file)
+   - Ask only the questions that fill the remaining gaps
+   - Mark newly filled sections as done
+
+5. **After completing each block, regenerate the affected files** just like a normal onboarding would. Update `META.md` if new files were created. Do NOT regenerate `CEREBRO.md` from scratch — only update sections that changed.
+
+6. **At the end, run `npx @aksp/cortex sync`** (or recompile manually) to propagate any changes to the compiled instruction files.
+
+**File generation in Continuation mode:** Same rules as the full onboarding — create missing files from templates, fill in only what's covered, preserve existing content.
+
+---
+
 ### ⚡ Modo Quickstart (5 min, 4 questions)
 
 **Goal:** Generate a functional Córtex on the spot, with the complete file structure but minimal content — so the user feels immediate value and fills in the rest later, bit by bit.
@@ -77,7 +114,7 @@ Ask only these 4 questions, one at a time:
 
 **File generation in Quickstart mode:**
 - Follow Steps 1, 2, 5, 6, and 7 from the "Geração dos Arquivos" section normally (folder structure, Frameworks, META.md, system prompt/CEREBRO.md).
-- In Step 3 (Pillars), create the 6 mandatory pillars (`01` through `06`) from the templates, but fill in only what the 4 questions covered. For any section with no information, keep the template's `<!-- REVISAR -->` comment instead of inventing content. Do NOT create the optional pillars (07/08/09/10+) in Quickstart — they can be added later via review.
+- In Step 3 (Pillars), create only the 4 mandatory pillars (`01_Estrategia`, `02_Cultura`, `05_Comunicacao`, `06_Operacao`) from the templates, filling in only what the 4 questions covered. For any section with no information, insert a `<!-- REVISAR -->` marker instead of inventing content. Do NOT create the optional pillars (03_Financeiro, 04_Comercial, 07/08/09/10+) in Quickstart — they can be added later via review or continuation.
 - In Step 4 (Memory), create all 5 files normally; record the pricing/negotiation rule from question 4 in `01_Decisoes.md` and leave the rest with the empty base structure.
 - In Step 8 (final message), be explicit: *"Isso foi o modo rápido — seu Córtex já funciona, mas ficou resumido. Diga **`revisar córtex`** quando quiser completar os detalhes, ou pergunte **`saúde do córtex`** para ver exatamente o que ainda está marcado como pendente."*
 
@@ -127,9 +164,21 @@ Ask only these 4 questions, one at a time:
 
 ---
 
-### Bloco 3: Comercial e Sustentabilidade Financeira
+### Bloco 3: Comercial e Sustentabilidade Financeira (OPCIONAL)
 
 **Goal:** Map how money comes in and the rules around it.
+
+> ⚠️ **THIS BLOCK IS OPTIONAL.** Before diving in, ask the user whether they want to include it:
+>
+> *"Agora a parte financeira e de precificação. Ela é **totalmente opcional** — se você já usa outro sistema pra isso, ou prefere não mexer com números agora, pode pular. Dá pra configurar depois, quando fizer sentido. Quer incluir?"*
+>
+> If the user says **no** or hesitates:
+> - Skip this block entirely.
+> - Do NOT create `Pilares/03_Financeiro.md` or `Pilares/04_Comercial.md`.
+> - The `cortex doctor` will show them as `ℹ️ Opcional não configurado` — not an error.
+> - The financial skills (`analisador-dre`, `proposta-comercial`) know how to work without these pillars and will offer to help configure them when the user needs them.
+>
+> If the user says **yes**, proceed with the appropriate branch below.
 
 > ⚠️ **HEADS UP:** This block's shape changes drastically depending on the business type. Follow the correct branch:
 
@@ -140,14 +189,19 @@ Ask only these 4 questions, one at a time:
 
 2. *"Me passa os valores ou faixas de preço de cada um. Pode ser aproximado."*
 
-3. *"Seus clientes pagam por projeto (pontual) ou de forma recorrente (mensal, plano, assinatura)?"*
+3. *"Quanto te custa, diretamente, entregar cada um desses produtos ou serviços? Pense no custo variável — material, frete, meia de freelancer, licença de software por projeto. Não precisa incluir o custo fixo (aluguel, luz, etc.) — isso vai em outro lugar."*
+   - Hint: *"Ex: 'Cada ensaio fotográfico me custa R$ 150 de deslocamento e assistente', 'Cada licença de software que revendo custa R$ 200', 'Meu custo variável é baixo, só meu tempo — coloca uns 20% do preço'"*
+   - If the user doesn't know the exact figure: suggest a percentage of the price as a reasonable estimate and mark it `<!-- REVISAR -->`.
+   - Record the per-item costs in `Pilares/03_Financeiro.md` frontmatter (`custos_variaveis`) and, if the user gives a general percentage, in `custo_variavel_padrao`.
+
+4. *"Seus clientes pagam por projeto (pontual) ou de forma recorrente (mensal, plano, assinatura)?"*
    - If one-off: *"Como funciona o pagamento? Tem sinal? Parcelamento?"*
    - If recurring: *"Quais são os planos? Qual o ticket médio mensal?"*
 
-4. *"Você dá desconto? Se sim, tem algum limite?"*
+5. *"Você dá desconto? Se sim, tem algum limite?"*
    - Hint: *"O importante é que a IA saiba o seu piso para não sugerir promoções que te prejudiquem."*
 
-> 💡 When generating `Pilares/03_Financeiro.md` and `Pilares/04_Comercial.md` in Step 3, fill in the YAML frontmatter at the top of each (`margem_alvo`, `margem_minima`, `preco_piso`, `desconto_max`) with the real numbers gathered here and in Block 2/3B. If a value wasn't provided, leave it as `null` and mark the corresponding text section with `<!-- REVISAR -->` instead of making up a number.
+> 💡 When generating `Pilares/03_Financeiro.md` and `Pilares/04_Comercial.md` in Step 3, fill in the YAML frontmatter at the top of each (`margem_alvo`, `margem_minima`, `custos_variaveis`, `custo_variavel_padrao`, `preco_piso`, `desconto_max`) with the real numbers gathered here. For `custos_variaveis`, use the format `{"item name": unit_cost, ...}` — this is what the Margin Guardian uses to compute real margin per project. If a value wasn't provided, leave it as `null` (or `{}` for `custos_variaveis`) and mark the corresponding text section with `<!-- REVISAR -->` instead of making up a number.
 
 #### 3B — For nonprofits:
 
@@ -292,8 +346,8 @@ For EACH pillar that applies to the business, **read the matching template**, **
 |---|---|---|
 | `templates/Pilares/01_Estrategia.md` | `./Pilares/01_Estrategia.md` | ✅ Sim |
 | `templates/Pilares/02_Cultura.md` | `./Pilares/02_Cultura.md` | ✅ Sim |
-| `templates/Pilares/03_Financeiro.md` | `./Pilares/03_Financeiro.md` | ✅ Sim |
-| `templates/Pilares/04_Comercial.md` | `./Pilares/04_Comercial.md` | ✅ Sim |
+| `templates/Pilares/03_Financeiro.md` | `./Pilares/03_Financeiro.md` | ⚠️ Opcional (Bloco 3) |
+| `templates/Pilares/04_Comercial.md` | `./Pilares/04_Comercial.md` | ⚠️ Opcional (Bloco 3) |
 | `templates/Pilares/05_Comunicacao.md` | `./Pilares/05_Comunicacao.md` | ✅ Sim |
 | `templates/Pilares/06_Operacao.md` | `./Pilares/06_Operacao.md` | ✅ Sim |
 | `templates/Pilares/07_Juridico.md` | `./Pilares/07_Juridico.md` | ⚠️ Somente se se aplica |
@@ -301,7 +355,7 @@ For EACH pillar that applies to the business, **read the matching template**, **
 | `templates/Pilares/09_Identidade_Visual.md` | `./Pilares/09_Identidade_Visual.md` | ⚠️ Somente se se aplica |
 | *(sem template)* | `./Pilares/10_[Nome_Custom].md` | ⚠️ Pilares extras do Bloco 9 |
 
-**IMPORTANT:** Never save empty templates. Remove the HTML comments `<!-- -->` and replace them with the real content. Use your file-writing tools to save to the user's disk.
+**IMPORTANT:** Never save empty templates. Remove the HTML comments `<!-- -->` and replace them with the real content. Use your file-writing tools to save to the user's disk. Skip optional pillars (`03_`, `04_`, `07_`, `08_`, `09_`, `10_+`) that the user chose not to include — do NOT create placeholder files for them.
 
 #### Step 4: Create the official Memória files
 
@@ -332,7 +386,7 @@ Read the template at `templates/Memoria/META.md` (fixed source, read only) and s
 - `Onboarding realizado em`: today's real date.
 - `Última revisão`: "Nenhuma ainda".
 - `Próxima revisão sugerida`: today's real date + 6 months.
-- File Map: include ONLY the Pillar lines you actually created (07/08/09/10+ only if they apply). The template already comes with the "Seção (âncora)" column filled in for the 6 mandatory pillars and the 5 Memory files — keep those anchors. For custom pillars (10+), add an anchor line only if the pillar has a section worth consulting in isolation; otherwise use "—".
+- File Map: include ONLY the Pillar lines you actually created. The 4 mandatory pillars (`01`, `02`, `05`, `06`) always go in. Optional pillars (`03`, `04`, `07`, `08`, `09`, `10+`) only if the user chose to include them. The template already comes with the "Seção (âncora)" column filled in for the mandatory pillars and the 5 Memory files — keep those anchors. For optional/custom pillars, add an anchor line only if the pillar has a section worth consulting in isolation; otherwise use "—".
 - "Pilares Customizados" section: list every 10+ pillar created in Block 9, if any.
 
 > ⚠️ **META sync rule:** this map is the index the AI reads first on every future lookup. Any skill that creates, renames, or removes a file in `Pilares/` or `Memoria/` (onboarding, semi-annual review, or any other) MUST update `Memoria/META.md` as part of that same action — never as a later "if there's time" step.
@@ -367,6 +421,19 @@ If the business has custom pillars (10+), add them to the template's `{{LISTA_PI
    ```json
    { "targets": ["AGENTS.md"] }
    ```
+
+   Also record the structured business metadata in `./.cortex/meta.json`:
+
+   ```json
+   {
+     "businessName": "[Nome do negócio]",
+     "type": "[Tipo identificado no Bloco 1]",
+     "onboardedAt": "[data real de hoje]",
+     "nextReview": "[data real de hoje + 6 meses]"
+   }
+   ```
+
+   This file lets `cortex doctor` and `cortex sync` read the business name without fragile regex parsing of `META.md`.
 
 3. **Compile the brain into each chosen file.** Each one receives the **FULL content** of `Frameworks/CEREBRO.md` (not a pointer saying "go read another file" — a pointer only works if the tool follows the indirection, and not every IDE does), preceded by this header:
 
@@ -432,4 +499,4 @@ After creating ALL the files above, show the user the complete list of what was 
 8. **The user's existing files are a SOURCE, not a DESTINATION.** If the workspace already had old files, use them as content reference but create the new files under Córtex's official naming.
 9. **`Memoria/META.md` must always be in sync.** Every pillar or memory file created during this interview must be listed in META's map before onboarding ends.
 10. **`Frameworks/CEREBRO.md` is the SOURCE of the system prompt; the root files are compiled artifacts.** Each generated root file carries the FULL brain content, with the "generated file" header. Never write a "go read another file" pointer — the AI tool might not follow it. And ALWAYS preserve the `CORTEX:BUSINESS` and `CORTEX:FRAMEWORK` markers in `CEREBRO.md`: without them, `cortex update` can't refresh the rules later.
-11. **The financial/commercial pillars' frontmatter is numeric, not text.** `margem_alvo`, `margem_minima`, `preco_piso`, and `desconto_max` must be numbers (or `null`), never sentences — it's what the "Margin Guardian" Mode reads first.
+11. **The financial/commercial pillars' frontmatter is numeric, not text.** `margem_alvo`, `margem_minima`, `preco_piso`, `desconto_max`, and `custo_variavel_padrao` must be numbers (or `null`), never sentences. `custos_variaveis` must be a JSON object mapping item names to their unit variable costs (or `{}`). These are what the "Margin Guardian" Mode reads first to compute `Custo Real → Margem Resultante → Veredito`.

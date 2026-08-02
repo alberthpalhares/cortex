@@ -24,22 +24,21 @@ const args = process.argv.slice(2);
 const command = args[0];
 
 // Camada de FRAMEWORK: código e templates que o CLI pode atualizar com segurança.
-// NUNCA inclui Pilares/, Memoria/, Ativos/, Frameworks/ (raiz) ou os system prompts
-// de raiz (AGENTS.md, CLAUDE.md, CODEX.md, GEMINI.md, .cursorrules) após
-// o onboarding — esses arquivos guardam o "cérebro" e os dados do negócio do usuário.
+// NUNCA inclui Pilares/, Memoria/, Ativos/ ou a região CORTEX:BUSINESS do cérebro
+// — esses são os dados do negócio do usuário. Os arquivos de instrução na raiz
+// (AGENTS.md, etc.) são artefatos compilados: update os regenera para propagar
+// regras novas, mas nunca toca nos dados do negócio.
 const FRAMEWORK_ITEMS = ['.agents'];
 
-// Camada de DADOS DO USUÁRIO: nunca tocada por `cortex update`.
+// Dados do usuário que `cortex update` NUNCA altera.
+// Os arquivos de raiz (AGENTS.md etc.) NÃO estão aqui porque são artefatos
+// compilados que o update INTENCIONALMENTE regenera para propagar regras novas.
 const USER_DATA_ITEMS = [
   'Frameworks',
   'Memoria',
   'Pilares',
   'Ativos',
-  'AGENTS.md',
-  'GEMINI.md',
-  'CLAUDE.md',
-  'CODEX.md',
-  '.cursorrules'
+  '.gitignore'
 ];
 
 const CORTEX_META_DIR = '.cortex';
@@ -72,6 +71,15 @@ const DEFAULT_TARGETS = ['AGENTS.md'];
 
 const TARGETS_FILE = 'targets.json';
 const CEREBRO_PATH = path.join('Frameworks', 'CEREBRO.md');
+
+// Pilares obrigatórios (v1.0.0+): 01_Estrategia, 02_Cultura, 05_Comunicacao, 06_Operacao.
+// 03_Financeiro e 04_Comercial tornaram-se opcionais — eram a principal barreira
+// de adoção para novos usuários. Fonte única usada por runDoctor e calculateCompleteness.
+const MANDATORY_PILLAR_PREFIXES = ['01_', '02_', '05_', '06_'];
+const MANDATORY_PILLAR_NAMES = {
+  '01_': 'Estratégia', '02_': 'Cultura',
+  '05_': 'Comunicação', '06_': 'Operação'
+};
 
 // Template da camada de framework do cérebro (regras de operação, disparo de
 // skills). Vive dentro de .agents/, então `cortex update` o atualiza junto com
@@ -249,6 +257,11 @@ function parseTargetsFlag(argv) {
     .map((s) => s.trim())
     .filter(Boolean);
   const valid = list.filter((t) => Object.prototype.hasOwnProperty.call(KNOWN_TARGETS, t));
+  const invalid = list.filter((t) => !Object.prototype.hasOwnProperty.call(KNOWN_TARGETS, t));
+  if (invalid.length > 0) {
+    console.log(`  ${yellow}Aviso:${reset} target(s) desconhecido(s) ignorado(s): ${invalid.join(', ')}`);
+    console.log(`  ${dim}Targets válidos: ${Object.keys(KNOWN_TARGETS).join(', ')}${reset}\n`);
+  }
   return valid.length > 0 ? valid : null;
 }
 
@@ -266,7 +279,14 @@ function compileTargets(targetDir, targets, version) {
   return written;
 }
 
+const CORTEX_META_FILE = 'meta.json';
+
 function readBusinessName(targetDir) {
+  // Prefer structured metadata written by onboarding (v0.12.0+)
+  const meta = readCortexMeta(targetDir);
+  if (meta && meta.businessName) return meta.businessName;
+
+  // Fallback: regex parse from META.md (backward compat with pre-v0.12.0)
   const metaPath = path.join(targetDir, 'Memoria', 'META.md');
   if (!fs.existsSync(metaPath)) return null;
   try {
@@ -277,6 +297,220 @@ function readBusinessName(targetDir) {
     }
   } catch (e) {}
   return null;
+}
+
+// Lê metadados estruturados de .cortex/meta.json (v0.12.0+).
+// Retorna null se o arquivo não existir ou for inválido.
+function readCortexMeta(targetDir) {
+  const metaPath = path.join(targetDir, CORTEX_META_DIR, CORTEX_META_FILE);
+  if (!fs.existsSync(metaPath)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+  } catch (e) {
+    return null;
+  }
+}
+
+// Escreve metadados estruturados em .cortex/meta.json.
+function writeCortexMeta(targetDir, meta) {
+  const metaDir = path.join(targetDir, CORTEX_META_DIR);
+  if (!fs.existsSync(metaDir)) {
+    fs.mkdirSync(metaDir, { recursive: true });
+  }
+  const existing = readCortexMeta(targetDir) || {};
+  const merged = Object.assign({}, existing, meta, { updatedAt: new Date().toISOString() });
+  fs.writeFileSync(
+    path.join(metaDir, CORTEX_META_FILE),
+    JSON.stringify(merged, null, 2) + '\n'
+  );
+}
+
+// Extrai os cabeçalhos do META.md (nome, setor, tipo, datas).
+function parseMetaHeaders(content) {
+  const meta = {};
+  const patterns = {
+    businessName: /\*\*Neg[oó]cio:\*\*\s*(.+)/,
+    sector: /\*\*Setor:\*\*\s*(.+)/,
+    type: /\*\*Tipo:\*\*\s*(.+)/,
+    onboardedAt: /\*\*Onboarding realizado em:\*\*\s*(.+)/,
+    lastReview: /\*\*Última revisão:\*\*\s*(.+)/,
+    nextReview: /\*\*Próxima revisão sugerida:\*\*\s*(.+)/,
+  };
+  for (const [key, re] of Object.entries(patterns)) {
+    const match = content.match(re);
+    if (match && match[1] && !match[1].includes('[Nome do negócio]') && !match[1].includes('[Setor')) {
+      meta[key] = match[1].trim();
+    }
+  }
+  return meta;
+}
+
+// Extrai a lista de arquivos únicos referenciados na tabela "Mapa de Arquivos" do META.md.
+function parseFileMapFromMeta(content) {
+  const files = new Set();
+  // Localiza a tabela: linhas entre "## Mapa de Arquivos" e "## Pilares Customizados" (ou fim)
+  const mapStart = content.indexOf('## Mapa de Arquivos');
+  if (mapStart === -1) return files;
+
+  const customStart = content.indexOf('## Pilares Customizados', mapStart);
+  const tableBlock = customStart !== -1
+    ? content.slice(mapStart, customStart)
+    : content.slice(mapStart);
+
+  // Cada linha da tabela: | Tópico | Arquivo | Seção |
+  for (const line of tableBlock.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed.startsWith('|') || trimmed.includes('---') || trimmed.includes('Tópico')) continue;
+    const cols = trimmed.split('|').map((s) => s.trim()).filter(Boolean);
+    if (cols.length >= 2) {
+      const filePath = cols[1].replace(/`/g, '').trim();
+      if (filePath && (filePath.startsWith('Pilares/') || filePath.startsWith('Memoria/'))) {
+        files.add(filePath);
+      }
+    }
+  }
+  return files;
+}
+
+// Lista os arquivos reais em Pilares/ e Memoria/ (apenas .md, ignora .gitkeep).
+// Caminhos normalizados com "/" para comparação consistente cross-platform.
+function listRealFiles(targetDir) {
+  const files = [];
+  for (const sub of ['Pilares', 'Memoria']) {
+    const dir = path.join(targetDir, sub);
+    if (!fs.existsSync(dir)) continue;
+    for (const entry of fs.readdirSync(dir)) {
+      if (entry === '.gitkeep') continue;
+      const fullPath = path.join(dir, entry);
+      if (fs.statSync(fullPath).isFile() && entry.endsWith('.md')) {
+        files.push(toPosix(path.join(sub, entry)));
+      }
+    }
+  }
+  return files;
+}
+
+// Extrai o frontmatter YAML simples de um arquivo (bloco entre --- no topo).
+// Retorna um objeto chave→valor ou {} se não houver frontmatter.
+function parseSimpleFrontmatter(content) {
+  const normalized = normalizeEol(content);
+  if (!normalized.startsWith('---')) return {};
+  const endIdx = normalized.indexOf('---', 3);
+  if (endIdx === -1) return {};
+  const fmBlock = normalized.slice(3, endIdx);
+  const result = {};
+  for (const line of fmBlock.split('\n')) {
+    const colonIdx = line.indexOf(':');
+    if (colonIdx === -1) continue;
+    const key = line.slice(0, colonIdx).trim();
+    const rawValue = line.slice(colonIdx + 1).trim();
+    // Remove comentários inline
+    const valueStr = rawValue.replace(/\s*#.*$/, '').trim();
+    if (!key) continue;
+    if (valueStr === 'null' || valueStr === '') {
+      result[key] = null;
+    } else if (valueStr === '{}') {
+      result[key] = {};
+    } else if (/^-?\d+(\.\d+)?$/.test(valueStr)) {
+      result[key] = parseFloat(valueStr);
+    } else {
+      result[key] = valueStr;
+    }
+  }
+  return result;
+}
+
+// Conta marcadores <!-- REVISAR --> e seções em branco num pilar.
+// Seções em branco: um heading seguido apenas de espaços/comentários HTML.
+function countRevisarAndBlanks(content) {
+  const revisarCount = (content.match(/<!--\s*REVISAR\s*-->/g) || []).length;
+
+  // Detecta seções em branco: ## heading seguido apenas de comentários/espaços
+  // até o próximo heading de mesmo nível ou superior, ou fim do arquivo.
+  let blankSections = 0;
+  const normalized = normalizeEol(content);
+  const lines = normalized.split('\n');
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (!/^##\s+\S/.test(line)) continue;
+
+    // Encontrou um heading ##. Avança para ver se há conteúdo real depois.
+    let hasContent = false;
+    for (let j = i + 1; j < lines.length; j++) {
+      const nextLine = lines[j];
+      // Se bateu em outro heading ## ou #, para
+      if (/^##\s+\S/.test(nextLine) || /^#\s+\S/.test(nextLine)) break;
+      // Linha não vazia, não é comentário HTML?
+      const trimmed = nextLine.trim();
+      if (trimmed && !trimmed.startsWith('<!--')) {
+        hasContent = true;
+        break;
+      }
+    }
+    if (!hasContent) blankSections++;
+  }
+
+  return { revisarCount, blankSections };
+}
+
+// Verifica a saúde do cérebro: CEREBRO.md existe, tem camadas, tem targets compilados.
+function checkBrainHealth(targetDir) {
+  const cerebroPath = path.join(targetDir, CEREBRO_PATH);
+  const result = {
+    hasCerebro: false,
+    hasLayers: false,
+    compiledTargets: [],
+    isLegacy: false,
+    isPointer: false,
+  };
+
+  if (fs.existsSync(cerebroPath)) {
+    result.hasCerebro = true;
+    const content = normalizeEol(fs.readFileSync(cerebroPath, 'utf8'));
+    result.hasLayers = hasBrainLayers(content);
+  }
+
+  // Verifica quais alvos compilados existem
+  const targets = readTargets(targetDir);
+  for (const t of targets) {
+    const targetPath = path.join(targetDir, t);
+    if (fs.existsSync(targetPath)) {
+      const content = normalizeEol(fs.readFileSync(targetPath, 'utf8'));
+      // Arquivo legado: ponteiro dizendo "vá ler CEREBRO.md"
+      if (content.includes('leia agora') && content.includes('CEREBRO.md')) {
+        result.isPointer = true;
+      }
+      // Só conta como compilado se tem o cabeçalho GERADO (não é ponteiro legado)
+      if (content.includes('ARQUIVO GERADO PELO CÓRTEX')) {
+        result.compiledTargets.push(t);
+      }
+    }
+  }
+
+  if (!result.hasLayers && result.hasCerebro) {
+    result.isLegacy = true;
+  }
+
+  return result;
+}
+
+// Calcula o índice de completude: share de pilares obrigatórios sem REVISAR.
+// Pilares opcionais (03, 04, 07-09) não afetam o índice.
+// Arredonda para a dezena mais próxima.
+function calculateCompleteness(pillarResults) {
+  const mandatory = MANDATORY_PILLAR_PREFIXES.map((p) => p.replace('_', ''));
+  const present = mandatory.filter((prefix) => {
+    const entry = pillarResults.find((p) => p.file.startsWith(`Pilares/${prefix}_`));
+    return entry && entry.exists;
+  });
+  if (present.length === 0) return 0;
+  const clean = present.filter((prefix) => {
+    const entry = pillarResults.find((p) => p.file.startsWith(`Pilares/${prefix}_`));
+    return entry && entry.revisarCount === 0 && entry.blankSections === 0 && entry.nullFields.length === 0;
+  });
+  const pct = Math.round((clean.length / present.length) * 100);
+  return Math.round(pct / 10) * 10;
 }
 
 function printHelp() {
@@ -291,8 +525,13 @@ ${bold}USO:${reset}
 
 ${bold}COMANDOS:${reset}
   ${green}init [pasta]${reset}   Inicializa a estrutura do Córtex na pasta especificada ou na pasta atual.
-  ${green}update [pasta]${reset} Atualiza APENAS a camada de framework (.agents/skills) para a versão instalada do CLI.
-                  Nunca toca em Pilares/, Memoria/, Ativos/, Frameworks/ ou nos system prompts de raiz.
+                  Por padrão cria só AGENTS.md (padrão cross-tool). Use --targets= para
+                  gerar arquivos para outras ferramentas já na instalação.
+                  ${dim}--targets=CLAUDE.md,GEMINI.md${reset}   gera bootstrap para ferramentas específicas
+                  ${dim}--targets=all${reset}                   gera para todas as ferramentas conhecidas
+  ${green}update [pasta]${reset} Atualiza APENAS a camada de framework (.agents/) para a versão instalada do CLI.
+                  Nunca toca em Pilares/, Memoria/, Ativos/ nem na área CORTEX:BUSINESS do cérebro.
+                  Regenera a área CORTEX:FRAMEWORK do cérebro e recompila os arquivos de instrução.
                   ${dim}--prune${reset}       Remove arquivos que o framework descontinuou (deixaram de existir no
                                 manifesto da versão atual). Nunca remove customizações suas — só o que
                                 o próprio framework já possuiu e abandonou. Um backup já é feito antes.
@@ -301,6 +540,9 @@ ${bold}COMANDOS:${reset}
                   Por padrão gera só AGENTS.md (o padrão cross-tool); os demais, sob demanda.
                   ${dim}--targets=CLAUDE.md,GEMINI.md${reset}   escolhe os alvos (grava em .cortex/targets.json)
                   ${dim}--targets=all${reset}                   gera todos os alvos conhecidos
+  ${green}doctor [pasta]${reset} Audita a estrutura do Córtex sem depender de IA: pilares faltando,
+                  marcadores REVISAR pendentes, frontmatter incompleto, saúde do cérebro.
+                  ${dim}Aliases: checkup, diagnostico${reset}
   ${green}--help, -h${reset}     Exibe esta mensagem de ajuda.
   ${green}--version, -v${reset}  Exibe a versão atual do CLI.
 
@@ -512,9 +754,14 @@ function pruneDeprecatedFiles(targetDir, removidosPeloFramework) {
 }
 
 async function runInit() {
-  const targetArg = args[1] && !args[1].startsWith('-') ? args[1] : '.';
+  // Primeiro argumento que não começa com "-" (pode estar após flags como --force)
+  const targetArg = args.slice(1).find((a) => !a.startsWith('-')) || '.';
   const targetDir = path.resolve(process.cwd(), targetArg);
   const templateDir = path.resolve(__dirname, '..');
+  const isForce = args.includes('--force') || args.includes('-f');
+
+  // --targets=CLAUDE.md,GEMINI.md ou --targets=all (mesmo parser do sync)
+  const toolsFlag = parseTargetsFlag(args);
 
   console.log(`\n${bold}${cyan}🧠 Inicializando Córtex...${reset}\n`);
 
@@ -524,8 +771,7 @@ async function runInit() {
   }
 
   const existingFiles = fs.readdirSync(targetDir);
-  if (existingFiles.length > 0 && targetArg !== '.') {
-    const isForce = args.includes('--force') || args.includes('-f');
+  if (existingFiles.length > 0) {
     if (!isForce) {
       console.log(`  ${yellow}⚠️ A pasta de destino não está vazia:${reset} ${targetDir}`);
       const confirmed = await askConfirmation(`  Deseja copiar a estrutura do Córtex mesmo assim? (s/N): `);
@@ -536,19 +782,20 @@ async function runInit() {
     }
   }
 
+  // init sempre cria AGENTS.md (o padrão cross-tool). Os demais targets são
+  // gerados sob demanda pelo onboarding Step 7, por --tools= no init, ou por
+  // `cortex sync --targets=...`. Isso evita a proliferação de 5 arquivos de
+  // instrução que o usuário talvez nunca use.
+  const extraTargets = (toolsFlag || []).filter((t) => t !== 'AGENTS.md');
+  const bootstrapTargets = ['AGENTS.md'].concat(extraTargets);
   const itemsToCopy = [
     '.agents',
     'Frameworks',
     'Memoria',
     'Pilares',
     'Ativos',
-    'AGENTS.md',
-    'GEMINI.md',
-    'CLAUDE.md',
-    'CODEX.md',
-    '.cursorrules',
     '.gitignore'
-  ];
+  ].concat(bootstrapTargets);
 
   console.log(`  ${dim}Copiando arquivos do framework...${reset}`);
 
@@ -781,6 +1028,184 @@ ${dim}Eles são artefatos gerados: edite sempre ${toPosix(CEREBRO_PATH)} e rode 
 `);
 }
 
+async function runDoctor() {
+  const targetArg = args[1] && !args[1].startsWith('-') ? args[1] : '.';
+  const targetDir = path.resolve(process.cwd(), targetArg);
+
+  console.log(`\n${bold}${cyan}🩺 Córtex Doctor — Diagnóstico Estrutural${reset}\n`);
+
+  if (!fs.existsSync(targetDir)) {
+    console.log(`${red}Pasta não encontrada:${reset} ${targetDir}`);
+    process.exit(1);
+  }
+
+  const metaPath = path.join(targetDir, 'Memoria', 'META.md');
+  if (!fs.existsSync(metaPath)) {
+    console.log(`${red}Não encontrei Memoria/META.md.${reset} Este Córtex ainda não foi montado.`);
+    console.log(`Rode ${cyan}npx @aksp/cortex init${reset} e depois peça para a IA ${cyan}"montar meu córtex"${reset}.\n`);
+    process.exit(1);
+  }
+
+  // --- 1. Parse META.md ---
+  const metaContent = fs.readFileSync(metaPath, 'utf8');
+  const headers = parseMetaHeaders(metaContent);
+  const fileMap = parseFileMapFromMeta(metaContent);
+  const realFiles = listRealFiles(targetDir);
+
+  const businessName = readBusinessName(targetDir) || headers.businessName || '(sem nome)';
+
+  console.log(`  ${bold}Negócio:${reset} ${businessName}`);
+  if (headers.type) console.log(`  ${bold}Tipo:${reset} ${headers.type}`);
+  if (headers.nextReview) console.log(`  ${bold}Próxima revisão:${reset} ${headers.nextReview}`);
+  console.log('');
+
+  // --- 2. Comparar mapa × disco ---
+  const mapFiles = new Set(fileMap);
+  const diskFiles = new Set(realFiles);
+
+  const broken = [];    // no mapa mas não no disco
+  const unindexed = []; // no disco mas não no mapa
+  const ok = [];        // nos dois
+
+  for (const f of mapFiles) {
+    if (diskFiles.has(f)) {
+      ok.push(f);
+    } else {
+      broken.push(f);
+    }
+  }
+  for (const f of diskFiles) {
+    if (!mapFiles.has(f)) unindexed.push(f);
+  }
+
+  const mandatoryMissing = MANDATORY_PILLAR_PREFIXES.filter((prefix) => {
+    const exists = [...diskFiles].some((f) => f.startsWith(`Pilares/${prefix}`));
+    return !exists;
+  });
+
+  // --- 3. Analisar cada pilar ---
+  const pillarResults = [];
+  for (const f of realFiles) {
+    if (!f.startsWith('Pilares/')) continue;
+    const fullPath = path.join(targetDir, f);
+    const content = fs.readFileSync(fullPath, 'utf8');
+    const { revisarCount, blankSections } = countRevisarAndBlanks(content);
+
+    // Frontmatter nulls: verifica apenas campos conhecidos
+    const fm = parseSimpleFrontmatter(content);
+    const knownFields = ['margem_alvo', 'margem_minima', 'preco_piso', 'desconto_max',
+      'custos_variaveis', 'custo_variavel_padrao'];
+    const nullFields = knownFields.filter((k) => fm[k] === null || (fm[k] && typeof fm[k] === 'object' && Object.keys(fm[k]).length === 0));
+
+    pillarResults.push({
+      file: f,
+      exists: true,
+      revisarCount,
+      blankSections,
+      nullFields,
+    });
+  }
+
+  // Pilares no mapa que não existem no disco também contam
+  for (const f of broken) {
+    if (!f.startsWith('Pilares/')) continue;
+    pillarResults.push({
+      file: f,
+      exists: false,
+      revisarCount: 0,
+      blankSections: 0,
+      nullFields: [],
+    });
+  }
+
+  // --- 4. Cérebro ---
+  const brain = checkBrainHealth(targetDir);
+
+  // --- 5. Completude ---
+  const completeness = calculateCompleteness(pillarResults);
+
+  // --- 6. Relatório ---
+  console.log(`${bold}📊 Completude estimada:${reset} ~${completeness}% dos pilares obrigatórios sem pendências\n`);
+
+  if (mandatoryMissing.length > 0) {
+    console.log(`${red}🔴 Pilares obrigatórios faltando:${reset}`);
+    for (const prefix of mandatoryMissing) {
+      const name = MANDATORY_PILLAR_NAMES[prefix] || prefix;
+      console.log(`   • ${prefix}${name}.md`);
+    }
+    console.log('');
+  } else {
+    console.log(`${green}🔴 Pilares obrigatórios faltando: Nenhum ✅${reset}\n`);
+  }
+
+  // Pilares opcionais não configurados (03_, 04_, 07_, 08_, 09_) — informativo, não alarmante
+  const optionalPrefixes = ['03_', '04_', '07_', '08_', '09_'];
+  const optionalMissing = optionalPrefixes.filter((prefix) => {
+    const exists = [...diskFiles].some((f) => f.startsWith(`Pilares/${prefix}`));
+    return !exists;
+  });
+  if (optionalMissing.length > 0) {
+    const names = { '03_': 'Financeiro', '04_': 'Comercial', '07_': 'Jurídico',
+      '08_': 'Inventário', '09_': 'Identidade Visual' };
+    console.log(`${dim}ℹ️  Pilares opcionais não configurados:${reset}`);
+    for (const prefix of optionalMissing) {
+      console.log(`   ${dim}• ${prefix}${names[prefix] || prefix}.md${reset}`);
+    }
+    console.log('');
+  }
+
+  const withPendencies = pillarResults.filter((p) => p.exists && (p.revisarCount > 0 || p.blankSections > 0 || p.nullFields.length > 0));
+  if (withPendencies.length > 0) {
+    console.log(`${yellow}📝 Pilares com pendências:${reset}`);
+    for (const p of withPendencies) {
+      const parts = [];
+      if (p.revisarCount > 0) parts.push(`${p.revisarCount} REVISAR`);
+      if (p.blankSections > 0) parts.push(`${p.blankSections} seção(ões) em branco`);
+      if (p.nullFields.length > 0) parts.push(`campos null: ${p.nullFields.join(', ')}`);
+      console.log(`   • ${p.file} — ${parts.join(' | ')}`);
+    }
+    console.log('');
+  } else {
+    console.log(`${green}📝 Pilares com pendências: Nenhum ✅${reset}\n`);
+  }
+
+  if (broken.length > 0 || unindexed.length > 0) {
+    console.log(`${yellow}⚠️ Inconsistências no META.md:${reset}`);
+    for (const f of broken) {
+      console.log(`   ${red}❌ Quebrado${reset} — ${f} (no mapa, mas não existe no disco)`);
+    }
+    for (const f of unindexed) {
+      console.log(`   ${yellow}⚠️ Não indexado${reset} — ${f} (no disco, mas não está no mapa)`);
+    }
+    console.log('');
+  } else {
+    console.log(`${green}⚠️ Inconsistências no META.md: Nenhuma ✅${reset}\n`);
+  }
+
+  console.log(`${bold}🧠 System prompt:${reset}`, (() => {
+    if (!brain.hasCerebro) return `${red}Sem CEREBRO.md — rode "revisar córtex" no chat`;
+    if (brain.hasLayers) return `${green}Fonte única (Frameworks/CEREBRO.md) com camadas ✅${reset}`;
+    if (brain.isLegacy) return `${yellow}Formato antigo (sem camadas CORTEX:BUSINESS/FRAMEWORK) — rode "revisar córtex" no chat para migrar${reset}`;
+    return `${yellow}Formato desconhecido — verifique manualmente${reset}`;
+  })());
+
+  if (brain.isPointer) {
+    console.log(`  ${yellow}⚠️ Arquivo(s) de raiz ainda são ponteiros (não compilados). Rode ${cyan}cortex sync${reset} para compilar.${reset}`);
+  }
+  if (brain.compiledTargets.length > 0) {
+    console.log(`  ${dim}Alvos compilados: ${brain.compiledTargets.join(', ')}${reset}`);
+  }
+
+  // --- 7. Sugestão ---
+  console.log(`\n${bold}💡 Sugestão:${reset}`, (() => {
+    if (mandatoryMissing.length > 0) return `Crie os pilares obrigatórios faltantes — diga "revisar córtex" no chat.`;
+    if (withPendencies.length > 0) return `Preencha os itens marcados como REVISAR — diga "completar meu córtex" no chat.`;
+    if (!brain.hasLayers) return `Migre o cérebro para o formato com camadas — diga "revisar córtex" no chat.`;
+    if (brain.isPointer) return `Recompile os arquivos de raiz — rode "npx @aksp/cortex sync".`;
+    return `Está tudo em dia! 🎉`;
+  })() + '\n');
+}
+
 async function main() {
   if (!command || command === 'init') {
     await runInit();
@@ -788,6 +1213,8 @@ async function main() {
     await runUpdate();
   } else if (command === 'sync') {
     await runSync();
+  } else if (command === 'doctor' || command === 'checkup' || command === 'diagnostico') {
+    await runDoctor();
   } else if (command === '--help' || command === '-h' || command === 'help') {
     printHelp();
   } else if (command === '--version' || command === '-v' || command === 'version') {
@@ -813,6 +1240,8 @@ module.exports = {
   VERSION,
   FRAMEWORK_ITEMS,
   USER_DATA_ITEMS,
+  MANDATORY_PILLAR_PREFIXES,
+  MANDATORY_PILLAR_NAMES,
   KNOWN_TARGETS,
   DEFAULT_TARGETS,
   CEREBRO_PATH,
@@ -837,6 +1266,15 @@ module.exports = {
   parseTargetsFlag,
   compileTargets,
   readBusinessName,
+  readCortexMeta,
+  writeCortexMeta,
+  parseMetaHeaders,
+  parseFileMapFromMeta,
+  listRealFiles,
+  parseSimpleFrontmatter,
+  countRevisarAndBlanks,
+  checkBrainHealth,
+  calculateCompleteness,
   copyRecursiveSync,
   writeVersionFile,
   readVersionFile,

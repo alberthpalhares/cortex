@@ -1,5 +1,5 @@
 {
-  "version": "0.12.0",
+  "version": "1.1.0",
   "files": [
     ".agents/cortex/brain.framework.md",
     ".agents/skills/ajuda/SKILL.md",
@@ -26,6 +26,7 @@
     ".agents/skills/cortex-onboarding/templates/Pilares/08_Inventario.md",
     ".agents/skills/cortex-onboarding/templates/Pilares/09_Identidade_Visual.md",
     ".agents/skills/cortex-revisao/SKILL.md",
+    ".agents/skills/ideias/SKILL.md",
     ".agents/skills/pesquisa-mercado/SKILL.md",
     ".agents/skills/proposta-comercial/SKILL.md",
     ".agents/skills/radar/SKILL.md",

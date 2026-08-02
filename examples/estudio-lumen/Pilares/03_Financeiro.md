@@ -1,6 +1,11 @@
 ---
-margem_alvo: 35    # % de lucro-alvo por projeto/produto (ex: 30). Lido primeiro pelo Modo "Guardião de Margem".
-margem_minima: 20  # % mínimo aceitável antes de recusar ou renegociar (ex: 15).
+margem_alvo: 35
+margem_minima: 20
+custos_variaveis:
+  "ensaio corporativo": 150
+  "vídeo institucional": 800
+  "evento corporativo": 200
+custo_variavel_padrao: 20
 ---
 
 # Financeiro

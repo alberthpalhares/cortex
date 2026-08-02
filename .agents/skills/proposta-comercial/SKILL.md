@@ -12,10 +12,16 @@ Generates a commercial proposal that's **90% ready** to send from what's already
 1. **Identify the minimum request.** You need at least: the client's name and what they want to hire (can be one item from the Product/Service lineup or something custom). If either is missing, ask objectively — just that, nothing more.
 
 2. **Silently read:**
-   - `Pilares/04_Comercial.md` — product lineup, frontmatter (`preco_piso`, `desconto_max`), and payment rules.
+   - `Pilares/04_Comercial.md` (if it exists) — product lineup, frontmatter (`preco_piso`, `desconto_max`), and payment rules.
+   - `Pilares/03_Financeiro.md` (if it exists) — frontmatter (`custos_variaveis`, `custo_variavel_padrao`) for the real variable cost of each item being quoted.
    - `Pilares/05_Comunicacao.md` — tone of voice.
    - `Pilares/09_Identidade_Visual.md`, if it exists — colors, font, brand guidelines.
    - `Memoria/01_Decisoes.md` — commercial rules already settled that affect the proposal (e.g. mandatory deposit, minimum deadline).
+
+   If `Pilares/04_Comercial.md` doesn't exist, the user hasn't configured the commercial pillar yet — it's optional. In that case:
+   - Ask the user for the service/item name, price, and payment terms directly (just what's needed for this proposal).
+   - Don't apply `preco_piso`/`desconto_max` guardrails (they weren't set).
+   - At the end of the proposal, add a note: *"💡 Você ainda não configurou os pilares financeiro e comercial no Córtex. Se quiser, posso te ajudar a registrar seus produtos, preços e políticas — aí as próximas propostas saem sozinhas, sem precisar perguntar valores."*
 
 3. **Assemble the proposal** in the tone of voice from the Communication pillar, using the real values and terms you found. Never make up a price — if the requested service isn't in the lineup and has no clear reference, build the proposal with the value as `[A DEFINIR]` and warn the user.
 

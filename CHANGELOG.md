@@ -6,7 +6,49 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-08-02
+
+### Corrigido
+- **Help do `update` corrigido:** o texto dizia que o comando "nunca toca em Frameworks/ ou nos system prompts de raiz", mas desde a v0.11.0 ele regenera `CORTEX:FRAMEWORK` e recompila os arquivos de instrução. O help e o README agora descrevem corretamente o que é e não é tocado.
+- **`USER_DATA_ITEMS` corrigido:** o array incluía os 5 arquivos de raiz como "dados do usuário nunca tocados", mas o update os regenera intencionalmente. Corrigido para listar apenas o que realmente é intocável: `Pilares/`, `Memoria/`, `Ativos/`, `Frameworks/` e `.gitignore`.
+- **`checkBrainHealth` corrigido:** branch morta (if/else idênticos) removida. Arquivos ponteiro legado não aparecem mais como "compilados" no relatório do doctor.
+- **`cortex-revisao` agora tem gatilho direto:** adicionado `'revisar córtex'` à description da skill (o gatilho mais comum, que estava ausente) e regra explícita no `brain.framework.md` (regra 6).
+- **Regra 14 do cérebro corrigida:** `04_Comercial.md` agora tem `(if it exists)` — é opcional desde a v1.0.0.
+- **`analisador-dre` reestruturado:** branches "arquivo existe" e "não existe" agora são independentes e não aninhados. A contradição "skip steps 3-4" vs "still analyze" foi resolvida.
+- **`ideias` não referencia mais arquivo deletado:** substituída a referência a `AUDITORIA_EVOLUCAO_v1.md` por `CONTRACTS.md`.
+- **`<!-- REVISAR -->` corrigido no onboarding:** a skill dizia "keep the template's REVISAR comment" mas nenhum template tinha o marcador. Agora instrui a "insert a REVISAR marker".
+- **`runInit` corrigido:** prompt de sobrescrita agora aparece sempre (antes pulava quando target era `.`). Argumento posicional agora é buscado corretamente após flags (`--force MinhaPasta` funciona).
+- **`--targets=inválido` agora emite warning** listando os targets válidos, em vez de falhar silenciosamente.
+- **Lista de pilares obrigatórios unificada** na constante `MANDATORY_PILLAR_PREFIXES`, eliminando 3 duplicatas no `cli.js`.
+- **`.gitignore` ampliado:** padrão `/AUDITORIA*.md` cobre qualquer auditoria futura, não só as de evolução.
+- **`package.json` `files` inclui `scripts/`** para que `build:manifest` e `verify:manifest` funcionem no pacote npm publicado.
+
+### Alterado
+- **`init` agora cria só `AGENTS.md` por padrão.** Os outros 4 arquivos de instrução (`CLAUDE.md`, `GEMINI.md`, `CODEX.md`, `.cursorrules`) só são gerados se o usuário passar `--targets=`. Isso elimina a proliferação de 5 arquivos que o usuário talvez nunca use. `init --targets=all` restaura o comportamento antigo. O onboarding Step 7 continua perguntando quais ferramentas o usuário usa e gerando os arquivos corretos.
+- **README totalmente atualizado:** tabela de comandos completa (16 comandos), árvore de diretórios marca `03_Financeiro`/`04_Comercial` como opcionais e inclui `.cortex/meta.json`, referência a "ponteiros" removida, seção "Mantendo o Córtex atualizado" inclui `cortex doctor`, tipos de negócio consolidados em 4 (removido "Profissionais liberais" redundante).
+- **`CONTRACTS.md` referenciado** como fonte de contratos na skill `ideias` e nos docs.
+
+## [1.0.0] - 2026-08-02
+
+### Adicionado
+- **Contratos congelados (`CONTRACTS.md`):** documento formalizando os 7 contratos estruturais que definem a v1.0.0: manifesto de framework, camadas do cérebro (marcadores `CORTEX:BUSINESS`/`CORTEX:FRAMEWORK`), schema do `.cortex/` (3 arquivos), formato dos artefatos compilados, lista de pilares obrigatórios/opcionais, nomenclatura de skills, e política de versionamento/migração. Quebrar qualquer um desses contratos exige major version bump (v2.0.0).
+- **Convenção de gatilhos (`CONTRIBUTING.md`):** tabela de verbos primários exclusivos por skill + regras para evitar colisão de gatilhos entre skills. Cada skill "possui" um verbo principal; skills novas devem verificar a tabela antes de escolher o seu.
+- **Regra de desempate no cérebro:** nova instrução no `brain.framework.md` e `CORTEX_TEMPLATE.md`: na dúvida entre duas skills, a IA pergunta em uma linha antes de agir ("Você quer registrar como decisão ou analisar o impacto financeiro?").
+- **Teste `skill ↔ ajuda`:** novo teste (`test/unit/skill-ajuda.test.js`) que falha se uma skill em `.agents/skills/` não tiver representação na skill `ajuda`. Roda no CI junto com os demais.
+- **Checklist de release (`CONTRIBUTING.md`):** lista de verificação para publicar uma nova versão (14 itens), incluindo sub-checklist para adicionar/remover skills.
+
+### Alterado
+- **Pilares financeiro e comercial passam a ser opcionais.** `03_Financeiro.md` e `04_Comercial.md` deixam de ser obrigatórios. Os obrigatórios caem de 6 para 4: `01_Estrategia`, `02_Cultura`, `05_Comunicacao`, `06_Operacao`. Onboarding pergunta antes do Bloco 3, `cortex doctor` mostra como `ℹ️ Opcional não configurado`, skills financeiras têm fallback elegante, Guardião de Margem verifica existência antes de calcular.
+- **Skill `cortex-onboarding`** agora aparece na `ajuda` como `montar meu córtex`.
+
 ## [0.12.0] - 2026-08-02
+
+### Adicionado
+- **Comando `cortex doctor` (aliases: `checkup`, `diagnostico`):** auditoria estrutural determinística do Córtex que roda direto no terminal, sem gastar tokens de IA. Verifica: pilares obrigatórios faltando, marcadores `REVISAR` pendentes, seções em branco, frontmatter com campos `null`/`{}` (incluindo `custos_variaveis`), inconsistências no `META.md` (arquivos quebrados ou não indexados), saúde do cérebro (camadas `CORTEX:BUSINESS`/`CORTEX:FRAMEWORK`, alvos compilados) e índice de completude. A skill `saude` espelha a mesma lógica, agora sugerindo `cortex doctor` como alternativa zero-token.
+- **Custo variável canônico no frontmatter:** `Pilares/03_Financeiro.md` ganha dois novos campos no frontmatter: `custos_variaveis` (mapeamento item→custo unitário, ex.: `{"fotografia corporativa": 150}`) e `custo_variavel_padrao` (% do preço quando não há custo por item). Isso fecha a conta do Modo "Guardião de Margem": agora o cálculo `Custo Real → Margem Resultante → Veredito` é determinístico e não depende de a IA adivinhar o custo na prosa. O Bloco 3A do onboarding passou a coletar o custo variável de cada produto/serviço. As skills `analisador-dre`, `proposta-comercial` e `saude` foram atualizadas para usar os novos campos.
+- **Modo Continuação no onboarding:** a skill `cortex-onboarding` agora detecta Córtex já existente (via `META.md`) e, quando acionada com "continuar onboarding" ou "completar meu córtex", lê os `REVISAR` e campos `null` pendentes e guia o usuário apenas pelos blocos incompletos — sem recomeçar do zero. Nova regra 17 no `brain.framework.md` para disparar esse modo.
+- **Metadados estruturados em `.cortex/meta.json`:** o onboarding agora grava `businessName`, `type`, `onboardedAt` e `nextReview` em `.cortex/meta.json` durante o Passo 7. O CLI (`readBusinessName`, `cortex doctor`) lê desse arquivo primeiro, com fallback para regex no `META.md` — fim do parsing frágil. Novas funções `readCortexMeta`/`writeCortexMeta` exportadas em `bin/cli.js`.
+- **Skill `ideias`:** nova skill para capturar e analisar ideias de evolução do próprio framework Córtex. Registra em `IDEIAS.md` (arquivo local gitignored, não versionado) com template estruturado de viabilidade. Três modos: captura rápida, análise de viabilidade contra os 6 princípios do projeto, e priorização. Nova regra 18 no cérebro.
 
 ### Alterado
 - **Internals do framework passam a ser escritos em inglês.** As 11 skills, os dois protocolos (`PROTOCOLO_AUTONOMIA.md`, `PROTOCOLO_MEMORIA.md`), o template do cérebro (`CORTEX_TEMPLATE.md` / `brain.framework.md`) e os comentários-guia dos templates de Pilares/Memória agora têm sua prosa instrucional em inglês — o que é carregado repetidamente no contexto da IA a cada sessão. Isso reduz o custo de token do carregamento recorrente sem mudar em nada a experiência do usuário: **a conversa com o usuário continua sempre em português**, os gatilhos das skills (`"radar"`, `"registra que..."`, `"saúde do córtex"` etc.) continuam em português nas `description`, os "Formatos de Saída" mostrados ao usuário continuam em português, e os dados do próprio negócio (Pilares/Memória preenchidos, cabeçalhos das seções, comentários do frontmatter YAML) permanecem no idioma do usuário.

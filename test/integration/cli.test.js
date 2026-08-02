@@ -22,11 +22,39 @@ test('init cria a estrutura completa esperada', () => {
   const result = runCli(['init', '.', '--force'], dir);
   assert.equal(result.status, 0, result.stderr);
 
-  for (const entry of ['.agents', 'Frameworks', 'Memoria', 'Pilares', 'Ativos', 'AGENTS.md', 'CLAUDE.md', 'GEMINI.md', 'CODEX.md', '.cursorrules', '.gitignore']) {
+  // init só cria AGENTS.md por padrão (cross-tool standard).
+  // Os demais targets são gerados sob demanda: onboarding Step 7 ou --targets= no init.
+  for (const entry of ['.agents', 'Frameworks', 'Memoria', 'Pilares', 'Ativos', 'AGENTS.md', '.gitignore']) {
     assert.ok(fs.existsSync(path.join(dir, entry)), `esperava "${entry}" depois do init`);
+  }
+  // Os outros targets NÃO devem ser criados sem --targets=
+  for (const f of ['CLAUDE.md', 'GEMINI.md', 'CODEX.md', '.cursorrules']) {
+    assert.equal(fs.existsSync(path.join(dir, f)), false, `${f} não deveria ser criado sem --targets=`);
   }
   assert.ok(fs.existsSync(path.join(dir, '.cortex', 'version.json')), 'esperava .cortex/version.json depois do init');
   assert.ok(fs.existsSync(path.join(dir, '.agents', 'manifest.json')), 'esperava .agents/manifest.json depois do init');
+});
+
+test('init --targets=all cria todos os targets', () => {
+  const dir = mkTmpDir();
+  const result = runCli(['init', '.', '--force', '--targets=all'], dir);
+  assert.equal(result.status, 0, result.stderr);
+
+  for (const entry of ['AGENTS.md', 'CLAUDE.md', 'GEMINI.md', 'CODEX.md', '.cursorrules']) {
+    assert.ok(fs.existsSync(path.join(dir, entry)), `esperava "${entry}" com --targets=all`);
+  }
+});
+
+test('init --targets=CLAUDE.md,.cursorrules cria só os targets pedidos', () => {
+  const dir = mkTmpDir();
+  const result = runCli(['init', '.', '--force', '--targets=CLAUDE.md,.cursorrules'], dir);
+  assert.equal(result.status, 0, result.stderr);
+
+  assert.ok(fs.existsSync(path.join(dir, 'AGENTS.md')), 'AGENTS.md sempre é criado (padrão cross-tool)');
+  assert.ok(fs.existsSync(path.join(dir, 'CLAUDE.md')), 'CLAUDE.md deveria existir com --targets=CLAUDE.md,.cursorrules');
+  assert.ok(fs.existsSync(path.join(dir, '.cursorrules')), '.cursorrules deveria existir com --targets=CLAUDE.md,.cursorrules');
+  assert.equal(fs.existsSync(path.join(dir, 'GEMINI.md')), false, 'GEMINI.md não deveria existir sem ser pedido');
+  assert.equal(fs.existsSync(path.join(dir, 'CODEX.md')), false, 'CODEX.md não deveria existir sem ser pedido');
 });
 
 test('update nunca altera os dados do usuário (Pilares, Memoria, Ativos)', () => {
@@ -221,4 +249,102 @@ test('sync gera apenas AGENTS.md por padrão e os demais alvos só sob demanda',
   const targetsPath = path.join(dir, '.cortex', 'targets.json');
   assert.ok(fs.existsSync(targetsPath), 'sync deveria registrar os alvos escolhidos em .cortex/targets.json');
   assert.deepEqual(JSON.parse(fs.readFileSync(targetsPath, 'utf8')).targets, ['AGENTS.md']);
+});
+
+test('doctor detecta córtex não montado', () => {
+  const dir = mkTmpDir();
+  let result = runCli(['init', '.', '--force'], dir);
+  assert.equal(result.status, 0, result.stderr);
+
+  // Sem Memoria/META.md, o doctor deve reportar que o Córtex não foi montado
+  result = runCli(['doctor', '.'], dir);
+  assert.notEqual(result.status, 0, 'doctor deve sair com erro quando não há META.md');
+  assert.ok(result.stdout.includes('ainda não foi montado') || result.stderr.includes('ainda não foi montado'),
+    'doctor deve avisar que o Córtex não está montado');
+});
+
+test('doctor audita um córtex com pendências e inconsistências', () => {
+  const dir = mkTmpDir();
+  let result = runCli(['init', '.', '--force'], dir);
+  assert.equal(result.status, 0, result.stderr);
+
+  // Monta um META.md com mapa de arquivos
+  fs.writeFileSync(
+    path.join(dir, 'Memoria', 'META.md'),
+    '# META — Índice\n\n**Negócio:** Empresa Teste\n**Setor:** Tecnologia\n' +
+    '**Tipo:** Eu-presa\n**Onboarding realizado em:** 2025-01-15\n' +
+    '**Última revisão:** 2025-07-15\n**Próxima revisão sugerida:** 2026-01-15\n\n' +
+    '## Mapa de Arquivos\n\n' +
+    '| Tópico | Arquivo | Seção (âncora) |\n' +
+    '|--------|---------|----------------|\n' +
+    '| Estratégia | `Pilares/01_Estrategia.md` | — |\n' +
+    '| Cultura | `Pilares/02_Cultura.md` | — |\n' +
+    '| Financeiro | `Pilares/03_Financeiro.md` | — |\n' +
+    '| Comercial | `Pilares/04_Comercial.md` | — |\n' +
+    '| Comunicação | `Pilares/05_Comunicacao.md` | — |\n' +
+    '| Operação | `Pilares/06_Operacao.md` | — |\n' +
+    '| Decisões | `Memoria/01_Decisoes.md` | — |\n' +
+    '| Lições | `Memoria/02_Licoes.md` | — |\n' +
+    '| Projetos | `Memoria/03_Projetos.md` | — |\n'
+  );
+
+  // Cria alguns pilares com REVISAR e frontmatter null
+  fs.writeFileSync(path.join(dir, 'Pilares', '01_Estrategia.md'), '# Estratégia\n\nAlgum conteúdo real.\n');
+  fs.writeFileSync(path.join(dir, 'Pilares', '02_Cultura.md'), '# Cultura\n\n<!-- REVISAR -->\n## Valores\n<!-- REVISAR -->\n');
+  fs.writeFileSync(path.join(dir, 'Pilares', '03_Financeiro.md'),
+    '---\nmargem_alvo: null\nmargem_minima: null\n---\n\n# Financeiro\n\n## Custos Fixos\n<!-- REVISAR -->\n');
+  fs.writeFileSync(path.join(dir, 'Pilares', '04_Comercial.md'),
+    '---\npreco_piso: null\ndesconto_max: null\n---\n\n# Comercial\n\n## Seção vazia\n<!-- Apenas comentário -->\n');
+  // Pilares 05 e 06 não existem no disco → quebrados no mapa
+
+  // Memoria
+  fs.writeFileSync(path.join(dir, 'Memoria', '01_Decisoes.md'), '# Decisões\n');
+  fs.writeFileSync(path.join(dir, 'Memoria', '02_Licoes.md'), '# Lições\n');
+  // 03_Projetos.md no mapa mas não no disco → quebrado
+
+  // Arquivo não indexado
+  fs.writeFileSync(path.join(dir, 'Memoria', '05_Registros_Gerais.md'), '# Registros\n');
+
+  // Cria CEREBRO.md com camadas
+  fs.mkdirSync(path.join(dir, 'Frameworks'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'Frameworks', 'CEREBRO.md'),
+    '# Cérebro\n\n<!-- CORTEX:BUSINESS:START -->\nNegócio de Teste\n<!-- CORTEX:BUSINESS:END -->\n\n' +
+    '<!-- CORTEX:FRAMEWORK:START -->\nRegras\n<!-- CORTEX:FRAMEWORK:END -->\n');
+
+  result = runCli(['doctor', '.'], dir);
+  assert.equal(result.status, 0, result.stderr);
+
+  const out = result.stdout;
+  assert.ok(out.includes('Empresa Teste'), 'deve mostrar o nome do negócio');
+  assert.ok(/[~]?\d+%/.test(out), 'deve mostrar índice de completude');
+  assert.ok(out.includes('🔴') || out.includes('Faltando') || out.includes('05_') || out.includes('06_'), 'deve reportar pilares obrigatórios faltando');
+  assert.ok(out.includes('REVISAR'), 'deve contar marcadores REVISAR');
+  assert.ok(out.includes('null'), 'deve reportar campos null no frontmatter');
+  assert.ok(out.includes('Quebrado') || out.includes('quebrado') || out.includes('quebrados'), 'deve reportar arquivos no mapa sem existir no disco');
+  assert.ok(out.includes('Não indexado') || out.includes('indexado'), 'deve reportar arquivos no disco fora do mapa');
+  assert.ok(out.includes('Frameworks/CEREBRO.md') || out.includes('camadas'), 'deve reportar saúde do cérebro');
+});
+
+test('doctor detecta cérebro legado (sem camadas)', () => {
+  const dir = mkTmpDir();
+  let result = runCli(['init', '.', '--force'], dir);
+  assert.equal(result.status, 0, result.stderr);
+
+  fs.writeFileSync(
+    path.join(dir, 'Memoria', 'META.md'),
+    '# META — Índice\n\n**Negócio:** Legado\n\n## Mapa de Arquivos\n\n' +
+    '| Tópico | Arquivo | Seção (âncora) |\n' +
+    '|--------|---------|----------------|\n' +
+    '| Estratégia | `Pilares/01_Estrategia.md` | — |\n'
+  );
+  fs.writeFileSync(path.join(dir, 'Pilares', '01_Estrategia.md'), '# Estratégia\n');
+  fs.mkdirSync(path.join(dir, 'Frameworks'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'Frameworks', 'CEREBRO.md'), '# Cérebro antigo, sem marcadores de camada\n');
+
+  result = runCli(['doctor', '.'], dir);
+  assert.equal(result.status, 0, result.stderr);
+
+  const out = result.stdout;
+  assert.ok(out.includes('Formato antigo') || out.includes('sem camadas') || out.includes('legado'),
+    'deve reportar que o cérebro está em formato antigo');
 });

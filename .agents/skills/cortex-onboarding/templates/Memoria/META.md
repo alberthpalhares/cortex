@@ -17,6 +17,12 @@
   moment, as part of that same action. A file that exists on disk but
   isn't listed here is invisible to layered reading.
 
+  Mandatory pillars (always created): 01_Estrategia, 02_Cultura,
+  05_Comunicacao, 06_Operacao.
+  Optional pillars (only if the user chose to include them):
+  03_Financeiro, 04_Comercial, 07_Juridico, 08_Inventario,
+  09_Identidade_Visual, and any 10+ custom pillars.
+
   "Seção (âncora)" column: when filled in, it's the exact `##` heading
   title inside the file — use it to read just that section instead of
   the whole file. "—" means the file is short enough to read in full.
@@ -33,13 +39,13 @@
 | Estratégia, posicionamento, público-alvo, metas | `Pilares/01_Estrategia.md` | — |
 | Panorama competitivo | `Pilares/01_Estrategia.md` | `## Panorama Competitivo` |
 | Cultura, valores, equipe | `Pilares/02_Cultura.md` | — |
-| Custos fixos | `Pilares/03_Financeiro.md` | `## Custos Fixos (mensal)` |
-| Margens (frontmatter: `margem_alvo`, `margem_minima`) | `Pilares/03_Financeiro.md` | frontmatter + `## Referências de Margem` |
-| Política de investimentos | `Pilares/03_Financeiro.md` | `## Política de Investimentos` |
-| Produtos e serviços | `Pilares/04_Comercial.md` | `## Esteira de Produtos/Serviços` |
-| Preços (frontmatter: `preco_piso`) | `Pilares/04_Comercial.md` | frontmatter + `## Estrutura de Precificação` |
-| Descontos (frontmatter: `desconto_max`) | `Pilares/04_Comercial.md` | frontmatter + `## Política de Descontos` |
-| Regras de pagamento | `Pilares/04_Comercial.md` | `## Regras de Pagamento` |
+| Custos fixos (opcional) | `Pilares/03_Financeiro.md` | `## Custos Fixos (mensal)` |
+| Margens (frontmatter: `margem_alvo`, `margem_minima`) (opcional) | `Pilares/03_Financeiro.md` | frontmatter + `## Referências de Margem` |
+| Política de investimentos (opcional) | `Pilares/03_Financeiro.md` | `## Política de Investimentos` |
+| Produtos e serviços (opcional) | `Pilares/04_Comercial.md` | `## Esteira de Produtos/Serviços` |
+| Preços (frontmatter: `preco_piso`) (opcional) | `Pilares/04_Comercial.md` | frontmatter + `## Estrutura de Precificação` |
+| Descontos (frontmatter: `desconto_max`) (opcional) | `Pilares/04_Comercial.md` | frontmatter + `## Política de Descontos` |
+| Regras de pagamento (opcional) | `Pilares/04_Comercial.md` | `## Regras de Pagamento` |
 | Canais, tom de voz, conteúdo | `Pilares/05_Comunicacao.md` | — |
 | Fluxos de trabalho, ferramentas, POPs | `Pilares/06_Operacao.md` | — |
 <!-- Include lines for 07_Juridico, 08_Inventario, 09_Identidade_Visual and pillars 10+ ONLY if those files were created -->

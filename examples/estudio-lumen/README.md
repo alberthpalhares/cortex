@@ -11,7 +11,7 @@ Este é um **Córtex de referência**, totalmente preenchido para um negócio fi
 
 ```
 estudio-lumen/
-├── Pilares/       ← 01 a 06 (obrigatórios) + 09 (Identidade Visual)
+├── Pilares/       ← 01, 02, 05, 06 (obrigatórios) + 03, 04, 09 (opcionais)
 ├── Memoria/       ← META.md + 5 arquivos, com decisões, lições e projetos de exemplo
 ├── Frameworks/    ← PROTOCOLO_AUTONOMIA.md, PROTOCOLO_MEMORIA.md, CEREBRO.md (system prompt completo)
 └── AGENTS.md                  ← cérebro compilado a partir de Frameworks/CEREBRO.md (artefato gerado)

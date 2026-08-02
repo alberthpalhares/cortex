@@ -61,7 +61,7 @@ Depois de montado, sempre que sair uma versão nova do framework, atualize as sk
 npx @aksp/cortex update
 ```
 
-`update` atualiza **apenas** `.agents/` (as skills e templates do framework) — nunca mexe em `Pilares/`, `Memoria/`, `Ativos/`, `Frameworks/` ou nos seus system prompts de raiz. Antes de aplicar qualquer mudança, ele mostra o que vai mudar e cria um backup automático de `.agents/`.
+`update` atualiza **apenas** a camada de framework (`.agents/`) e a região `CORTEX:FRAMEWORK` do cérebro — nunca mexe em `Pilares/`, `Memoria/`, `Ativos/` nem na área `CORTEX:BUSINESS` (os dados do seu negócio). Antes de aplicar qualquer mudança, ele mostra o que vai mudar e cria um backup automático de `.agents/`.
 
 ---
 
@@ -141,16 +141,18 @@ npx @aksp/cortex sync --targets=CLAUDE.md,.cursorrules
 SeuNegocio/
 ├── CHANGELOG.md               ← Histórico de versões e melhorias do framework
 ├── .gitignore                  ← Protege Pilares/Memoria/Ativos de irem para um repositório Git
-├── .cortex/version.json        ← Versão do framework instalada (usado por `cortex update`)
-├── AGENTS.md                   ← Cérebro compilado (gerado; outros alvos sob demanda)
-├── .cortex/targets.json        ← Quais arquivos de instrução gerar
+├── .cortex/
+│   ├── version.json           ← Versão do framework instalada (usado por `cortex update`)
+│   ├── targets.json           ← Quais arquivos de instrução gerar
+│   └── meta.json              ← Metadados do negócio (nome, tipo, datas)
+├── AGENTS.md                   ← Cérebro compilado (artefato gerado; edite Frameworks/CEREBRO.md)
 ├── Pilares/
-│   ├── 01_Estrategia.md      ← Posicionamento, público-alvo, metas
-│   ├── 02_Cultura.md         ← Valores, equipe, conduta
-│   ├── 03_Financeiro.md      ← Custos fixos, margens
-│   ├── 04_Comercial.md       ← Preços, pagamento, descontos
-│   ├── 05_Comunicacao.md     ← Canais, tom de voz, conteúdo
-│   ├── 06_Operacao.md        ← Fluxos de trabalho, ferramentas
+│   ├── 01_Estrategia.md      ← Posicionamento, público-alvo, metas ✅
+│   ├── 02_Cultura.md         ← Valores, equipe, conduta ✅
+│   ├── 03_Financeiro.md      ← Custos, margens (opcional)
+│   ├── 04_Comercial.md       ← Preços, pagamento, descontos (opcional)
+│   ├── 05_Comunicacao.md     ← Canais, tom de voz, conteúdo ✅
+│   ├── 06_Operacao.md        ← Fluxos de trabalho, ferramentas ✅
 │   ├── 07_Juridico.md        ← Contratos, regulamentações (opcional)
 │   ├── 08_Inventario.md      ← Equipamentos, estoque (opcional)
 │   ├── 09_Identidade_Visual.md ← Manual de marca (opcional)
@@ -165,7 +167,7 @@ SeuNegocio/
 ├── Frameworks/
 │   ├── PROTOCOLO_AUTONOMIA.md ← Protocolo de Ação Automática da IA
 │   ├── PROTOCOLO_MEMORIA.md   ← Como a Memória é arquivada com o tempo, sem perder histórico
-│   └── CEREBRO.md             ← Fonte única do system prompt (os 5 arquivos acima só apontam pra cá)
+│   └── CEREBRO.md             ← Fonte única do system prompt — editado aqui e compilado para os arquivos de raiz
 └── Ativos/                    ← Seus logos, templates, etc.
 ```
 
@@ -175,10 +177,11 @@ SeuNegocio/
 
 ## Mantendo o Córtex atualizado
 
-O framework (`.agents/`) e os dados do seu negócio (`Pilares/`, `Memoria/`, `Ativos/`, `Frameworks/` e os system prompts de raiz) são camadas separadas.
+O framework (`.agents/`) e os dados do seu negócio (`Pilares/`, `Memoria/`, `Ativos/`, e a região `CORTEX:BUSINESS` do cérebro) são camadas separadas.
 
-- `npx @aksp/cortex update` — traz skills novas e correções do framework sem nunca sobrescrever o que você já preencheu, com backup automático de `.agents/` antes de qualquer mudança.
+- `npx @aksp/cortex update` — traz skills novas e correções do framework, regenera as regras de operação (`CORTEX:FRAMEWORK`) e recompila os arquivos de instrução — sem nunca sobrescrever o que você já preencheu. Backup automático de `.agents/` antes de qualquer mudança.
 - `npx @aksp/cortex sync` — recompila os arquivos de instrução a partir de `Frameworks/CEREBRO.md`. Use depois de editar o cérebro à mão, ou com `--targets=` para incluir uma ferramenta nova.
+- `npx @aksp/cortex doctor` — auditoria estrutural do Córtex no terminal, sem gastar tokens de IA. Mostra pilares faltando, `REVISAR` pendentes, e a saúde do cérebro.
 
 > 💡 Desde a v0.11.0, o `update` também **atualiza as regras de operação dentro do seu cérebro** (a área `CORTEX:FRAMEWORK`) e recompila os arquivos de instrução — é isso que faz uma skill nova realmente passar a funcionar num Córtex antigo, em vez de só aparecer no disco. A área `CORTEX:BUSINESS`, com os dados do seu negócio, nunca é tocada.
 
@@ -188,6 +191,8 @@ O framework (`.agents/`) e os dados do seu negócio (`Pilares/`, `Memoria/`, `At
 
 | Comando | O que faz |
 |---------|-----------|
+| `montar meu córtex` | Inicia a configuração guiada do Córtex (entrevista inteligente) |
+| `continuar onboarding` | Retoma a configuração de onde parou |
 | `radar` | Mostra panorama do negócio (pendências, projetos, atrasos) |
 | `registra que...` | Grava uma decisão, lição ou pendência no arquivo correto |
 | `lição: ...` | Registra um aprendizado |
@@ -199,6 +204,8 @@ O framework (`.agents/`) e os dados do seu negócio (`Pilares/`, `Memoria/`, `At
 | `gerar proposta para [cliente]` | Monta uma proposta comercial pronta para envio |
 | `analisar DRE` | Cruza uma planilha financeira com suas metas de margem |
 | `pesquisar concorrência` | Mapeia concorrentes e atualiza o Panorama Competitivo |
+| `ideia` / `nova ideia` | Registra uma ideia de melhoria para o Córtex com análise de viabilidade |
+| `npx @aksp/cortex doctor` | Diagnóstico estrutural no terminal (sem gastar tokens) |
 | `ajuda` | Lista todos os comandos disponíveis |
 
 ---
@@ -213,11 +220,10 @@ Quer ver como fica um Córtex maduro antes de montar o seu? [`examples/estudio-l
 
 O Córtex se adapta automaticamente ao tipo de negócio durante a entrevista:
 
-- ✅ **Eu-presas** — MEI, autônomos, freelancers
+- ✅ **Eu-presas / MEI** — autônomos, freelancers, profissionais liberais
 - ✅ **Pequenas empresas** — com sócios e equipe
 - ✅ **Entidades sem fins lucrativos** — associações, clubes, ONGs, projetos sociais
 - ✅ **Negócios recorrentes** — academias, SaaS, consultorias mensais, escolas
-- ✅ **Profissionais liberais** — advogados, médicos, consultores
 
 ---
 

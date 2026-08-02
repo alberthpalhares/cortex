@@ -1,6 +1,6 @@
 ---
 name: cortex-revisao
-description: "Semi-annual Córtex review. Walks through each pillar, showing what was recorded during onboarding, and asks whether it still reflects the business's reality. Trigger with: 'revisão do córtex', 'revisar pilares', or when Radar warns the review date is near."
+description: "Semi-annual Córtex review. Walks through each pillar, showing what was recorded during onboarding, and asks whether it still reflects the business's reality. Trigger with: 'revisar córtex', 'revisão do córtex', 'revisar pilares', or when Radar warns the review date is near."
 ---
 
 # Skill: Córtex — Revisão Semestral
