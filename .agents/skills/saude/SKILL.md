@@ -22,9 +22,11 @@ Esta skill não julga o conteúdo do negócio — ela audita a **estrutura** do 
 
 5. **Leia cada arquivo em `Pilares/`** e conte quantos marcadores `<!-- REVISAR -->` ou seções em branco (título seguido só de comentário HTML) cada um tem. Em `Pilares/03_Financeiro.md` e `Pilares/04_Comercial.md`, verifique também o frontmatter YAML no topo: cada campo (`margem_alvo`, `margem_minima`, `preco_piso`, `desconto_max`) que ainda estiver `null` conta como uma pendência — é um dado que o Modo "Guardião de Margem" precisa e ainda não tem.
 
-6. **Verifique a camada do system prompt:**
-   - Se `Frameworks/CEREBRO.md` existir → formato atual (fonte única). Confirme que os 5 arquivos de raiz existem.
-   - Se não existir mas os 5 arquivos de raiz (`GEMINI.md` etc.) tiverem conteúdo completo → formato antigo, funcional, mas sugira migrar via `revisar córtex`.
+6. **Verifique a camada do cérebro:**
+   - `Frameworks/CEREBRO.md` existe e contém os marcadores `CORTEX:BUSINESS` e `CORTEX:FRAMEWORK` → **formato atual**. Confirme que existe ao menos um arquivo de instrução compilado na raiz (o padrão é `AGENTS.md`; os alvos escolhidos ficam em `.cortex/targets.json`).
+   - `CEREBRO.md` existe mas **sem** os marcadores → formato intermediário: funciona, mas o `cortex update` não consegue atualizar as regras sozinho. Sugira `revisar córtex` para separar as duas camadas.
+   - `CEREBRO.md` não existe → formato antigo (conteúdo duplicado nos arquivos de raiz). Sugira `revisar córtex` para migrar.
+   - Se algum arquivo de raiz ainda for um **ponteiro** antigo (contém *"leia `Frameworks/CEREBRO.md`"* em vez do conteúdo completo), aponte isso: basta rodar `npx @aksp/cortex sync` para recompilar.
 
 7. **Calcule um índice de completude simples:** proporção de pilares obrigatórios sem nenhum marcador `REVISAR` restante. Não invente decimais de precisão — arredonde para a dezena mais próxima (ex: "~70% preenchido").
 

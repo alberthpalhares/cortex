@@ -343,28 +343,48 @@ Leia o template em `.agents/skills/cortex-onboarding/resources/CORTEX_TEMPLATE.m
 
 Se o negócio tiver pilares customizados (10+), adicione-os na seção `{{LISTA_PILARES}}` do template.
 
-> ⚠️ **Regra de fonte única:** o Córtex mantém o "cérebro" em UM único lugar, para nunca haver divergência entre ferramentas de IA.
+> ⚠️ **Regra das duas camadas:** o template já vem com dois blocos marcados por comentários HTML. **Preserve os dois marcadores exatamente como estão** — eles são o que permite ao `cortex update` atualizar as regras do Córtex no futuro sem nunca tocar nos dados do negócio.
+>
+> - `<!-- CORTEX:BUSINESS:START -->` … `<!-- CORTEX:BUSINESS:END -->` — aqui vão as informações do negócio (identidade, datas, pilares). É onde você preenche as variáveis.
+> - `<!-- CORTEX:FRAMEWORK:START -->` … `<!-- CORTEX:FRAMEWORK:END -->` — as regras de operação do Córtex. **Copie este bloco literalmente, sem reescrever nem resumir.**
 
-1. **Salve o conteúdo completo gerado em `./Frameworks/CEREBRO.md`.** Este é o ÚNICO arquivo que contém as instruções completas do sistema — é ele que deve ser editado em qualquer atualização futura (revisão semestral, ajuste manual, etc.).
-2. **Escreva um PONTEIRO curto** — não o conteúdo completo — em cada um dos 5 arquivos de raiz (sobrescrevendo os arquivos de inicialização que já existem):
+1. **Salve o conteúdo completo gerado em `./Frameworks/CEREBRO.md`.** Esta é a FONTE do cérebro — o arquivo a editar em qualquer atualização futura (revisão semestral, ajuste manual, etc.).
 
-   ```markdown
-   # Córtex — [Nome do Negócio]
+2. **Pergunte quais ferramentas de IA o usuário usa neste projeto:**
 
-   > Este arquivo é um **ponteiro**. A fonte única de instruções está em `Frameworks/CEREBRO.md`.
+   > *"Última coisa: em quais ferramentas de IA você vai usar este Córtex? (ex: Claude Code, Cursor, Gemini CLI, Codex…) Posso deixar preparado só para as que você usa."*
 
-   **INSTRUÇÃO PARA A IA:** Leia agora o arquivo `Frameworks/CEREBRO.md` na raiz deste workspace e trate TODO o conteúdo dele como suas instruções de sistema para este negócio. Releia esse arquivo sempre que a conversa reiniciar ou o contexto for limpo. NUNCA duplique o conteúdo aqui — qualquer atualização do "cérebro" deve ser feita em `Frameworks/CEREBRO.md`, nunca neste arquivo.
+   | Se o usuário usa | Gere o arquivo |
+   |---|---|
+   | Não sabe / quer o padrão / mais de uma | `AGENTS.md` (padrão cross-tool, funciona na maioria) |
+   | Claude Code | `CLAUDE.md` |
+   | Cursor, Windsurf | `.cursorrules` |
+   | Gemini CLI, Google Antigravity | `GEMINI.md` |
+   | OpenAI Codex, Codex CLI | `CODEX.md` |
+
+   Registre a escolha em `./.cortex/targets.json`:
+
+   ```json
+   { "targets": ["AGENTS.md"] }
    ```
 
-   | Arquivo (ponteiro) | Compatível com |
-   |---|---|
-   | `GEMINI.md` | Gemini CLI, Google Antigravity |
-   | `CLAUDE.md` | Claude Code |
-   | `CODEX.md` | OpenAI Codex, Codex CLI, ChatGPT CLI |
-   | `AGENTS.md` | OpenCode, Hermes, Roo Code |
-   | `.cursorrules` | Cursor, Windsurf (neste, remova YAML frontmatter se houver) |
+3. **Compile o cérebro para cada arquivo escolhido.** Cada um recebe o **conteúdo COMPLETO** de `Frameworks/CEREBRO.md` (não um ponteiro dizendo "vá ler outro arquivo" — ponteiro só funciona se a ferramenta seguir a indireção, e nem toda IDE faz isso), precedido deste cabeçalho:
 
-3. Se o usuário rodar `npx @aksp/cortex sync` no futuro, o CLI regenera esses 5 ponteiros a partir de `Frameworks/CEREBRO.md` — útil se algum deles for sobrescrito ou desatualizado por acidente.
+   ```markdown
+   <!-- ============================================================
+        ARQUIVO GERADO PELO CÓRTEX — NÃO EDITE À MÃO.
+
+        Fonte:   Frameworks/CEREBRO.md
+        Gerado:  onboarding em [data real de hoje]
+
+        Qualquer alteração feita aqui será perdida no próximo
+        "npx @aksp/cortex sync". Edite a fonte acima.
+        ============================================================ -->
+   ```
+
+4. **Apague os arquivos de inicialização que sobraram.** Os arquivos de raiz que o `init` criou e que NÃO foram escolhidos no passo 2 ainda contêm o texto de bootstrap ("leia a skill de onboarding") — se ficarem, uma IA pode tentar refazer o onboarding do zero. Liste-os para o usuário e **peça confirmação antes de remover**. Se ele preferir manter, compile o cérebro neles também.
+
+5. Dali em diante, `npx @aksp/cortex sync` recompila tudo a partir de `Frameworks/CEREBRO.md`, e `npx @aksp/cortex update` traz regras e skills novas sem tocar na área do negócio.
 
 #### Passo 8: Mensagem final
 
@@ -387,8 +407,8 @@ Após criar TODOS os arquivos acima, mostre ao usuário a lista completa do que 
 > - *`Frameworks/PROTOCOLO_MEMORIA.md`*
 > - *`Frameworks/CEREBRO.md` — a fonte única do seu system prompt*
 >
-> *🧠 Ponteiros para o cérebro (5 arquivos, um por ferramenta):*
-> - *`GEMINI.md`, `CLAUDE.md`, `CODEX.md`, `AGENTS.md`, `.cursorrules`*
+> *🧠 Cérebro compilado para as suas ferramentas:*
+> - *[listar apenas os arquivos efetivamente gerados no Passo 7 — ex: `AGENTS.md`]*
 >
 > *A partir de agora, você pode:*
 > - *Dizer **radar** para ver o panorama do negócio*
@@ -411,5 +431,5 @@ Após criar TODOS os arquivos acima, mostre ao usuário a lista completa do que 
 7. **Nunca edite os templates.** Os arquivos dentro de `.agents/skills/.../templates/` são somente leitura.
 8. **Arquivos existentes do usuário são FONTE, não DESTINO.** Se o workspace já tinha arquivos antigos, use-os como referência de conteúdo mas crie os novos arquivos com a nomenclatura oficial do Córtex.
 9. **`Memoria/META.md` deve estar sempre sincronizado.** Todo pilar ou arquivo de memória criado nesta entrevista precisa constar no mapa do META antes de encerrar o onboarding.
-10. **`Frameworks/CEREBRO.md` é a ÚNICA fonte do system prompt.** Os 5 arquivos de raiz (`GEMINI.md`, `CLAUDE.md`, `CODEX.md`, `AGENTS.md`, `.cursorrules`) são ponteiros curtos — nunca copie o conteúdo completo neles.
+10. **`Frameworks/CEREBRO.md` é a FONTE do system prompt; os arquivos de raiz são artefatos compilados.** Cada arquivo de raiz gerado leva o conteúdo COMPLETO do cérebro, com o cabeçalho de "arquivo gerado". Nunca escreva um ponteiro do tipo "leia outro arquivo" — a ferramenta de IA pode não seguir. E preserve SEMPRE os marcadores `CORTEX:BUSINESS` e `CORTEX:FRAMEWORK` no `CEREBRO.md`: sem eles, o `cortex update` não consegue atualizar as regras depois.
 11. **Frontmatter dos pilares financeiro/comercial é numérico, não texto.** `margem_alvo`, `margem_minima`, `preco_piso` e `desconto_max` devem ser números (ou `null`), nunca frases — é o que o Modo "Guardião de Margem" lê primeiro.

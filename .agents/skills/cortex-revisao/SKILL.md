@@ -74,9 +74,21 @@ Aplique agora o `Frameworks/PROTOCOLO_MEMORIA.md`: siga o fluxo da skill `consol
    Próxima revisão sugerida: [data real de hoje + 6 meses]
    ```
 2. **Confira o Mapa de Arquivos do `Memoria/META.md` contra a lista real de arquivos em `Pilares/` e `Memoria/`.** Qualquer arquivo que exista no disco e não esteja no mapa deve ser adicionado agora — esta é a última chance da revisão de corrigir um META desatualizado.
-3. **Atualize o system prompt:**
-   - Se `Frameworks/CEREBRO.md` existir (Córtex montado a partir da v0.7.0), é ele o ÚNICO arquivo a editar — atualize as datas de revisão e qualquer conteúdo que tenha mudado lá. Os 5 arquivos de raiz são só ponteiros; não precisam de edição a menos que estejam corrompidos (nesse caso, rode `npx @aksp/cortex sync`).
-   - Se `Frameworks/CEREBRO.md` **não** existir (Córtex mais antigo, com o conteúdo completo duplicado nos 5 arquivos de raiz), pergunte ao usuário: *"Seu Córtex ainda usa o formato antigo, com o cérebro duplicado em 5 arquivos. Quer que eu migre para o formato novo — um arquivo único (`Frameworks/CEREBRO.md`) com ponteiros nos outros 5? Isso evita que eles fiquem dessincronizados no futuro."* Se sim: copie o conteúdo de qualquer um dos 5 arquivos de raiz (eles devem ser idênticos) para `Frameworks/CEREBRO.md`, atualize-o com o que mudou nesta revisão, e substitua os 5 arquivos de raiz pelo ponteiro curto descrito na skill `cortex-onboarding` (Passo 7). Se não, apenas atualize os 5 arquivos normalmente, mantendo-os idênticos entre si.
+3. **Atualize o cérebro (`Frameworks/CEREBRO.md`).** Ele é a FONTE; os arquivos de raiz (`AGENTS.md` etc.) são artefatos compilados a partir dele. Identifique em qual dos três estados o Córtex está:
+
+   **(a) Tem `CEREBRO.md` COM os marcadores `CORTEX:BUSINESS` / `CORTEX:FRAMEWORK` (formato atual).**
+   Edite **somente dentro da região `CORTEX:BUSINESS`** — atualize as datas na seção "Ciclo de Revisão" e a lista de pilares, se mudou. **Nunca edite a região `CORTEX:FRAMEWORK`**: ela é regenerada pelo `npx @aksp/cortex update` e qualquer coisa escrita ali será perdida. Ao terminar, rode `npx @aksp/cortex sync` (ou peça ao usuário) para recompilar os arquivos de instrução.
+
+   **(b) Tem `CEREBRO.md` SEM os marcadores (Córtex entre a v0.7.0 e a v0.10.0).**
+   Ofereça a migração: *"Seu cérebro ainda é um bloco único. Posso separá-lo em duas áreas — a do seu negócio e a das regras do Córtex? A vantagem é que, daí em diante, as atualizações do framework chegam sozinhas sem nunca mexer nos seus dados."* Se sim:
+   - Envolva a parte do negócio (identidade, datas de revisão, lista de pilares) entre `<!-- CORTEX:BUSINESS:START -->` e `<!-- CORTEX:BUSINESS:END -->`.
+   - **Substitua** toda a parte de regras de operação pelo conteúdo literal de `.agents/cortex/brain.framework.md`, envolto em `<!-- CORTEX:FRAMEWORK:START -->` e `<!-- CORTEX:FRAMEWORK:END -->`. Se o usuário tinha regras próprias ali, mostre-as antes e pergunte onde ele quer preservá-las (o lugar natural é a região de negócio).
+   - Rode `npx @aksp/cortex sync` ao final.
+
+   **(c) Não tem `CEREBRO.md` (Córtex anterior à v0.7.0, com o conteúdo duplicado nos 5 arquivos de raiz).**
+   Copie o conteúdo de qualquer um dos arquivos de raiz (eles devem ser idênticos) para `Frameworks/CEREBRO.md` e siga exatamente o caso (b) para separá-lo em duas camadas.
+
+   > Em qualquer caso: se algum arquivo de raiz ainda contiver um "ponteiro" antigo (do tipo *"leia `Frameworks/CEREBRO.md`"*), ele está obsoleto — `sync` vai substituí-lo pelo cérebro completo, que é o que garante que a ferramenta de IA leia as instruções sem depender de seguir a indireção.
 4. **Mostre um resumo** do que foi alterado:
 
 > *"✅ Revisão do Córtex concluída!*

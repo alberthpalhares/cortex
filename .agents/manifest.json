@@ -1,6 +1,7 @@
 {
-  "version": "0.10.0",
+  "version": "0.11.0",
   "files": [
+    ".agents/cortex/brain.framework.md",
     ".agents/skills/ajuda/SKILL.md",
     ".agents/skills/analisador-dre/SKILL.md",
     ".agents/skills/consolidar/SKILL.md",

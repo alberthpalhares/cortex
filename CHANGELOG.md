@@ -6,6 +6,19 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-08-02
+
+### Adicionado
+- **Cérebro em duas camadas:** `Frameworks/CEREBRO.md` passa a ter duas regiões marcadas — `CORTEX:BUSINESS` (identidade, datas de revisão e pilares do negócio, **nunca** tocada por uma atualização) e `CORTEX:FRAMEWORK` (regras de operação e disparo de skills, regenerável). O texto da camada de framework agora é shippado em `.agents/cortex/brain.framework.md`, dentro da camada atualizável.
+- **`cortex update` passa a propagar o cérebro.** Até aqui, `update` instalava as skills novas em `.agents/` mas nada ensinava a IA a acioná-las: a skill chegava ao disco e ficava invisível. Agora o comando regenera a região `CORTEX:FRAMEWORK` do cérebro e recompila os arquivos de instrução, preservando a região do negócio byte a byte (com backup do `CEREBRO.md` antes de qualquer escrita).
+- **`--targets` no `cortex sync`:** escolhe quais arquivos de instrução gerar (`--targets=CLAUDE.md,GEMINI.md` ou `--targets=all`), gravando a escolha em `.cortex/targets.json`.
+
+### Alterado
+- **Os arquivos de instrução deixam de ser "ponteiros" e passam a ser compilados.** `AGENTS.md` e companhia agora contêm o **conteúdo completo** do cérebro, com um cabeçalho de "arquivo gerado — não edite à mão", em vez de um texto pedindo à IA que fosse ler `Frameworks/CEREBRO.md`. O modelo de ponteiro só funcionava se a ferramenta seguisse a indireção — e nem toda IDE faz isso. Como os arquivos passam a ser gerados, e não editados, eles também não têm como divergir entre si.
+- **`AGENTS.md` é o alvo padrão, os demais são sob demanda.** Em vez de manter cinco arquivos de instrução na raiz por padrão, o Córtex gera apenas `AGENTS.md` (a convenção cross-tool) e cria os outros só quando o usuário pede — menos arquivos, menos superfície de erro. O onboarding pergunta quais ferramentas o usuário usa.
+- **Fim de linha preservado:** a comparação e a escrita do cérebro respeitam o estilo do arquivo (CRLF/LF), evitando que uma atualização reescrevesse o arquivo inteiro só por causa de quebra de linha.
+- **`cortex-onboarding`, `cortex-revisao` e `saude`** atualizadas para o modelo compilado, incluindo o caminho de migração para Córtex das versões 0.7–0.10 (cérebro sem marcadores) e anteriores à 0.7.
+
 ## [0.10.0] - 2026-08-01
 
 ### Adicionado

@@ -14,7 +14,7 @@ estudio-lumen/
 ├── Pilares/       ← 01 a 06 (obrigatórios) + 09 (Identidade Visual)
 ├── Memoria/       ← META.md + 5 arquivos, com decisões, lições e projetos de exemplo
 ├── Frameworks/    ← PROTOCOLO_AUTONOMIA.md, PROTOCOLO_MEMORIA.md, CEREBRO.md (system prompt completo)
-└── GEMINI.md / CLAUDE.md / CODEX.md / AGENTS.md / .cursorrules  ← ponteiros para Frameworks/CEREBRO.md
+└── AGENTS.md                  ← cérebro compilado a partir de Frameworks/CEREBRO.md (artefato gerado)
 ```
 
 Para explorar como um Córtex real funciona, abra esta pasta em qualquer ferramenta de IA compatível (Claude Code, Gemini CLI, Cursor, etc.) e pergunte "radar" ou "quem é o cliente ideal do Estúdio Lumen?".

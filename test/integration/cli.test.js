@@ -29,7 +29,7 @@ test('init cria a estrutura completa esperada', () => {
   assert.ok(fs.existsSync(path.join(dir, '.agents', 'manifest.json')), 'esperava .agents/manifest.json depois do init');
 });
 
-test('update nunca altera os dados do usuário (Pilares, Memoria, Ativos, Frameworks, ponteiros de raiz)', () => {
+test('update nunca altera os dados do usuário (Pilares, Memoria, Ativos)', () => {
   const dir = mkTmpDir();
   let result = runCli(['init', '.', '--force'], dir);
   assert.equal(result.status, 0, result.stderr);
@@ -54,8 +54,11 @@ test('update nunca altera os dados do usuário (Pilares, Memoria, Ativos, Framew
   const radarSkillPath = path.join(dir, '.agents', 'skills', 'radar', 'SKILL.md');
   fs.writeFileSync(radarSkillPath, '# versão antiga da skill radar, anterior à atualização');
 
+  // Os arquivos de raiz (AGENTS.md etc.) NÃO entram aqui: a partir do modelo de
+  // cérebro compilado eles são artefatos gerados, e ser regenerado é o
+  // comportamento correto. O que é intocável são os dados do negócio.
   const userDataSnapshot = new Map();
-  for (const rel of ['Pilares/01_Estrategia.md', 'Memoria/META.md', '.gitignore', 'AGENTS.md', 'CLAUDE.md']) {
+  for (const rel of ['Pilares/01_Estrategia.md', 'Memoria/META.md', '.gitignore']) {
     userDataSnapshot.set(rel, fs.readFileSync(path.join(dir, rel)));
   }
 
@@ -119,18 +122,103 @@ test('update mantém arquivos descontinuados pelo framework por padrão, e só r
   assert.equal(fs.existsSync(deprecatedPath), false, 'com --prune, o arquivo descontinuado deveria ser removido');
 });
 
-test('sync regenera os 5 ponteiros de raiz a partir de Frameworks/CEREBRO.md', () => {
+test('update propaga as regras novas para o cérebro e para o arquivo que a IA lê', () => {
+  // Este é o ponto central do modelo de cérebro compilado: antes dele, um
+  // "cortex update" instalava a skill nova no disco, mas nada ensinava a IA a
+  // acioná-la — a skill chegava e ficava invisível.
   const dir = mkTmpDir();
   let result = runCli(['init', '.', '--force'], dir);
   assert.equal(result.status, 0, result.stderr);
 
+  const regraDoFrameworkAtual = fs.readFileSync(
+    path.join(REPO_ROOT, '.agents', 'cortex', 'brain.framework.md'),
+    'utf8'
+  );
+  const trechoEsperado = regraDoFrameworkAtual.split('\n').find((l) => l.includes('proposta-comercial'));
+  assert.ok(trechoEsperado, 'pré-condição do teste: o framework atual precisa citar alguma skill');
+
+  // Um Córtex montado numa versão anterior: tem as duas camadas, mas a área de
+  // framework está velha e não conhece as skills que vieram depois.
+  const dadosDoNegocio = '## Identidade\n\nNegócio de Teste — informação que só o usuário tem.';
   fs.mkdirSync(path.join(dir, 'Frameworks'), { recursive: true });
-  fs.writeFileSync(path.join(dir, 'Frameworks', 'CEREBRO.md'), '# Cérebro de teste');
+  fs.writeFileSync(
+    path.join(dir, 'Frameworks', 'CEREBRO.md'),
+    `# Instruções do Sistema\n\n<!-- CORTEX:BUSINESS:START -->\n${dadosDoNegocio}\n<!-- CORTEX:BUSINESS:END -->\n\n<!-- CORTEX:FRAMEWORK:START -->\nRegras antigas, de uma versão que não conhecia as skills novas.\n<!-- CORTEX:FRAMEWORK:END -->\n`
+  );
+  fs.writeFileSync(
+    path.join(dir, '.cortex', 'version.json'),
+    JSON.stringify({ version: '0.7.0', updatedAt: new Date().toISOString() }, null, 2)
+  );
+
+  result = runCli(['update', '.', '--force'], dir);
+  assert.equal(result.status, 0, result.stderr);
+
+  const cerebroDepois = fs.readFileSync(path.join(dir, 'Frameworks', 'CEREBRO.md'), 'utf8');
+  assert.ok(
+    cerebroDepois.includes('proposta-comercial'),
+    'depois do update, o cérebro precisa conhecer as skills da versão atual'
+  );
+  assert.ok(
+    cerebroDepois.includes('Negócio de Teste — informação que só o usuário tem.'),
+    'o update NUNCA pode alterar a área de negócio do cérebro'
+  );
+
+  const agentsDepois = fs.readFileSync(path.join(dir, 'AGENTS.md'), 'utf8');
+  assert.ok(
+    agentsDepois.includes('proposta-comercial'),
+    'o arquivo que a IA lê precisa ter sido recompilado com as regras novas'
+  );
+});
+
+test('sync compila o cérebro COMPLETO no arquivo de instrução (não um ponteiro)', () => {
+  const dir = mkTmpDir();
+  let result = runCli(['init', '.', '--force'], dir);
+  assert.equal(result.status, 0, result.stderr);
+
+  const marcaExclusiva = 'REGRA-DE-TESTE-QUE-SO-EXISTE-NO-CEREBRO';
+  fs.mkdirSync(path.join(dir, 'Frameworks'), { recursive: true });
+  fs.writeFileSync(
+    path.join(dir, 'Frameworks', 'CEREBRO.md'),
+    `# Cérebro de teste\n\n${marcaExclusiva}\n`
+  );
   fs.writeFileSync(path.join(dir, 'CLAUDE.md'), 'conteúdo corrompido, precisa ser regenerado');
+
+  result = runCli(['sync', '.', '--force', '--targets=CLAUDE.md'], dir);
+  assert.equal(result.status, 0, result.stderr);
+
+  const claudeContent = fs.readFileSync(path.join(dir, 'CLAUDE.md'), 'utf8');
+  assert.ok(
+    claudeContent.includes(marcaExclusiva),
+    'o arquivo compilado precisa conter o conteúdo real do cérebro, não uma referência a ele'
+  );
+  assert.ok(
+    claudeContent.includes('ARQUIVO GERADO PELO CÓRTEX'),
+    'o arquivo compilado precisa avisar que é gerado e não deve ser editado à mão'
+  );
+});
+
+test('sync gera apenas AGENTS.md por padrão e os demais alvos só sob demanda', () => {
+  const dir = mkTmpDir();
+  let result = runCli(['init', '.', '--force'], dir);
+  assert.equal(result.status, 0, result.stderr);
+
+  // Um projeto onde só AGENTS.md existe na raiz: os outros alvos não devem
+  // ser criados sem o usuário pedir.
+  for (const f of ['CLAUDE.md', 'GEMINI.md', 'CODEX.md', '.cursorrules']) {
+    fs.rmSync(path.join(dir, f), { force: true });
+  }
+  fs.mkdirSync(path.join(dir, 'Frameworks'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'Frameworks', 'CEREBRO.md'), '# Cérebro de teste\n');
 
   result = runCli(['sync', '.', '--force'], dir);
   assert.equal(result.status, 0, result.stderr);
 
-  const claudeContent = fs.readFileSync(path.join(dir, 'CLAUDE.md'), 'utf8');
-  assert.ok(claudeContent.includes('Frameworks/CEREBRO.md'), 'ponteiro regenerado deveria referenciar Frameworks/CEREBRO.md');
+  assert.ok(fs.existsSync(path.join(dir, 'AGENTS.md')), 'AGENTS.md é o alvo padrão e deveria existir');
+  for (const f of ['CLAUDE.md', 'GEMINI.md', 'CODEX.md', '.cursorrules']) {
+    assert.equal(fs.existsSync(path.join(dir, f)), false, `${f} não deveria ser gerado sem --targets`);
+  }
+
+  const targetsPath = path.join(dir, '.cortex', 'targets.json');
+  assert.ok(fs.existsSync(targetsPath), 'sync deveria registrar os alvos escolhidos em .cortex/targets.json');
+  assert.deepEqual(JSON.parse(fs.readFileSync(targetsPath, 'utf8')).targets, ['AGENTS.md']);
 });

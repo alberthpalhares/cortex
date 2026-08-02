@@ -115,17 +115,23 @@ Independentemente de como você baixou:
 
 ## Funciona em qualquer IDE
 
-O conteúdo completo do system prompt vive em um único lugar — `Frameworks/CEREBRO.md` — e os 5 arquivos abaixo são ponteiros curtos que instruem cada ferramenta a lê-lo. Isso elimina o risco de os arquivos divergirem entre si:
+O cérebro vive em um único lugar — `Frameworks/CEREBRO.md` — e o Córtex **compila** esse conteúdo para o arquivo de instrução que a sua ferramenta lê. Cada arquivo gerado carrega o cérebro **completo**, então a IA nunca precisa "seguir um atalho" até outro arquivo para saber as regras:
 
-| Arquivo (ponteiro) | Compatível com |
+| Arquivo gerado | Compatível com |
 |---|---|
-| `GEMINI.md` | Gemini CLI, Google Antigravity |
+| `AGENTS.md` *(padrão)* | OpenCode, Hermes, Roo Code e demais ferramentas que seguem o padrão AGENTS.md |
 | `CLAUDE.md` | Claude Code |
-| `CODEX.md` | OpenAI Codex, Codex CLI, ChatGPT CLI |
-| `AGENTS.md` | OpenCode, Hermes, Roo Code |
 | `.cursorrules` | Cursor, Windsurf |
+| `GEMINI.md` | Gemini CLI, Google Antigravity |
+| `CODEX.md` | OpenAI Codex, Codex CLI, ChatGPT CLI |
 
-Você pode alternar entre ferramentas no mesmo projeto sem reconfigurar nada. Se algum ponteiro for sobrescrito ou corrompido, rode `npx @aksp/cortex sync` para regenerá-los a partir de `Frameworks/CEREBRO.md`.
+Por padrão só o `AGENTS.md` é gerado. Se você usa outra ferramenta, o onboarding pergunta — ou você mesmo escolhe a qualquer momento:
+
+```bash
+npx @aksp/cortex sync --targets=CLAUDE.md,.cursorrules
+```
+
+> ⚠️ Esses arquivos são **artefatos gerados**: edite sempre `Frameworks/CEREBRO.md` e rode `npx @aksp/cortex sync`. Como eles nunca são editados à mão, também não têm como ficar divergentes entre si.
 
 ---
 
@@ -136,7 +142,8 @@ SeuNegocio/
 ├── CHANGELOG.md               ← Histórico de versões e melhorias do framework
 ├── .gitignore                  ← Protege Pilares/Memoria/Ativos de irem para um repositório Git
 ├── .cortex/version.json        ← Versão do framework instalada (usado por `cortex update`)
-├── GEMINI.md / CLAUDE.md / CODEX.md / AGENTS.md / .cursorrules  ← Ponteiros para Frameworks/CEREBRO.md
+├── AGENTS.md                   ← Cérebro compilado (gerado; outros alvos sob demanda)
+├── .cortex/targets.json        ← Quais arquivos de instrução gerar
 ├── Pilares/
 │   ├── 01_Estrategia.md      ← Posicionamento, público-alvo, metas
 │   ├── 02_Cultura.md         ← Valores, equipe, conduta
@@ -171,7 +178,9 @@ SeuNegocio/
 O framework (`.agents/`) e os dados do seu negócio (`Pilares/`, `Memoria/`, `Ativos/`, `Frameworks/` e os system prompts de raiz) são camadas separadas.
 
 - `npx @aksp/cortex update` — traz skills novas e correções do framework sem nunca sobrescrever o que você já preencheu, com backup automático de `.agents/` antes de qualquer mudança.
-- `npx @aksp/cortex sync` — regenera os 5 ponteiros de raiz a partir de `Frameworks/CEREBRO.md`, caso algum deles seja sobrescrito ou corrompido.
+- `npx @aksp/cortex sync` — recompila os arquivos de instrução a partir de `Frameworks/CEREBRO.md`. Use depois de editar o cérebro à mão, ou com `--targets=` para incluir uma ferramenta nova.
+
+> 💡 Desde a v0.11.0, o `update` também **atualiza as regras de operação dentro do seu cérebro** (a área `CORTEX:FRAMEWORK`) e recompila os arquivos de instrução — é isso que faz uma skill nova realmente passar a funcionar num Córtex antigo, em vez de só aparecer no disco. A área `CORTEX:BUSINESS`, com os dados do seu negócio, nunca é tocada.
 
 ---
 

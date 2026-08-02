@@ -53,10 +53,38 @@ const CORTEX_VERSION_FILE = 'version.json';
 // conta própria dentro de .agents/skills (nunca estiveram em nenhum manifesto).
 const MANIFEST_REL_PATH = path.join('.agents', 'manifest.json');
 
-// Os 5 arquivos de raiz que, a partir da fonte única, viram ponteiros para
-// Frameworks/CEREBRO.md em vez de guardar o conteúdo completo do system prompt.
-const POINTER_ROOT_FILES = ['GEMINI.md', 'CLAUDE.md', 'CODEX.md', 'AGENTS.md', '.cursorrules'];
+// Alvos de compilação: os arquivos de instrução que cada ferramenta de IA lê.
+// A partir da v0.11.0 eles são ARTEFATOS GERADOS com o conteúdo COMPLETO do
+// cérebro — não mais ponteiros dizendo "vá ler outro arquivo". Ponteiro só
+// funciona se a ferramenta seguir a indireção, e nem toda IDE faz isso.
+const KNOWN_TARGETS = {
+  'AGENTS.md': 'Padrão AGENTS.md — OpenCode, Hermes, Roo Code e ferramentas compatíveis',
+  'CLAUDE.md': 'Claude Code',
+  'GEMINI.md': 'Gemini CLI, Google Antigravity',
+  'CODEX.md': 'OpenAI Codex, Codex CLI, ChatGPT CLI',
+  '.cursorrules': 'Cursor, Windsurf'
+};
+
+// `AGENTS.md` virou a convenção cross-tool de fato, então é o único alvo gerado
+// por padrão. Os demais são gerados sob demanda (`cortex sync --targets=...`),
+// mantendo a raiz do projeto limpa e reduzindo a superfície de arquivos.
+const DEFAULT_TARGETS = ['AGENTS.md'];
+
+const TARGETS_FILE = 'targets.json';
 const CEREBRO_PATH = path.join('Frameworks', 'CEREBRO.md');
+
+// Template da camada de framework do cérebro (regras de operação, disparo de
+// skills). Vive dentro de .agents/, então `cortex update` o atualiza junto com
+// as skills — é isso que faz uma skill nova passar a ser realmente acionada
+// num Córtex antigo, em vez de só aparecer no disco sem ninguém chamar.
+const BRAIN_FRAMEWORK_REL_PATH = path.join('.agents', 'cortex', 'brain.framework.md');
+
+// Marcadores que separam, dentro de Frameworks/CEREBRO.md, o que é do usuário
+// (BUSINESS — nunca tocado) do que é do framework (FRAMEWORK — regenerável).
+const BUSINESS_START = '<!-- CORTEX:BUSINESS:START -->';
+const BUSINESS_END = '<!-- CORTEX:BUSINESS:END -->';
+const FRAMEWORK_START = '<!-- CORTEX:FRAMEWORK:START -->';
+const FRAMEWORK_END = '<!-- CORTEX:FRAMEWORK:END -->';
 
 // Normaliza separadores de caminho para "/" — necessário porque o manifesto
 // é gerado numa máquina (Windows, macOS ou Linux) e comparado em outra.
@@ -64,14 +92,178 @@ function toPosix(p) {
   return p.split(path.sep).join('/');
 }
 
-function buildPointerContent(nomeNegocio) {
-  const titulo = nomeNegocio ? `Córtex — ${nomeNegocio}` : 'Córtex';
-  return `# ${titulo}
+// Normalização de fim de linha. Os arquivos do framework chegam com LF, mas o
+// cérebro do usuário pode estar em CRLF (Windows, ou checkout do Git com
+// autocrlf). Sem isso, toda comparação daria "mudou" e o `update` reescreveria
+// o cérebro a cada execução, gerando ruído e diffs gigantes por nada.
+function normalizeEol(text) {
+  return text.replace(/\r\n/g, '\n');
+}
 
-> Este arquivo é um **ponteiro**. A fonte única de instruções está em \`Frameworks/CEREBRO.md\`.
+// Descobre o estilo de quebra de linha dominante de um conteúdo, para escrever
+// de volta no mesmo padrão em que o arquivo do usuário já estava.
+function detectEol(text) {
+  const crlf = (text.match(/\r\n/g) || []).length;
+  const lf = (text.match(/\n/g) || []).length - crlf;
+  return crlf > lf ? '\r\n' : '\n';
+}
 
-**INSTRUÇÃO PARA A IA:** Leia agora o arquivo \`Frameworks/CEREBRO.md\` na raiz deste workspace e trate TODO o conteúdo dele como suas instruções de sistema para este negócio. Releia esse arquivo sempre que a conversa reiniciar ou o contexto for limpo. NUNCA duplique o conteúdo aqui — qualquer atualização do "cérebro" deve ser feita em \`Frameworks/CEREBRO.md\`, nunca neste arquivo.
+function applyEol(text, eol) {
+  return eol === '\r\n' ? normalizeEol(text).replace(/\n/g, '\r\n') : normalizeEol(text);
+}
+
+// Cabeçalho de artefato gerado. Precisa deixar claro para um humano que abrir
+// o arquivo que ele não deve ser editado ali — a edição se perde no próximo
+// sync. Como é comentário HTML, não atrapalha a leitura pela IA.
+function buildGeneratedHeader(version) {
+  const data = new Date().toISOString().slice(0, 10);
+  return `<!-- ============================================================
+     ARQUIVO GERADO PELO CÓRTEX — NÃO EDITE À MÃO.
+
+     Fonte:   ${toPosix(CEREBRO_PATH)}
+     Gerado:  cortex sync (v${version}) em ${data}
+
+     Qualquer alteração feita aqui será perdida no próximo
+     "npx @aksp/cortex sync". Edite a fonte acima.
+     ============================================================ -->
+
 `;
+}
+
+// Compila o conteúdo final que cada ferramenta de IA vai ler: o cérebro
+// COMPLETO, autossuficiente, sem depender de a IDE seguir nenhum ponteiro.
+function compileBrain(cerebroContent, version) {
+  const eol = detectEol(cerebroContent);
+  const compiled = buildGeneratedHeader(version) + normalizeEol(cerebroContent).trimStart();
+  return applyEol(compiled, eol);
+}
+
+// Extrai o miolo de uma região marcada. Retorna null se os marcadores não
+// existirem (Córtex montado antes da v0.11.0) ou estiverem fora de ordem.
+function extractRegion(content, startMarker, endMarker) {
+  const startIdx = content.indexOf(startMarker);
+  if (startIdx === -1) return null;
+  const endIdx = content.indexOf(endMarker, startIdx + startMarker.length);
+  if (endIdx === -1) return null;
+  return content.slice(startIdx + startMarker.length, endIdx);
+}
+
+// Substitui o miolo de uma região marcada, preservando tudo fora dela.
+// Retorna null quando os marcadores não existem — o chamador decide o que
+// fazer, mas NUNCA deve reescrever o arquivo às cegas nesse caso.
+function replaceRegion(content, startMarker, endMarker, newInner) {
+  const startIdx = content.indexOf(startMarker);
+  if (startIdx === -1) return null;
+  const endIdx = content.indexOf(endMarker, startIdx + startMarker.length);
+  if (endIdx === -1) return null;
+  return (
+    content.slice(0, startIdx + startMarker.length) +
+    newInner +
+    content.slice(endIdx)
+  );
+}
+
+function hasBrainLayers(content) {
+  return (
+    extractRegion(content, BUSINESS_START, BUSINESS_END) !== null &&
+    extractRegion(content, FRAMEWORK_START, FRAMEWORK_END) !== null
+  );
+}
+
+// Atualiza APENAS a região de framework do cérebro, a partir do template
+// shippado em .agents/. A região de negócio é preservada byte a byte.
+// Retorna { status, changed }:
+//   'updated'    — região regenerada
+//   'unchanged'  — já estava igual
+//   'no-markers' — cérebro legado, sem marcadores: nada foi tocado
+//   'no-template'/'no-cerebro' — nada a fazer
+function refreshBrainFramework(targetDir, templateDir, options) {
+  const dryRun = Boolean(options && options.dryRun);
+  const cerebroPath = path.join(targetDir, CEREBRO_PATH);
+  const templatePath = path.join(templateDir, BRAIN_FRAMEWORK_REL_PATH);
+
+  if (!fs.existsSync(cerebroPath)) return { status: 'no-cerebro', changed: false };
+  if (!fs.existsSync(templatePath)) return { status: 'no-template', changed: false };
+
+  const cerebroRaw = fs.readFileSync(cerebroPath, 'utf8');
+  const eol = detectEol(cerebroRaw);
+  const cerebro = normalizeEol(cerebroRaw);
+  const frameworkBody = normalizeEol(fs.readFileSync(templatePath, 'utf8')).trim();
+
+  const currentInner = extractRegion(cerebro, FRAMEWORK_START, FRAMEWORK_END);
+  if (currentInner === null) return { status: 'no-markers', changed: false };
+
+  const desiredInner = `\n${frameworkBody}\n`;
+  if (currentInner === desiredInner) return { status: 'unchanged', changed: false };
+
+  const updated = replaceRegion(cerebro, FRAMEWORK_START, FRAMEWORK_END, desiredInner);
+  if (updated === null) return { status: 'no-markers', changed: false };
+
+  if (dryRun) return { status: 'updated', changed: false };
+
+  fs.writeFileSync(cerebroPath, applyEol(updated, eol));
+  return { status: 'updated', changed: true };
+}
+
+// Lê os alvos de compilação escolhidos para este projeto. Ordem de precedência:
+//   1. .cortex/targets.json (escolha explícita do usuário)
+//   2. arquivos de instrução que já existem na raiz (Córtex anterior à v0.11.0,
+//      que tinha os 5 ponteiros — respeitamos o que ele já usava)
+//   3. DEFAULT_TARGETS
+function readTargets(targetDir) {
+  const targetsPath = path.join(targetDir, CORTEX_META_DIR, TARGETS_FILE);
+  if (fs.existsSync(targetsPath)) {
+    try {
+      const data = JSON.parse(fs.readFileSync(targetsPath, 'utf8'));
+      if (Array.isArray(data.targets) && data.targets.length > 0) {
+        return data.targets.filter((t) => Object.prototype.hasOwnProperty.call(KNOWN_TARGETS, t));
+      }
+    } catch (e) {}
+  }
+
+  const detected = Object.keys(KNOWN_TARGETS).filter((f) => fs.existsSync(path.join(targetDir, f)));
+  if (detected.length > 0) return detected;
+
+  return DEFAULT_TARGETS.slice();
+}
+
+function writeTargets(targetDir, targets) {
+  const metaDir = path.join(targetDir, CORTEX_META_DIR);
+  if (!fs.existsSync(metaDir)) {
+    fs.mkdirSync(metaDir, { recursive: true });
+  }
+  fs.writeFileSync(
+    path.join(metaDir, TARGETS_FILE),
+    JSON.stringify({ targets, updatedAt: new Date().toISOString() }, null, 2) + '\n'
+  );
+}
+
+// Interpreta --targets=AGENTS.md,CLAUDE.md (ou --targets all).
+function parseTargetsFlag(argv) {
+  const raw = argv.find((a) => a.startsWith('--targets='));
+  if (!raw) return null;
+  const value = raw.slice('--targets='.length).trim();
+  if (value === 'all') return Object.keys(KNOWN_TARGETS);
+  const list = value
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const valid = list.filter((t) => Object.prototype.hasOwnProperty.call(KNOWN_TARGETS, t));
+  return valid.length > 0 ? valid : null;
+}
+
+// Compila o cérebro para cada alvo. Retorna a lista de arquivos escritos.
+function compileTargets(targetDir, targets, version) {
+  const cerebroPath = path.join(targetDir, CEREBRO_PATH);
+  const cerebro = fs.readFileSync(cerebroPath, 'utf8');
+  const content = compileBrain(cerebro, version);
+
+  const written = [];
+  for (const target of targets) {
+    fs.writeFileSync(path.join(targetDir, target), content);
+    written.push(target);
+  }
+  return written;
 }
 
 function readBusinessName(targetDir) {
@@ -104,8 +296,11 @@ ${bold}COMANDOS:${reset}
                   ${dim}--prune${reset}       Remove arquivos que o framework descontinuou (deixaram de existir no
                                 manifesto da versão atual). Nunca remove customizações suas — só o que
                                 o próprio framework já possuiu e abandonou. Um backup já é feito antes.
-  ${green}sync [pasta]${reset}   Regenera os 5 ponteiros de raiz (GEMINI.md, CLAUDE.md, CODEX.md, AGENTS.md, .cursorrules)
-                  a partir de Frameworks/CEREBRO.md. Use se algum ponteiro for sobrescrito ou corrompido.
+  ${green}sync [pasta]${reset}   Compila Frameworks/CEREBRO.md nos arquivos de instrução que a sua ferramenta de IA lê.
+                  Cada arquivo gerado leva o cérebro COMPLETO — a IA não precisa seguir ponteiro nenhum.
+                  Por padrão gera só AGENTS.md (o padrão cross-tool); os demais, sob demanda.
+                  ${dim}--targets=CLAUDE.md,GEMINI.md${reset}   escolhe os alvos (grava em .cortex/targets.json)
+                  ${dim}--targets=all${reset}                   gera todos os alvos conhecidos
   ${green}--help, -h${reset}     Exibe esta mensagem de ajuda.
   ${green}--version, -v${reset}  Exibe a versão atual do CLI.
 
@@ -445,12 +640,25 @@ async function runUpdate() {
     removidosPeloFramework.forEach((f) => console.log(`     ${yellow}•${reset} ${f}`));
   }
 
-  console.log(`\n${bold}O que NUNCA é tocado:${reset} ${USER_DATA_ITEMS.join(', ')}\n`);
+  console.log(`\n${bold}O que NUNCA é tocado:${reset} Pilares/, Memoria/, Ativos/ e a área ${dim}CORTEX:BUSINESS${reset} do cérebro (identidade, datas, pilares).`);
+  console.log(`${bold}O que é regenerado:${reset} a área ${dim}CORTEX:FRAMEWORK${reset} de ${toPosix(CEREBRO_PATH)} (regras de operação e disparo de skills)`);
+  console.log(`  ${dim}e os arquivos de instrução compilados na raiz — sem isso, uma skill nova chega ao disco mas nenhuma IA sabe acioná-la.${reset}\n`);
 
   const hasFrameworkChanges = novos.length > 0 || alterados.length > 0;
   const hasPruneWork = isPrune && removidosPeloFramework.length > 0;
 
-  if (!hasFrameworkChanges && !hasPruneWork) {
+  // O cérebro pode estar desatualizado mesmo com .agents/ já em dia — é
+  // exatamente o caso de quem instalou o framework novo mas nunca migrou as
+  // regras. Sem contar isso como trabalho, o update sairia cedo demais e a
+  // propagação (a razão de existir deste comando) nunca aconteceria.
+  const brainPreview = refreshBrainFramework(targetDir, templateDir, { dryRun: true });
+  const hasBrainWork = brainPreview.status === 'updated';
+
+  if (hasBrainWork) {
+    console.log(`  ${yellow}~${reset} as regras de operação do cérebro estão desatualizadas e serão regeneradas`);
+  }
+
+  if (!hasFrameworkChanges && !hasPruneWork && !hasBrainWork) {
     console.log(`${green}Nada para atualizar em .agents/.${reset}`);
     writeVersionFile(targetDir, VERSION);
     return;
@@ -475,13 +683,37 @@ async function runUpdate() {
   }
 
   applyFrameworkUpdate(templateDir, targetDir, novos, alterados);
+
+  // Propaga o cérebro: sem este passo, as skills novas chegam ao disco mas
+  // continuam invisíveis para a IA, porque nada as ensina a acioná-las.
+  const cerebroPath = path.join(targetDir, CEREBRO_PATH);
+  if (fs.existsSync(cerebroPath)) {
+    fs.copyFileSync(cerebroPath, `${cerebroPath}.backup-${timestamp}`);
+  }
+
+  const brain = refreshBrainFramework(targetDir, templateDir);
+
+  if (brain.status === 'updated') {
+    console.log(`  ${green}✓${reset} Regras de operação do cérebro atualizadas em ${toPosix(CEREBRO_PATH)} ${dim}(sua área de negócio ficou intacta)${reset}`);
+  } else if (brain.status === 'no-markers') {
+    console.log(`  ${yellow}!${reset} ${toPosix(CEREBRO_PATH)} ainda não tem as camadas CORTEX:BUSINESS/CORTEX:FRAMEWORK.`);
+    console.log(`    ${dim}Não mexi nele. Rode "revisar córtex" no chat para migrar e destravar a atualização automática das regras.${reset}`);
+  }
+
+  if (fs.existsSync(cerebroPath)) {
+    const targets = readTargets(targetDir);
+    compileTargets(targetDir, targets, VERSION);
+    writeTargets(targetDir, targets);
+    console.log(`  ${green}✓${reset} Cérebro recompilado para: ${targets.join(', ')}`);
+  }
+
   writeVersionFile(targetDir, VERSION);
 
   console.log(`
 ${bold}${green}🎉 Framework atualizado para v${VERSION}!${reset}
 
 ${dim}Se você tinha personalizado algum arquivo dentro de .agents/skills, confira o backup acima para recuperar suas mudanças.${reset}
-${dim}Pilares/, Memoria/, Ativos/, Frameworks/ e os system prompts de raiz não foram tocados.${reset}
+${dim}Pilares/, Memoria/, Ativos/ e a área CORTEX:BUSINESS do seu cérebro não foram tocados.${reset}
 `);
 }
 
@@ -490,7 +722,7 @@ async function runSync() {
   const targetDir = path.resolve(process.cwd(), targetArg);
   const isForce = args.includes('--force') || args.includes('-f');
 
-  console.log(`\n${bold}${cyan}🧠 Sincronizando ponteiros do Córtex...${reset}\n`);
+  console.log(`\n${bold}${cyan}🧠 Compilando o cérebro do Córtex...${reset}\n`);
 
   if (!fs.existsSync(targetDir)) {
     console.log(`${red}Pasta não encontrada:${reset} ${targetDir}`);
@@ -505,31 +737,47 @@ async function runSync() {
     process.exit(1);
   }
 
-  const nomeNegocio = readBusinessName(targetDir);
-  const pointerContent = buildPointerContent(nomeNegocio);
+  const cerebroContent = fs.readFileSync(cerebroPath, 'utf8');
+  const flagTargets = parseTargetsFlag(args);
+  const targets = flagTargets || readTargets(targetDir);
 
-  console.log(`  ${dim}Fonte:${reset} ${CEREBRO_PATH}`);
-  console.log(`${bold}Ponteiros a regenerar:${reset}`);
-  POINTER_ROOT_FILES.forEach((f) => console.log(`   ${cyan}•${reset} ${f}`));
+  console.log(`  ${dim}Fonte:${reset} ${toPosix(CEREBRO_PATH)}`);
+
+  if (!hasBrainLayers(cerebroContent)) {
+    console.log(`  ${yellow}Aviso:${reset} este cérebro ainda não tem as camadas ${dim}CORTEX:BUSINESS${reset}/${dim}CORTEX:FRAMEWORK${reset}.`);
+    console.log(`  ${dim}A compilação abaixo funciona normalmente, mas "cortex update" não conseguirá${reset}`);
+    console.log(`  ${dim}atualizar sozinho as regras de operação. Rode "revisar córtex" no chat para migrar.${reset}`);
+  }
+
+  console.log(`${bold}Arquivos a compilar (conteúdo completo do cérebro):${reset}`);
+  targets.forEach((f) => console.log(`   ${cyan}•${reset} ${f} ${dim}— ${KNOWN_TARGETS[f]}${reset}`));
+
+  const naoGerados = Object.keys(KNOWN_TARGETS).filter((t) => !targets.includes(t));
+  if (naoGerados.length > 0) {
+    console.log(`  ${dim}Não gerados: ${naoGerados.join(', ')} — use --targets=${naoGerados[0]} (ou --targets=all) se precisar.${reset}`);
+  }
   console.log('');
 
   if (!isForce) {
-    const confirmed = await askConfirmation(`  Sobrescrever esses ${POINTER_ROOT_FILES.length} arquivos com o ponteiro padrão? (s/N): `);
+    const confirmed = await askConfirmation(`  Sobrescrever ${targets.length} arquivo(s) com o cérebro compilado? (s/N): `);
     if (!confirmed) {
       console.log(`\n${red}Sincronização cancelada. Nenhum arquivo foi alterado.${reset}\n`);
       return;
     }
   }
 
-  for (const file of POINTER_ROOT_FILES) {
-    fs.writeFileSync(path.join(targetDir, file), pointerContent);
+  compileTargets(targetDir, targets, VERSION);
+  writeTargets(targetDir, targets);
+
+  for (const file of targets) {
     console.log(`   ${green}✓${reset} ${file}`);
   }
 
   console.log(`
-${bold}${green}🎉 Ponteiros sincronizados!${reset}
+${bold}${green}🎉 Cérebro compilado!${reset}
 
-${dim}Todos os 5 arquivos de raiz agora apontam para ${CEREBRO_PATH}. O conteúdo completo do system prompt continua vivendo só lá.${reset}
+${dim}Cada arquivo acima contém o cérebro COMPLETO — a ferramenta de IA lê tudo direto, sem depender de seguir nenhum ponteiro.${reset}
+${dim}Eles são artefatos gerados: edite sempre ${toPosix(CEREBRO_PATH)} e rode "cortex sync" de novo.${reset}
 `);
 }
 
@@ -565,11 +813,29 @@ module.exports = {
   VERSION,
   FRAMEWORK_ITEMS,
   USER_DATA_ITEMS,
-  POINTER_ROOT_FILES,
+  KNOWN_TARGETS,
+  DEFAULT_TARGETS,
   CEREBRO_PATH,
   MANIFEST_REL_PATH,
+  BRAIN_FRAMEWORK_REL_PATH,
+  BUSINESS_START,
+  BUSINESS_END,
+  FRAMEWORK_START,
+  FRAMEWORK_END,
   toPosix,
-  buildPointerContent,
+  normalizeEol,
+  detectEol,
+  applyEol,
+  buildGeneratedHeader,
+  compileBrain,
+  extractRegion,
+  replaceRegion,
+  hasBrainLayers,
+  refreshBrainFramework,
+  readTargets,
+  writeTargets,
+  parseTargetsFlag,
+  compileTargets,
   readBusinessName,
   copyRecursiveSync,
   writeVersionFile,
