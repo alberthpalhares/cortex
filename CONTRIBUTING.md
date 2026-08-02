@@ -69,6 +69,27 @@ Defina a estrutura esperada do resultado gerado.
 ### Economia de Tokens (Context Overhead)
 > ⚠️ **IMPORTANTE:** Cada skill adicionada é carregada no contexto da IA. Mantenha as instruções **curtas, diretas e extremamente objetivas**. Prefira bullet points a parágrafos longos.
 
+### Manifesto do Framework (`.agents/manifest.json`)
+
+Toda skill ou template novo/removido em `.agents/` deve ser refletido no manifesto, que é o que permite ao `cortex update` diferenciar arquivos do framework de customizações do usuário:
+
+```bash
+npm run build:manifest   # regenera .agents/manifest.json
+npm run verify:manifest  # falha se o manifesto commitado estiver desatualizado (rodado no CI)
+```
+
+Rode `npm run build:manifest` sempre que adicionar, remover ou renomear um arquivo dentro de `.agents/`, e commite o `manifest.json` atualizado junto com o PR.
+
+### Testes (`bin/cli.js`)
+
+O CLI executa operações que tocam o disco do usuário (`init`, `update`, `sync`), então qualquer mudança em `bin/cli.js` precisa vir acompanhada de teste:
+
+```bash
+npm test   # node --test — roda os testes em test/unit e test/integration
+```
+
+A invariante mais importante do projeto — **`cortex update` nunca altera `Pilares/`, `Memoria/`, `Ativos/`, `Frameworks/` ou os arquivos de raiz** — é coberta por `test/integration/cli.test.js`. PRs que tocam `bin/cli.js` sem teste correspondente não serão aceitos.
+
 ---
 
 ## 💻 Compatibilidade Multi-IDE

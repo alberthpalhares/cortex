@@ -6,6 +6,15 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-08-01
+
+### Adicionado
+- **Testes automatizados (`node --test`) e CI:** `bin/cli.js` ganha uma suíte de testes (`test/unit/`, `test/integration/`) cobrindo `init`, `update` e `sync` de ponta a ponta, incluindo a invariante central do projeto — `cortex update` nunca altera `Pilares/`, `Memoria/`, `Ativos/`, `Frameworks/` ou os arquivos de raiz. Workflow `.github/workflows/ci.yml` roda a suíte em Node 18/20 no Linux e no Windows a cada PR.
+- **Manifesto de framework (`.agents/manifest.json`):** lista, versionada e gerada por `scripts/build-manifest.js`, de todos os arquivos que pertencem à camada de framework nesta release. `npm run build:manifest` regenera; `npm run verify:manifest` (rodado no CI) falha se o manifesto commitado ficar desatualizado.
+- **`cortex update --prune`:** o comando `update` agora distingue, dentro de `.agents/`, arquivos que o usuário criou por conta própria (sempre preservados) de arquivos que o próprio framework já possuiu e descontinuou nesta versão (mantidos por padrão, removidos apenas com a nova flag `--prune`, sempre com backup prévio). Instalações anteriores à v0.10.0 — sem manifesto instalado — continuam com o comportamento anterior: tudo é preservado.
+- `bin/cli.js` passa a exportar suas funções internas puras (`diffFrameworkLayer`, `classifyPreserved`, `applyFrameworkUpdate`, etc.) quando importado como módulo, para permitir os testes unitários sem depender de `process.argv`. O comportamento como CLI (`node bin/cli.js ...`) não muda.
+
+
 ## [0.9.0] - 2026-08-01
 
 ### Adicionado

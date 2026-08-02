@@ -1,12 +1,17 @@
 {
   "name": "@aksp/cortex",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "O cérebro estratégico do seu negócio impulsionado por IA local e autônoma.",
   "main": "bin/cli.js",
   "bin": {
     "cortex": "bin/cli.js",
     "cortex-ai": "bin/cli.js",
     "cortex-framework": "bin/cli.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "build:manifest": "node scripts/build-manifest.js",
+    "verify:manifest": "node scripts/build-manifest.js --check"
   },
   "keywords": [
     "cortex",
