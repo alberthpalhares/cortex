@@ -1,21 +1,21 @@
 ---
 name: radar
-description: "Levanta um panorama rápido e atualizado de todas as pendências ativas e status de projetos para a tomada de decisão. Use no início do dia ou quando o usuário pedir o status geral. Acione com: 'radar', 'status', 'como estamos?', 'briefing'."
+description: "Delivers a fast, up-to-date snapshot of all active pending items and project status to support decision-making. Use at the start of the day or when the user asks for a general status. Trigger with: 'radar', 'status', 'como estamos?', 'briefing'."
 ---
 
 # Skill: Radar
 
-Você acaba de ser acionado para rodar o **Radar** do negócio. O objetivo desta skill é dar ao usuário uma visão instantânea (em 10 a 15 linhas no máximo) de onde está o gargalo atual.
+You've just been triggered to run the business's **Radar**. The goal of this skill is to give the user an instant snapshot (10 to 15 lines max) of where the current bottleneck is.
 
-## Passo a Passo
+## Step by Step
 
-1. **Leia silenciosamente** o arquivo `Memoria/META.md` para descobrir o nome do negócio.
-2. **Leia silenciosamente** o arquivo de Pendências: `Memoria/04_Pessoas_Pendencias.md`
-3. **Leia silenciosamente** o arquivo de Projetos: `Memoria/03_Projetos.md`
-4. **Obtenha a data real do sistema** (via terminal/ferramenta de data disponível) — nunca deduza a data a partir do texto da conversa. Compare essa data real com os deadlines listados para classificar como atrasado/urgente.
-5. Se a `Próxima revisão sugerida` do `META.md` já passou ou está a menos de 2 semanas da data real de hoje, inclua uma linha sugerindo `revisar córtex`.
-5.5. Dê uma olhada rápida no tamanho de `Memoria/01_Decisoes.md` e `Memoria/02_Licoes.md` (contagem aproximada de linhas). Se algum estiver grande (mais de ~80 linhas), inclua uma linha sugerindo `consolidar memória` (skill `consolidar`) — não é preciso abrir os arquivos por completo para isso, uma leitura rápida basta.
-6. Gere um **Mini-Relatório de Radar** estritamente neste formato (use emojis e seja sucinto):
+1. **Silently read** `Memoria/META.md` to find out the business name.
+2. **Silently read** the pending items file: `Memoria/04_Pessoas_Pendencias.md`
+3. **Silently read** the projects file: `Memoria/03_Projetos.md`
+4. **Get the real system date** (via terminal/whatever date tool is available) — never infer the date from the conversation text. Compare that real date against the listed deadlines to classify items as late/urgent.
+5. If the `Próxima revisão sugerida` in `META.md` has already passed or is less than 2 weeks from today's real date, include a line suggesting `revisar córtex`.
+5.5. Take a quick look at the size of `Memoria/01_Decisoes.md` and `Memoria/02_Licoes.md` (approximate line count). If either is large (more than ~80 lines), include a line suggesting `consolidar memória` (the `consolidar` skill) — no need to open the files in full for this, a quick scan is enough.
+6. Generate a **Mini Radar Report** strictly in this format (use emojis and be concise):
 
 ```
 📡 **RADAR [NOME DO NEGÓCIO] — [Data de Hoje]**
@@ -36,8 +36,8 @@ Você acaba de ser acionado para rodar o **Radar** do negócio. O objetivo desta
 💡 O que você gostaria de focar hoje?
 ```
 
-## Regras de Formatação
-- Nunca traga pendências resolvidas.
-- Se não houver itens atrasados, escreva "Nenhum atraso crítico hoje. ✅".
-- Seja extremamente conciso. Não reescreva toda a descrição da tarefa, apenas o núcleo dela. O usuário já conhece os projetos.
-- Todos os caminhos de arquivo são **relativos à raiz do workspace**. Nunca use caminhos absolutos.
+## Formatting Rules
+- Never bring up resolved pending items.
+- If there's nothing overdue, write "Nenhum atraso crítico hoje. ✅".
+- Be extremely concise. Don't rewrite the whole task description, just its core. The user already knows the projects.
+- All file paths are **relative to the workspace root**. Never use absolute paths.

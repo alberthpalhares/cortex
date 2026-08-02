@@ -141,6 +141,34 @@ test('parseTargetsFlag entende lista, "all" e ignora alvo desconhecido', () => {
   assert.equal(cli.parseTargetsFlag(['--force']), null);
 });
 
+test('o framework do cérebro instrui a IA a sempre responder em português (independente do idioma das instruções)', () => {
+  const framework = fs.readFileSync(path.join(REPO_ROOT, '.agents', 'cortex', 'brain.framework.md'), 'utf8');
+  assert.ok(
+    /reply.*Brazilian Portuguese/i.test(framework) || /Portuguese \(pt-BR\)/i.test(framework),
+    'as regras do framework (em inglês, por economia de tokens) precisam deixar explícito que a IA responde ao usuário em português'
+  );
+});
+
+test('os gatilhos das skills continuam em português mesmo com as instruções em inglês', () => {
+  const skillsDir = path.join(REPO_ROOT, '.agents', 'skills');
+  const gatilhosEsperados = {
+    'radar/SKILL.md': 'radar',
+    'registrar/SKILL.md': 'registra',
+    'ajuda/SKILL.md': 'ajuda',
+    'saude/SKILL.md': 'saúde do córtex',
+    'consolidar/SKILL.md': 'consolidar memória'
+  };
+  for (const [rel, gatilho] of Object.entries(gatilhosEsperados)) {
+    const conteudo = fs.readFileSync(path.join(skillsDir, rel), 'utf8');
+    const fm = conteudo.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    assert.ok(fm, `${rel} deveria ter frontmatter`);
+    assert.ok(
+      fm[1].includes(gatilho),
+      `${rel}: a description precisa manter o gatilho em português "${gatilho}" para o usuário conseguir acionar a skill`
+    );
+  }
+});
+
 test('a área CORTEX:FRAMEWORK do CORTEX_TEMPLATE.md é idêntica ao brain.framework.md shippado', () => {
   const tpl = cli.normalizeEol(
     fs.readFileSync(

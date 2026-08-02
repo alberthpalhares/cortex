@@ -1,10 +1,10 @@
 # Operação
 
 ## Ferramentas e Softwares
-<!-- Quais são as ferramentas essenciais para o dia a dia da operação? -->
+<!-- What are the essential tools for day-to-day operations? -->
 
 ## Fluxos de Trabalho (POPs)
-<!-- Como é o processo de entrega, desde o fechamento até o pós-venda? (Procedimentos Operacionais Padrão) -->
+<!-- What does the delivery process look like, from closing the deal to after-sales? (Standard Operating Procedures) -->
 
 ## Gestão de Arquivos e Backup
-<!-- Como os arquivos são organizados e onde são feitos os backups? -->
+<!-- How are files organized, and where are backups kept? -->

@@ -1,13 +1,13 @@
 # Estratégia
 
 ## Posicionamento de Mercado (DNA)
-<!-- Qual é a sua proposta de valor única? O que diferencia você no mercado? -->
+<!-- What's your unique value proposition? What sets you apart in the market? -->
 
 ## Público-Alvo Ideal (ICP)
-<!-- Quem é o seu cliente dos sonhos? Quais são as dores e desejos desse cliente? -->
+<!-- Who is your dream client? What are that client's pains and desires? -->
 
 ## Objetivos Estratégicos (Visão de 3 Anos)
-<!-- Onde a empresa deve estar daqui a 3 anos? Quais são as metas principais? -->
+<!-- Where should the company be 3 years from now? What are the main goals? -->
 
 ## Panorama Competitivo
-<!-- Preenchido pela skill "pesquisa-mercado", ou manualmente se você já conhece bem seus concorrentes. Fica em branco até a primeira pesquisa. -->
+<!-- Filled in by the "pesquisa-mercado" skill, or manually if you already know your competitors well. Stays blank until the first research pass. -->

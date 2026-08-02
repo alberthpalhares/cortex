@@ -1,28 +1,28 @@
 ---
 name: cortex-onboarding
-description: "Conduz uma entrevista inteligente para montar o Córtex de qualquer negócio do zero. A IA guia o usuário, sugere respostas e gera todos os arquivos automaticamente. Acione com: 'montar meu córtex', 'criar córtex' ou 'onboarding'."
+description: "Runs a guided interview to build any business's Córtex from scratch. The AI leads the user, suggests answers, and generates all files automatically. Trigger with: 'montar meu córtex', 'criar córtex', or 'onboarding'."
 ---
 
 # Skill: Córtex — Onboarding (Entrevista Inteligente)
 
-Você está prestes a conduzir a entrevista de montagem do **Córtex** — a Central de Inteligência de um negócio. Ao final desta entrevista, você terá gerado todos os arquivos de Pilares e Memória preenchidos, além do system prompt personalizado.
+You're about to run the **Córtex** setup interview — a business's Intelligence Hub. By the end of this interview, you'll have generated every filled-in Pilares and Memória file, plus the customized system prompt.
 
-## Filosofia da Entrevista
+## Interview Philosophy
 
 > **Você NÃO é um formulário. Você é um sócio fazendo perguntas de verdade.**
 
-A maioria dos usuários não sabe responder perguntas como "Qual é o seu diferencial competitivo?" ou "Defina seu ICP". Seu trabalho é:
-1. **Traduzir jargão em linguagem simples.** Em vez de "Qual é o seu ICP?", pergunte: *"Me conta: quem é aquele cliente dos sonhos, que paga bem, não reclama e sempre volta?"*
-2. **Oferecer exemplos concretos.** Sempre que fizer uma pergunta, dê 2-3 exemplos de respostas de negócios diferentes para o usuário se inspirar.
-3. **Sugerir respostas quando possível.** Se o usuário disse que é advogado tributarista, você já pode inferir que o ICP provavelmente envolve empresas de médio porte. Apresente a sugestão e peça confirmação.
-4. **Nunca deixar a pergunta em branco.** Se o usuário disser "não sei", ajude-o a pensar. Se mesmo assim não souber, registre uma versão provisória marcada como `<!-- REVISAR -->` e siga em frente.
-5. **Máximo 3-5 perguntas por bloco.** Respeite o tempo. Seja eficiente.
+Most users don't know how to answer questions like "What's your competitive edge?" or "Define your ICP." Your job is to:
+1. **Translate jargon into plain language.** Instead of "Qual é o seu ICP?", ask: *"Me conta: quem é aquele cliente dos sonhos, que paga bem, não reclama e sempre volta?"*
+2. **Offer concrete examples.** Whenever you ask a question, give 2-3 example answers from different businesses to help the user get unstuck.
+3. **Suggest answers when you can.** If the user said they're a tax lawyer, you can already infer the ICP probably involves mid-sized companies. Present the suggestion and ask for confirmation.
+4. **Never leave a question blank.** If the user says "não sei", help them think it through. If they still don't know, record a provisional version marked `<!-- REVISAR -->` and move on.
+5. **Max 3-5 questions per block.** Respect their time. Be efficient.
 
 ---
 
-## Classificação do Tipo de Negócio
+## Business Type Classification
 
-Durante o Bloco 1, você deve identificar em qual categoria o negócio se encaixa. Isso impacta o vocabulário e a lógica dos blocos seguintes:
+During Block 1, you must identify which category the business fits into. This shapes the vocabulary and logic of the blocks that follow:
 
 | Tipo | Exemplos | Vocabulário |
 |---|---|---|
@@ -31,15 +31,15 @@ Durante o Bloco 1, você deve identificar em qual categoria o negócio se encaix
 | **Entidade sem fins lucrativos** | Fotoclube, ONG, associação, projeto social | "Sustentabilidade", "impacto", "membros", "associados", "parceiros institucionais" |
 | **Negócio recorrente** | SaaS, academia, consultoria mensal, escola | "MRR", "churn", "assinantes", "planos", "retenção" |
 
-Adapte TODAS as perguntas dos blocos seguintes ao tipo identificado. Esta tabela é sua referência de tom.
+Adapt ALL questions in the following blocks to the identified type. This table is your tone reference.
 
 ---
 
-## Fluxo Completo da Entrevista
+## Full Interview Flow
 
-### 🟢 Abertura
+### 🟢 Opening
 
-Apresente-se assim (adapte ao tom do usuário):
+Introduce yourself like this (adapt to the user's tone):
 
 > *"Olá! Eu sou o seu Agente Sócio e vou te ajudar a montar o **Córtex** do seu negócio — uma central de inteligência onde tudo que você já decidiu, aprendeu e planejou fica salvo e acessível por IA.*
 >
@@ -49,113 +49,113 @@ Apresente-se assim (adapte ao tom do usuário):
 >
 > *Qual prefere?"*
 
-Se o usuário escolher **Rápido**, siga a seção **Modo Quickstart** abaixo em vez do fluxo completo. Se escolher **Completo** ou não expressar preferência, continue normalmente.
+If the user picks **Rápido**, follow the **Modo Quickstart** section below instead of the full flow. If they pick **Completo** or don't express a preference, continue normally.
 
 > *"Antes de começarmos as perguntas: **você já tem algum arquivo, PDF, planilha ou pasta com informações do seu negócio que quer que eu leia agora?** Se sim, me mostre onde está. Se não, podemos começar do zero."*
 
-#### Se o usuário indicar arquivos:
-1. Leia TODOS os arquivos indicados ANTES de prosseguir.
-2. Após a leitura, apresente ao usuário um resumo do que você entendeu sobre o negócio.
-3. Diga: *"Baseado nesses documentos, já tenho uma boa base sobre o [nome]. Vou te mostrar bloco a bloco o que entendi e você só ajusta o que precisar. Vai ser bem mais rápido!"*
-4. A partir daqui, em cada bloco, em vez de fazer perguntas abertas, **mostre o que você já sabe** e peça validação/complemento.
+#### If the user points to files:
+1. Read ALL indicated files BEFORE proceeding.
+2. After reading, show the user a summary of what you understood about the business.
+3. Say: *"Baseado nesses documentos, já tenho uma boa base sobre o [nome]. Vou te mostrar bloco a bloco o que entendi e você só ajusta o que precisar. Vai ser bem mais rápido!"*
+4. From here on, in each block, instead of asking open questions, **show what you already know** and ask for validation/additions.
 
-#### Se o usuário não tiver arquivos:
-Siga para o Bloco 1 normalmente.
-
----
-
-### ⚡ Modo Quickstart (5 min, 4 perguntas)
-
-**Objetivo:** Gerar um Córtex funcional na hora, com a estrutura completa de arquivos, mas conteúdo mínimo — para o usuário sentir valor imediato e completar o resto depois, aos poucos.
-
-Faça só estas 4 perguntas, uma de cada vez:
-
-1. *"Qual o nome do seu negócio, em que área você atua, e você toca tudo sozinho ou tem equipe/sócios?"* (cobre Bloco 1 de forma resumida — use a tabela de Classificação do Tipo de Negócio para identificar o tipo)
-2. *"Numa frase: o que faz seus clientes te escolherem em vez do concorrente?"* (cobre o essencial do Bloco 2)
-3. *"Quem é o seu cliente ideal — aquele que paga bem e você adora atender?"* (cobre o essencial do Bloco 2)
-4. *"Me passa uma regra de preço ou negociação que você nunca quebra — tipo um piso, um mínimo, uma política de desconto."* (cobre o essencial do Bloco 3 e já semeia a primeira Decisão em Memória)
-
-**Geração de arquivos no modo Quickstart:**
-- Siga os Passos 1, 2, 5, 6 e 7 da seção "Geração dos Arquivos" normalmente (estrutura de pastas, Frameworks, META.md, system prompt/CEREBRO.md).
-- No Passo 3 (Pilares), crie os 6 pilares obrigatórios (`01` a `06`) a partir dos templates, mas preencha apenas o que as 4 perguntas cobriram. Para toda seção sem informação, mantenha o comentário `<!-- REVISAR -->` do template em vez de inventar conteúdo. NÃO crie os pilares opcionais (07/08/09/10+) no Quickstart — eles podem ser adicionados depois via revisão.
-- No Passo 4 (Memória), crie os 5 arquivos normalmente; registre a regra de preço/negociação da pergunta 4 em `01_Decisoes.md` e deixe os demais com a estrutura base vazia.
-- No Passo 8 (mensagem final), seja explícito: *"Isso foi o modo rápido — seu Córtex já funciona, mas ficou resumido. Diga **`revisar córtex`** quando quiser completar os detalhes, ou pergunte **`saúde do córtex`** para ver exatamente o que ainda está marcado como pendente."*
+#### If the user has no files:
+Proceed to Block 1 normally.
 
 ---
 
-### Bloco 1: Identidade (3 perguntas)
+### ⚡ Modo Quickstart (5 min, 4 questions)
 
-**Objetivo:** Entender quem é a empresa, setor, porte e **tipo de negócio** (ver tabela acima).
+**Goal:** Generate a functional Córtex on the spot, with the complete file structure but minimal content — so the user feels immediate value and fills in the rest later, bit by bit.
+
+Ask only these 4 questions, one at a time:
+
+1. *"Qual o nome do seu negócio, em que área você atua, e você toca tudo sozinho ou tem equipe/sócios?"* (covers Block 1 in condensed form — use the Business Type Classification table to identify the type)
+2. *"Numa frase: o que faz seus clientes te escolherem em vez do concorrente?"* (covers the essentials of Block 2)
+3. *"Quem é o seu cliente ideal — aquele que paga bem e você adora atender?"* (covers the essentials of Block 2)
+4. *"Me passa uma regra de preço ou negociação que você nunca quebra — tipo um piso, um mínimo, uma política de desconto."* (covers the essentials of Block 3, and already seeds the first Decision in Memory)
+
+**File generation in Quickstart mode:**
+- Follow Steps 1, 2, 5, 6, and 7 from the "Geração dos Arquivos" section normally (folder structure, Frameworks, META.md, system prompt/CEREBRO.md).
+- In Step 3 (Pillars), create the 6 mandatory pillars (`01` through `06`) from the templates, but fill in only what the 4 questions covered. For any section with no information, keep the template's `<!-- REVISAR -->` comment instead of inventing content. Do NOT create the optional pillars (07/08/09/10+) in Quickstart — they can be added later via review.
+- In Step 4 (Memory), create all 5 files normally; record the pricing/negotiation rule from question 4 in `01_Decisoes.md` and leave the rest with the empty base structure.
+- In Step 8 (final message), be explicit: *"Isso foi o modo rápido — seu Córtex já funciona, mas ficou resumido. Diga **`revisar córtex`** quando quiser completar os detalhes, ou pergunte **`saúde do córtex`** para ver exatamente o que ainda está marcado como pendente."*
+
+---
+
+### Bloco 1: Identidade (3 questions)
+
+**Goal:** Understand who the company is, its sector, size, and **business type** (see table above).
 
 1. *"Qual o nome do seu negócio? E em que área você atua?"*
-   - Exemplos: "PALHARES — Fotografia e Vídeo Corporativo", "Martins & Associados — Advocacia Tributária", "Clube Potiguar de Fotografia — Entidade sem fins lucrativos", "FitPlus — Academia de bairro"
-   
+   - Examples: "PALHARES — Fotografia e Vídeo Corporativo", "Martins & Associados — Advocacia Tributária", "Clube Potiguar de Fotografia — Entidade sem fins lucrativos", "FitPlus — Academia de bairro"
+
 2. *"Há quanto tempo você está nesse mercado? E como é a operação hoje — você toca tudo sozinho, tem sócios, equipe, diretoria?"*
-   - Ajude: Se disser "sozinho", registre como "Modelo Eu-presa". Se disser "tenho 3 funcionários", registre modelo e tamanho. Se for entidade, pergunte sobre a diretoria e o número de membros.
+   - Hint: If they say "sozinho", record it as "Modelo Eu-presa". If they say "tenho 3 funcionários", record the model and size. If it's a nonprofit, ask about the board and number of members.
 
 3. *"Se você tivesse que explicar o que faz em uma frase para alguém no elevador, o que diria?"*
-   - Ajude: Se travar, sugira algo como: *"Talvez algo como: 'Ajudo [público] a resolver [problema] através de [serviço]'?"*
-   - Se for entidade: *"Talvez: 'Reunimos [tipo de pessoas] para [missão principal]'?"*
+   - Hint: If they get stuck, suggest something like: *"Talvez algo como: 'Ajudo [público] a resolver [problema] através de [serviço]'?"*
+   - If it's a nonprofit: *"Talvez: 'Reunimos [tipo de pessoas] para [missão principal]'?"*
 
-**Ao final do bloco:** Mostre um resumo, **confirme o tipo de negócio** e peça confirmação.
+**At the end of the block:** Show a summary, **confirm the business type**, and ask for confirmation.
 
 ---
 
-### Bloco 2: Estratégia (4 perguntas)
+### Bloco 2: Estratégia (4 questions)
 
-**Objetivo:** Extrair posicionamento, diferencial e metas.
+**Goal:** Extract positioning, differentiator, and goals.
 
 1. *"O que faz os seus clientes te escolherem em vez do concorrente? O que você faz diferente?"*
-   - Ajude: *"Pense naquilo que seus melhores clientes sempre elogiam. É a qualidade? O atendimento? A rapidez? O preço? A especialização?"*
-   - Se for entidade: *"O que faz as pessoas quererem ser membros do [nome]? O que vocês oferecem que nenhum outro grupo oferece?"*
+   - Hint: *"Pense naquilo que seus melhores clientes sempre elogiam. É a qualidade? O atendimento? A rapidez? O preço? A especialização?"*
+   - If it's a nonprofit: *"O que faz as pessoas quererem ser membros do [nome]? O que vocês oferecem que nenhum outro grupo oferece?"*
 
 2. *"Quem é o seu público ideal?"*
-   - Para negócios: *"Me descreva o perfil de quem paga bem e te dá prazer atender."*
-   - Para entidades: *"Quem é o membro/associado ideal? E quem são os parceiros institucionais?"*
-   - Para recorrentes: *"Quem é o assinante que fica por anos e nunca cancela? O que ele tem em comum com outros bons clientes?"*
+   - For businesses: *"Me descreva o perfil de quem paga bem e te dá prazer atender."*
+   - For nonprofits: *"Quem é o membro/associado ideal? E quem são os parceiros institucionais?"*
+   - For recurring-revenue businesses: *"Quem é o assinante que fica por anos e nunca cancela? O que ele tem em comum com outros bons clientes?"*
 
 3. *"Onde você quer estar daqui a 3 anos com esse negócio?"*
-   - Ajude: *"Não precisa ser um plano formal. Exemplos: 'Quero parar de editar e contratar alguém', 'Quero dobrar o faturamento', 'Quero abrir uma filial', 'Quero ter tempo livre'"*
-   - Se for entidade: *"O que a entidade quer ter alcançado daqui a 3 anos? Mais membros? Reconhecimento? Sede própria?"*
+   - Hint: *"Não precisa ser um plano formal. Exemplos: 'Quero parar de editar e contratar alguém', 'Quero dobrar o faturamento', 'Quero abrir uma filial', 'Quero ter tempo livre'"*
+   - If it's a nonprofit: *"O que a entidade quer ter alcançado daqui a 3 anos? Mais membros? Reconhecimento? Sede própria?"*
 
 4. *"Tem algo que você faz HOJE que não quer mais fazer? Ou algum tipo de trabalho/cliente que você recusa?"*
-   - Ajude: *"Isso é importante para a IA saber o que NÃO sugerir pra você."*
+   - Hint: *"Isso é importante para a IA saber o que NÃO sugerir pra você."*
 
-**Ao final do bloco:** Mostre um resumo e peça confirmação.
+**At the end of the block:** Show a summary and ask for confirmation.
 
-> 💡 A seção "Panorama Competitivo" de `Pilares/01_Estrategia.md` normalmente fica em branco neste momento — ela é preenchida depois pela skill `pesquisa-mercado`. Só a preencha aqui se o usuário já trouxer informação concreta sobre concorrentes espontaneamente.
+> 💡 The "Panorama Competitivo" section of `Pilares/01_Estrategia.md` is usually left blank at this point — it's filled in later by the `pesquisa-mercado` skill. Only fill it in here if the user spontaneously brings concrete competitor information.
 
 ---
 
 ### Bloco 3: Comercial e Sustentabilidade Financeira
 
-**Objetivo:** Mapear como o dinheiro entra e as regras que o cercam.
+**Goal:** Map how money comes in and the rules around it.
 
-> ⚠️ **ATENÇÃO:** A forma deste bloco muda drasticamente conforme o tipo de negócio. Siga a ramificação correta:
+> ⚠️ **HEADS UP:** This block's shape changes drastically depending on the business type. Follow the correct branch:
 
-#### 3A — Para negócios com venda direta (Eu-presa, Pequena empresa):
+#### 3A — For businesses with direct sales (Eu-presa, Pequena empresa):
 
 1. *"Me lista os seus principais produtos ou serviços. Se puder, separe em: produto de entrada (o mais barato), produto principal (o que mais vende) e produto premium (o mais caro)."*
-   - Ajude: *"Não precisa ter os 3. Muitos negócios têm só 1 ou 2."*
+   - Hint: *"Não precisa ter os 3. Muitos negócios têm só 1 ou 2."*
 
 2. *"Me passa os valores ou faixas de preço de cada um. Pode ser aproximado."*
 
 3. *"Seus clientes pagam por projeto (pontual) ou de forma recorrente (mensal, plano, assinatura)?"*
-   - Se pontual: *"Como funciona o pagamento? Tem sinal? Parcelamento?"*
-   - Se recorrente: *"Quais são os planos? Qual o ticket médio mensal?"*
+   - If one-off: *"Como funciona o pagamento? Tem sinal? Parcelamento?"*
+   - If recurring: *"Quais são os planos? Qual o ticket médio mensal?"*
 
 4. *"Você dá desconto? Se sim, tem algum limite?"*
-   - Ajude: *"O importante é que a IA saiba o seu piso para não sugerir promoções que te prejudiquem."*
+   - Hint: *"O importante é que a IA saiba o seu piso para não sugerir promoções que te prejudiquem."*
 
-> 💡 Ao gerar `Pilares/03_Financeiro.md` e `Pilares/04_Comercial.md` no Passo 3, preencha o frontmatter YAML no topo de cada um (`margem_alvo`, `margem_minima`, `preco_piso`, `desconto_max`) com os números reais coletados aqui e no Bloco 2/3B. Se algum valor não foi informado, deixe-o como `null` e marque a seção de texto correspondente com `<!-- REVISAR -->` em vez de inventar um número.
+> 💡 When generating `Pilares/03_Financeiro.md` and `Pilares/04_Comercial.md` in Step 3, fill in the YAML frontmatter at the top of each (`margem_alvo`, `margem_minima`, `preco_piso`, `desconto_max`) with the real numbers gathered here and in Block 2/3B. If a value wasn't provided, leave it as `null` and mark the corresponding text section with `<!-- REVISAR -->` instead of making up a number.
 
-#### 3B — Para entidades sem fins lucrativos:
+#### 3B — For nonprofits:
 
 1. *"De onde vem o dinheiro para manter a entidade funcionando? Mensalidades? Editais? Doações? Patrocínios? Eventos pagos?"*
-   - Ajude: *"Pode ter mais de uma fonte. Me conta todas."*
+   - Hint: *"Pode ter mais de uma fonte. Me conta todas."*
 
 2. *"Quanto custa manter a entidade por mês, aproximadamente? Quais são os custos fixos?"*
-   - Ajude: *"Pense em: aluguel de espaço, plataformas, seguros, materiais, eventos."*
+   - Hint: *"Pense em: aluguel de espaço, plataformas, seguros, materiais, eventos."*
 
 3. *"Tem alguma meta financeira? Por exemplo: 'Precisamos de X membros pagantes para cobrir os custos' ou 'Queremos aprovar 2 editais por ano'."*
 
@@ -163,108 +163,108 @@ Faça só estas 4 perguntas, uma de cada vez:
 
 ---
 
-### Bloco 4: Comunicação e Identidade Visual (4 perguntas)
+### Bloco 4: Comunicação e Identidade Visual (4 questions)
 
-**Objetivo:** Entender como o negócio se comunica com o mundo e se tem marca visual.
+**Goal:** Understand how the business communicates with the world, and whether it has a visual brand.
 
 1. *"Como seus clientes/membros te encontram hoje? Indicação? Google? Instagram? Eventos?"*
-   - Ajude: *"Pense nos últimos 5 clientes/membros. Como cada um chegou até você?"*
+   - Hint: *"Pense nos últimos 5 clientes/membros. Como cada um chegou até você?"*
 
 2. *"Em quais canais você está presente? Site, Instagram, WhatsApp, LinkedIn, YouTube?"*
-   - Ajude: *"Não precisa estar em todos. Me diz onde você já está ativo e onde gostaria de estar."*
+   - Hint: *"Não precisa estar em todos. Me diz onde você já está ativo e onde gostaria de estar."*
 
 3. *"Se a IA fosse escrever um post ou um e-mail no seu nome, qual deveria ser o tom? Formal? Descontraído? Técnico? Inspiracional?"*
-   - Ajude: *"Exemplos: 'Profissional mas acessível', 'Formal e corporativo', 'Descontraído e educativo'"*
+   - Hint: *"Exemplos: 'Profissional mas acessível', 'Formal e corporativo', 'Descontraído e educativo'"*
 
 4. *"Você já tem um logo, cores definidas ou um manual de marca? Se sim, me conta os detalhes (quais cores, qual fonte, onde estão os arquivos)."*
-   - Se sim → Pilar `09_Identidade_Visual.md` será criado
-   - Se não: *"Sem problema. Quando surgir a necessidade, podemos adicionar esse pilar depois."*
+   - If yes → the `09_Identidade_Visual.md` pillar will be created
+   - If no: *"Sem problema. Quando surgir a necessidade, podemos adicionar esse pilar depois."*
 
 ---
 
-### Bloco 5: Operação (3 perguntas)
+### Bloco 5: Operação (3 questions)
 
-**Objetivo:** Mapear as ferramentas e o fluxo de trabalho.
+**Goal:** Map the tools and workflow.
 
 1. *"Quais são as principais ferramentas, softwares ou apps que você usa no dia a dia do negócio?"*
-   - Ajude: *"Pense em tudo: agenda (Google Calendar?), comunicação (WhatsApp?), financeiro (planilha? app?), produção (Canva? Photoshop? Excel?), armazenamento (Google Drive? Dropbox?)"*
+   - Hint: *"Pense em tudo: agenda (Google Calendar?), comunicação (WhatsApp?), financeiro (planilha? app?), produção (Canva? Photoshop? Excel?), armazenamento (Google Drive? Dropbox?)"*
 
 2. *"Me descreve o passo a passo do seu serviço/atividade mais comum. Do início ao fim."*
-   - Ajude: *"Exemplo: '1. Cliente entra em contato → 2. Faço orçamento → 3. Recebo sinal → 4. Executo → 5. Entrego → 6. Recebo restante'"*
-   - Se for entidade: *"Exemplo: '1. Membro propõe atividade → 2. Diretoria aprova → 3. Divulga → 4. Executa → 5. Registra'"*
+   - Hint: *"Exemplo: '1. Cliente entra em contato → 2. Faço orçamento → 3. Recebo sinal → 4. Executo → 5. Entrego → 6. Recebo restante'"*
+   - If it's a nonprofit: *"Exemplo: '1. Membro propõe atividade → 2. Diretoria aprova → 3. Divulga → 4. Executa → 5. Registra'"*
 
 3. *"Tem algum equipamento, estoque ou material físico importante que você usa no trabalho? Ou é tudo digital?"*
-   - Se responder sim: o pilar `08_Inventario.md` será criado
-   - Se responder não ou for irrelevante: pular o pilar
+   - If yes: the `08_Inventario.md` pillar will be created
+   - If no, or it's irrelevant: skip the pillar
 
 ---
 
-### Bloco 6: Cultura e Valores (3 perguntas)
+### Bloco 6: Cultura e Valores (3 questions)
 
-**Objetivo:** Capturar os valores inegociáveis e regras de conduta.
+**Goal:** Capture non-negotiable values and rules of conduct.
 
 1. *"Se eu fosse trabalhar com você amanhã, quais são as 3 regras que você me daria logo de cara?"*
-   - Ajude: *"Pense no que te irrita quando alguém faz errado. Ex: 'Pontualidade é sagrada', 'Nunca prometa o que não pode cumprir', 'O cliente sempre recebe resposta no mesmo dia'"*
-   - Se for entidade: *"Se um novo membro entrasse hoje, quais são as 3 regras de ouro que ele precisa saber?"*
+   - Hint: *"Pense no que te irrita quando alguém faz errado. Ex: 'Pontualidade é sagrada', 'Nunca prometa o que não pode cumprir', 'O cliente sempre recebe resposta no mesmo dia'"*
+   - If it's a nonprofit: *"Se um novo membro entrasse hoje, quais são as 3 regras de ouro que ele precisa saber?"*
 
 2. *"Você trabalha com parceiros, freelancers ou fornecedores? Se sim, o que você exige deles?"*
-   - Se disser não: *"Entendi, por enquanto é tudo na sua mão. Quando precisar contratar, essas regras já vão estar documentadas aqui."*
+   - If they say no: *"Entendi, por enquanto é tudo na sua mão. Quando precisar contratar, essas regras já vão estar documentadas aqui."*
 
 3. *"Tem algo que é tolerância zero pra você? Aquilo que se acontecer, encerra a relação na hora?"*
-   - Exemplos: *"Desonestidade com cliente", "Não cumprir prazo sem avisar", "Falar mal da entidade publicamente"*
+   - Examples: *"Desonestidade com cliente", "Não cumprir prazo sem avisar", "Falar mal da entidade publicamente"*
 
 ---
 
-### Bloco 7: Jurídico (2 perguntas, opcional)
+### Bloco 7: Jurídico (2 questions, optional)
 
-**Objetivo:** Registrar proteções legais e regulamentações. Pergunte antes:
+**Goal:** Record legal protections and regulations. Ask first:
 *"Você tem alguma questão jurídica importante no seu negócio? Contratos, regulamentações do setor, proteções legais, estatuto?"*
-- Se disser não ou "não sei": *"Sem problema. Podemos adicionar isso depois. Quando precisar de um contrato ou cláusula, o Córtex vai te lembrar que essa parte está em branco."* → Pular bloco.
+- If they say no or "não sei": *"Sem problema. Podemos adicionar isso depois. Quando precisar de um contrato ou cláusula, o Córtex vai te lembrar que essa parte está em branco."* → Skip the block.
 
 1. *"Você usa algum contrato ou termo padrão? Se sim, quais são as cláusulas mais importantes?"*
-   - Se for entidade: *"Vocês têm estatuto? Regimento interno? Algo que rege o funcionamento oficial?"*
+   - If it's a nonprofit: *"Vocês têm estatuto? Regimento interno? Algo que rege o funcionamento oficial?"*
 2. *"Existe alguma regulamentação específica do seu setor que a IA precisa saber? Ex: LGPD, CRM, OAB, Anvisa, Lei de Direitos Autorais, etc."*
 
 ---
 
-### Bloco 8: Memória Inicial (2 perguntas)
+### Bloco 8: Memória Inicial (2 questions)
 
-**Objetivo:** Capturar decisões e lições que já existem na cabeça do usuário.
+**Goal:** Capture decisions and lessons that already exist in the user's head.
 
 1. *"Tem alguma regra ou decisão que você já tomou e não quer esquecer? Pode ser sobre preço, política, fornecedor, qualquer coisa."*
-   - Ajude: *"Ex: 'Decidi que nunca mais trabalho com o fornecedor X', 'Meu preço mínimo é R$ 500', 'Sempre peço sinal antes de começar'"*
-   - Se for entidade: *"Ex: 'Decidimos que não aceitamos mais de 50 membros', 'Todo evento precisa ter pelo menos 2 meses de antecedência'"*
+   - Hint: *"Ex: 'Decidi que nunca mais trabalho com o fornecedor X', 'Meu preço mínimo é R$ 500', 'Sempre peço sinal antes de começar'"*
+   - If it's a nonprofit: *"Ex: 'Decidimos que não aceitamos mais de 50 membros', 'Todo evento precisa ter pelo menos 2 meses de antecedência'"*
 
 2. *"E alguma lição que aprendeu da maneira difícil? Um erro que não quer repetir?"*
-   - Ajude: *"Ex: 'Perdi um cliente porque demorei 3 dias pra responder', 'Fizemos um evento sem patrocínio e tomamos prejuízo'"*
+   - Hint: *"Ex: 'Perdi um cliente porque demorei 3 dias pra responder', 'Fizemos um evento sem patrocínio e tomamos prejuízo'"*
 
 ---
 
-### Bloco 9: Pilares Extras (opcional, pergunta aberta)
+### Bloco 9: Pilares Extras (optional, open question)
 
-**Objetivo:** Capturar áreas específicas do negócio que não se encaixam nos 9 pilares padrão.
+**Goal:** Capture specific areas of the business that don't fit the 9 standard pillars.
 
 *"Tem mais alguma área importante do seu negócio que a gente não cobriu? Algo específico do seu setor que merece um capítulo próprio?"*
-   - Ajude com exemplos baseados no setor: 
-     - Fotoclube: *"Ex: Histórico de Exposições, Registro Institucional, Calendário de Atividades"*
-     - Restaurante: *"Ex: Cardápio e Fornecedores de Insumos, Normas Sanitárias"*
-     - Escola: *"Ex: Grade Curricular, Perfil dos Alunos"*
-   - Se sim → crie pilares adicionais numerados a partir de `10_` (ex: `Pilares/10_Historico_Exposicoes.md`)
-   - Se não → prossiga para a geração de arquivos
+   - Help with sector-based examples:
+     - Photo club: *"Ex: Histórico de Exposições, Registro Institucional, Calendário de Atividades"*
+     - Restaurant: *"Ex: Cardápio e Fornecedores de Insumos, Normas Sanitárias"*
+     - School: *"Ex: Grade Curricular, Perfil dos Alunos"*
+   - If yes → create additional pillars numbered from `10_` onward (e.g. `Pilares/10_Historico_Exposicoes.md`)
+   - If no → proceed to file generation
 
 ---
 
-### ⚙️ Geração dos Arquivos (OBRIGATÓRIO)
+### ⚙️ Geração dos Arquivos (MANDATORY)
 
-Após concluir TODOS os blocos da entrevista, você DEVE executar os passos abaixo **nesta ordem exata**. NÃO pule nenhum passo. Todos os caminhos abaixo são **relativos à raiz do workspace** (a pasta onde o usuário abriu a IDE).
+After finishing ALL interview blocks, you MUST execute the steps below **in this exact order**. Do NOT skip any step. All paths below are **relative to the workspace root** (the folder the user opened in their IDE).
 
-> ⚠️ **REGRA MÁXIMA:** Você DEVE usar suas ferramentas de escrita de arquivo (`write_to_file`, `ctx_edit`, terminal `mkdir`, etc) para criar os arquivos FISICAMENTE no computador do usuário. NÃO basta exibir o conteúdo no chat. Se você apenas imprimir o texto na tela sem gravar no disco, a tarefa FALHOU.
+> ⚠️ **TOP RULE:** You MUST use your file-writing tools (`write_to_file`, `ctx_edit`, terminal `mkdir`, etc.) to create the files PHYSICALLY on the user's computer. Just displaying the content in chat is NOT enough. If you only print the text on screen without saving it to disk, the task HAS FAILED.
 
 ---
 
-#### Passo 1: Criar a estrutura de pastas na RAIZ
+#### Step 1: Create the folder structure at the ROOT
 
-Crie TODAS estas pastas na **RAIZ do workspace do usuário** (o diretório principal, fora da pasta `.agents`). Use `mkdir` ou ferramentas nativas do sistema. Não presuma que elas existem:
+Create ALL of these folders at the **root of the user's workspace** (the main directory, outside the `.agents` folder). Use `mkdir` or native system tools. Don't assume they already exist:
 
 ```
 ./Pilares/
@@ -273,20 +273,20 @@ Crie TODAS estas pastas na **RAIZ do workspace do usuário** (o diretório princ
 ./Ativos/
 ```
 
-#### Passo 2: Localizar os templates (APENAS LEITURA)
+#### Step 2: Locate the templates (READ ONLY)
 
-Os templates de referência estão em `.agents/skills/cortex-onboarding/templates/`. 
-**REGRA DE OURO:** Estes arquivos são APENAS PARA LEITURA. Você **NUNCA** deve editar ou sobrescrever os arquivos dentro da pasta `.agents/skills/.../templates/`. Eles são moldes estáticos. Se você editar os templates, você destruirá o framework.
+The reference templates live in `.agents/skills/cortex-onboarding/templates/`.
+**GOLDEN RULE:** These files are READ ONLY. You must **NEVER** edit or overwrite files inside the `.agents/skills/.../templates/` folder. They're static molds. If you edit the templates, you'll destroy the framework.
 
-Se o caminho relativo não funcionar, tente também:
-- `./agents/skills/cortex-onboarding/templates/` (para IDEs que não veem pastas ocultas)
-- O caminho absoluto da pasta do workspace + `.agents/skills/cortex-onboarding/templates/`
+If the relative path doesn't work, also try:
+- `./agents/skills/cortex-onboarding/templates/` (for IDEs that don't show hidden folders)
+- The workspace folder's absolute path + `.agents/skills/cortex-onboarding/templates/`
 
-#### Passo 3: Criar a estrutura oficial de Pilares
+#### Step 3: Create the official Pilares structure
 
-O Córtex possui uma estrutura padronizada. Se o usuário já tiver arquivos antigos no workspace (ex: `01_estrategia_e_missao.md`), **NÃO** atualize esses arquivos e **NÃO** preserve esses nomes. Eles serviram **apenas como fonte de conhecimento** durante a entrevista. Agora você cria a estrutura oficial do Córtex.
+Córtex has a standardized structure. If the user already has old files in the workspace (e.g. `01_estrategia_e_missao.md`), do **NOT** update those files and do **NOT** preserve those names. They only served **as a source of knowledge** during the interview. Now you create Córtex's official structure.
 
-Para CADA pilar que se aplica ao negócio, **leia o template correspondente**, **preencha com as respostas da entrevista e com as informações migradas dos arquivos antigos do usuário**, e salve na pasta `./Pilares/` com o nome oficial:
+For EACH pillar that applies to the business, **read the matching template**, **fill it in with the interview's answers plus information migrated from the user's old files**, and save it in the `./Pilares/` folder under its official name:
 
 | Template fonte (Leitura) | Arquivo oficial do Córtex (Criação) | Obrigatório? |
 |---|---|---|
@@ -301,11 +301,11 @@ Para CADA pilar que se aplica ao negócio, **leia o template correspondente**, *
 | `templates/Pilares/09_Identidade_Visual.md` | `./Pilares/09_Identidade_Visual.md` | ⚠️ Somente se se aplica |
 | *(sem template)* | `./Pilares/10_[Nome_Custom].md` | ⚠️ Pilares extras do Bloco 9 |
 
-**IMPORTANTE:** Nunca salve templates vazios. Remova os comentários HTML `<!-- -->` e substitua pelo conteúdo real. Use suas ferramentas de escrita de arquivo para gravar no disco do usuário.
+**IMPORTANT:** Never save empty templates. Remove the HTML comments `<!-- -->` and replace them with the real content. Use your file-writing tools to save to the user's disk.
 
-#### Passo 4: Criar os arquivos oficiais de Memória
+#### Step 4: Create the official Memória files
 
-Crie a estrutura oficial de Memória usando os templates como base e preenchendo com o conteúdo real:
+Create the official Memory structure using the templates as a base, filled in with real content:
 
 | Template fonte (Leitura) | Arquivo oficial do Córtex (Criação) |
 |---|---|
@@ -315,60 +315,60 @@ Crie a estrutura oficial de Memória usando os templates como base e preenchendo
 | `templates/Memoria/04_Pessoas_Pendencias.md` | `./Memoria/04_Pessoas_Pendencias.md` |
 | `templates/Memoria/05_Registros_Gerais.md` | `./Memoria/05_Registros_Gerais.md` |
 
-Preencha `01_Decisoes.md` e `02_Licoes.md` com as respostas do Bloco 8. Os demais podem ficar com a estrutura base (seções vazias mas com cabeçalhos).
+Fill `01_Decisoes.md` and `02_Licoes.md` with Block 8's answers. The others can keep the base structure (empty sections, but with headings).
 
-#### Passo 5: Criar o Frameworks
+#### Step 5: Create the Frameworks files
 
-Copie os arquivos abaixo. Nenhum dos dois precisa de edição — são protocolos fixos:
+Copy the files below. Neither needs editing — they're fixed protocols:
 - `templates/Frameworks/PROTOCOLO_AUTONOMIA.md` → `./Frameworks/PROTOCOLO_AUTONOMIA.md`
 - `templates/Frameworks/PROTOCOLO_MEMORIA.md` → `./Frameworks/PROTOCOLO_MEMORIA.md`
 
-#### Passo 6: Criar o META.md
+#### Step 6: Create META.md
 
-**Antes de tudo, obtenha a data real do sistema** (via terminal/ferramenta de data disponível). NUNCA estime ou "chute" a data — ela é usada para calcular a próxima revisão semestral e para o Radar avaliar atrasos.
+**Before anything else, get the real system date** (via terminal/whatever date tool is available). NEVER estimate or "guess" the date — it's used to compute the next semi-annual review and for Radar to assess overdue items.
 
-Leia o template em `templates/Memoria/META.md` (fonte fixa, somente leitura) e salve o conteúdo preenchido com os dados reais em `./Memoria/META.md`:
+Read the template at `templates/Memoria/META.md` (fixed source, read only) and save the filled-in content with real data to `./Memoria/META.md`:
 
-- `Onboarding realizado em`: a data real de hoje.
+- `Onboarding realizado em`: today's real date.
 - `Última revisão`: "Nenhuma ainda".
-- `Próxima revisão sugerida`: data real de hoje + 6 meses.
-- Mapa de Arquivos: inclua APENAS as linhas de Pilares que você efetivamente criou (07/08/09/10+ somente se se aplicam). O template já vem com a coluna "Seção (âncora)" preenchida para os 6 pilares obrigatórios e os 5 arquivos de Memória — mantenha essas âncoras. Para pilares customizados (10+), adicione uma linha de âncora apenas se o pilar tiver uma seção que valha a pena consultar isoladamente; senão, use "—".
-- Seção "Pilares Customizados": liste cada pilar 10+ criado no Bloco 9, se houver.
+- `Próxima revisão sugerida`: today's real date + 6 months.
+- File Map: include ONLY the Pillar lines you actually created (07/08/09/10+ only if they apply). The template already comes with the "Seção (âncora)" column filled in for the 6 mandatory pillars and the 5 Memory files — keep those anchors. For custom pillars (10+), add an anchor line only if the pillar has a section worth consulting in isolation; otherwise use "—".
+- "Pilares Customizados" section: list every 10+ pillar created in Block 9, if any.
 
-> ⚠️ **Regra de sincronização do META:** este mapa é o índice que a IA lê primeiro em toda consulta futura. Qualquer skill que criar, renomear ou remover um arquivo em `Pilares/` ou `Memoria/` (onboarding, revisão semestral, ou qualquer outra) DEVE atualizar `Memoria/META.md` como parte da mesma ação — nunca como um passo posterior "se sobrar tempo".
+> ⚠️ **META sync rule:** this map is the index the AI reads first on every future lookup. Any skill that creates, renames, or removes a file in `Pilares/` or `Memoria/` (onboarding, semi-annual review, or any other) MUST update `Memoria/META.md` as part of that same action — never as a later "if there's time" step.
 
-#### Passo 7: Gerar o System Prompt (o "cérebro") — fonte única
+#### Step 7: Generate the System Prompt (the "brain") — single source
 
-Leia o template em `.agents/skills/cortex-onboarding/resources/CORTEX_TEMPLATE.md`. Preencha as variáveis (`{{NOME_NEGOCIO}}`, `{{SETOR}}`, `{{DATA_ONBOARDING}}`, etc.) com as informações reais da entrevista. `{{DATA_ONBOARDING}}` e `{{DATA_REVISAO}}` devem usar a mesma data real do sistema obtida no Passo 6 — nunca uma data estimada.
+Read the template at `.agents/skills/cortex-onboarding/resources/CORTEX_TEMPLATE.md`. Fill in the variables (`{{NOME_NEGOCIO}}`, `{{SETOR}}`, `{{DATA_ONBOARDING}}`, etc.) with the interview's real information. `{{DATA_ONBOARDING}}` and `{{DATA_REVISAO}}` must use the same real system date obtained in Step 6 — never an estimated date.
 
-Se o negócio tiver pilares customizados (10+), adicione-os na seção `{{LISTA_PILARES}}` do template.
+If the business has custom pillars (10+), add them to the template's `{{LISTA_PILARES}}` section.
 
-> ⚠️ **Regra das duas camadas:** o template já vem com dois blocos marcados por comentários HTML. **Preserve os dois marcadores exatamente como estão** — eles são o que permite ao `cortex update` atualizar as regras do Córtex no futuro sem nunca tocar nos dados do negócio.
+> ⚠️ **Two-layer rule:** the template already ships with two blocks marked by HTML comments. **Preserve both markers exactly as they are** — they're what lets `cortex update` refresh Córtex's rules in the future without ever touching the business's data.
 >
-> - `<!-- CORTEX:BUSINESS:START -->` … `<!-- CORTEX:BUSINESS:END -->` — aqui vão as informações do negócio (identidade, datas, pilares). É onde você preenche as variáveis.
-> - `<!-- CORTEX:FRAMEWORK:START -->` … `<!-- CORTEX:FRAMEWORK:END -->` — as regras de operação do Córtex. **Copie este bloco literalmente, sem reescrever nem resumir.**
+> - `<!-- CORTEX:BUSINESS:START -->` … `<!-- CORTEX:BUSINESS:END -->` — the business's information goes here (identity, dates, pillars). This is where you fill in the variables.
+> - `<!-- CORTEX:FRAMEWORK:START -->` … `<!-- CORTEX:FRAMEWORK:END -->` — Córtex's operating rules. **Copy this block literally, without rewriting or summarizing it.**
 
-1. **Salve o conteúdo completo gerado em `./Frameworks/CEREBRO.md`.** Esta é a FONTE do cérebro — o arquivo a editar em qualquer atualização futura (revisão semestral, ajuste manual, etc.).
+1. **Save the full generated content to `./Frameworks/CEREBRO.md`.** This is the brain's SOURCE — the file to edit on any future update (semi-annual review, manual tweak, etc.).
 
-2. **Pergunte quais ferramentas de IA o usuário usa neste projeto:**
+2. **Ask which AI tools the user uses on this project:**
 
    > *"Última coisa: em quais ferramentas de IA você vai usar este Córtex? (ex: Claude Code, Cursor, Gemini CLI, Codex…) Posso deixar preparado só para as que você usa."*
 
-   | Se o usuário usa | Gere o arquivo |
+   | If the user uses | Generate the file |
    |---|---|
-   | Não sabe / quer o padrão / mais de uma | `AGENTS.md` (padrão cross-tool, funciona na maioria) |
+   | Doesn't know / wants the default / more than one | `AGENTS.md` (cross-tool default, works for most) |
    | Claude Code | `CLAUDE.md` |
    | Cursor, Windsurf | `.cursorrules` |
    | Gemini CLI, Google Antigravity | `GEMINI.md` |
    | OpenAI Codex, Codex CLI | `CODEX.md` |
 
-   Registre a escolha em `./.cortex/targets.json`:
+   Record the choice in `./.cortex/targets.json`:
 
    ```json
    { "targets": ["AGENTS.md"] }
    ```
 
-3. **Compile o cérebro para cada arquivo escolhido.** Cada um recebe o **conteúdo COMPLETO** de `Frameworks/CEREBRO.md` (não um ponteiro dizendo "vá ler outro arquivo" — ponteiro só funciona se a ferramenta seguir a indireção, e nem toda IDE faz isso), precedido deste cabeçalho:
+3. **Compile the brain into each chosen file.** Each one receives the **FULL content** of `Frameworks/CEREBRO.md` (not a pointer saying "go read another file" — a pointer only works if the tool follows the indirection, and not every IDE does), preceded by this header:
 
    ```markdown
    <!-- ============================================================
@@ -382,13 +382,13 @@ Se o negócio tiver pilares customizados (10+), adicione-os na seção `{{LISTA_
         ============================================================ -->
    ```
 
-4. **Apague os arquivos de inicialização que sobraram.** Os arquivos de raiz que o `init` criou e que NÃO foram escolhidos no passo 2 ainda contêm o texto de bootstrap ("leia a skill de onboarding") — se ficarem, uma IA pode tentar refazer o onboarding do zero. Liste-os para o usuário e **peça confirmação antes de remover**. Se ele preferir manter, compile o cérebro neles também.
+4. **Delete any leftover bootstrap files.** The root files that `init` created and that were NOT chosen in step 2 still contain the bootstrap text ("read the onboarding skill") — if left in place, an AI might try to redo onboarding from scratch. List them for the user and **ask for confirmation before removing them**. If they'd rather keep them, compile the brain into those too.
 
-5. Dali em diante, `npx @aksp/cortex sync` recompila tudo a partir de `Frameworks/CEREBRO.md`, e `npx @aksp/cortex update` traz regras e skills novas sem tocar na área do negócio.
+5. From then on, `npx @aksp/cortex sync` recompiles everything from `Frameworks/CEREBRO.md`, and `npx @aksp/cortex update` brings in new rules and skills without touching the business area.
 
-#### Passo 8: Mensagem final
+#### Step 8: Final message
 
-Após criar TODOS os arquivos acima, mostre ao usuário a lista completa do que foi criado:
+After creating ALL the files above, show the user the complete list of what was created:
 
 > *"✅ Seu Córtex está montado! Aqui está tudo o que foi criado:*
 >
@@ -420,16 +420,16 @@ Após criar TODOS os arquivos acima, mostre ao usuário a lista completa do que 
 
 ---
 
-## Regras Invioláveis
+## Non-Negotiable Rules
 
-1. **Nunca pule um bloco sem perguntar.** Mesmo os opcionais — pergunte se se aplica antes de pular.
-2. **Nunca deixe o usuário sem resposta.** Se ele travar, ofereça sugestões. Se ele disser "não sei", proponha uma versão provisória.
-3. **Confirme cada bloco antes de avançar.** Mostre um resumo do que você entendeu e peça um "ok".
-4. **Adapte-se ao tipo de negócio.** Use a tabela de classificação para ajustar vocabulário, tom e perguntas. Nunca fale "lucro" para uma ONG.
-5. **Obtenha a data real do sistema antes de registrar qualquer data.** Nunca estime. Ela alimenta o `META.md` e o ciclo de revisão semestral.
-6. **TODOS os arquivos de Pilares e Memória devem ser CRIADOS FISICAMENTE.** Use suas ferramentas de escrita de arquivo. Não basta imprimir no chat.
-7. **Nunca edite os templates.** Os arquivos dentro de `.agents/skills/.../templates/` são somente leitura.
-8. **Arquivos existentes do usuário são FONTE, não DESTINO.** Se o workspace já tinha arquivos antigos, use-os como referência de conteúdo mas crie os novos arquivos com a nomenclatura oficial do Córtex.
-9. **`Memoria/META.md` deve estar sempre sincronizado.** Todo pilar ou arquivo de memória criado nesta entrevista precisa constar no mapa do META antes de encerrar o onboarding.
-10. **`Frameworks/CEREBRO.md` é a FONTE do system prompt; os arquivos de raiz são artefatos compilados.** Cada arquivo de raiz gerado leva o conteúdo COMPLETO do cérebro, com o cabeçalho de "arquivo gerado". Nunca escreva um ponteiro do tipo "leia outro arquivo" — a ferramenta de IA pode não seguir. E preserve SEMPRE os marcadores `CORTEX:BUSINESS` e `CORTEX:FRAMEWORK` no `CEREBRO.md`: sem eles, o `cortex update` não consegue atualizar as regras depois.
-11. **Frontmatter dos pilares financeiro/comercial é numérico, não texto.** `margem_alvo`, `margem_minima`, `preco_piso` e `desconto_max` devem ser números (ou `null`), nunca frases — é o que o Modo "Guardião de Margem" lê primeiro.
+1. **Never skip a block without asking.** Even the optional ones — ask whether it applies before skipping.
+2. **Never leave the user without an answer.** If they get stuck, offer suggestions. If they say "não sei", propose a provisional version.
+3. **Confirm each block before moving on.** Show a summary of what you understood and ask for an "ok".
+4. **Adapt to the business type.** Use the classification table to adjust vocabulary, tone, and questions. Never say "lucro" to a nonprofit.
+5. **Get the real system date before recording any date.** Never estimate. It feeds `META.md` and the semi-annual review cycle.
+6. **ALL Pilares and Memória files must be PHYSICALLY CREATED.** Use your file-writing tools. Printing in chat isn't enough.
+7. **Never edit the templates.** Files inside `.agents/skills/.../templates/` are read only.
+8. **The user's existing files are a SOURCE, not a DESTINATION.** If the workspace already had old files, use them as content reference but create the new files under Córtex's official naming.
+9. **`Memoria/META.md` must always be in sync.** Every pillar or memory file created during this interview must be listed in META's map before onboarding ends.
+10. **`Frameworks/CEREBRO.md` is the SOURCE of the system prompt; the root files are compiled artifacts.** Each generated root file carries the FULL brain content, with the "generated file" header. Never write a "go read another file" pointer — the AI tool might not follow it. And ALWAYS preserve the `CORTEX:BUSINESS` and `CORTEX:FRAMEWORK` markers in `CEREBRO.md`: without them, `cortex update` can't refresh the rules later.
+11. **The financial/commercial pillars' frontmatter is numeric, not text.** `margem_alvo`, `margem_minima`, `preco_piso`, and `desconto_max` must be numbers (or `null`), never sentences — it's what the "Margin Guardian" Mode reads first.

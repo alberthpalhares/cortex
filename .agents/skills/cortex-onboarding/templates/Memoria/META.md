@@ -8,22 +8,22 @@
 **Próxima revisão sugerida:** [data + 6 meses no formato YYYY-MM-DD]
 
 <!--
-  REGRA PARA A IA: Este arquivo é o ÍNDICE MESTRE do Córtex e deve ser
-  lido PRIMEIRO antes de qualquer outra consulta a Pilares/ ou Memoria/.
+  RULE FOR THE AI: This file is the Córtex's MASTER INDEX and must be
+  read FIRST, before any other lookup in Pilares/ or Memoria/.
 
-  Sempre que um arquivo for CRIADO, RENOMEADO ou REMOVIDO em Pilares/
-  ou Memoria/ (por exemplo, um pilar customizado 10+ criado no onboarding
-  ou na revisão semestral), este mapa DEVE ser atualizado no mesmo
-  momento, como parte da mesma ação. Um arquivo que existe no disco mas
-  não está listado aqui é invisível para a leitura em camadas.
+  Whenever a file is CREATED, RENAMED, or REMOVED in Pilares/
+  or Memoria/ (for example, a custom pillar 10+ created during onboarding
+  or a semi-annual review), this map MUST be updated at that same
+  moment, as part of that same action. A file that exists on disk but
+  isn't listed here is invisible to layered reading.
 
-  Coluna "Seção (âncora)": quando preenchida, é o título exato do
-  cabeçalho `##` dentro do arquivo — use-a para ler só aquele trecho em
-  vez do arquivo inteiro. "—" significa que o arquivo é curto o
-  suficiente para ler por completo. Ao criar um pilar customizado (10+)
-  ou uma nova seção relevante em um arquivo existente, adicione uma
-  linha de âncora aqui SOMENTE se a seção for algo que valha a pena
-  consultar isoladamente; não é preciso enumerar cada cabeçalho.
+  "Seção (âncora)" column: when filled in, it's the exact `##` heading
+  title inside the file — use it to read just that section instead of
+  the whole file. "—" means the file is short enough to read in full.
+  When creating a custom pillar (10+) or a new relevant section in an
+  existing file, add an anchor line here ONLY if the section is
+  something worth consulting in isolation; there's no need to list
+  every single heading.
 -->
 
 ## Mapa de Arquivos
@@ -42,7 +42,7 @@
 | Regras de pagamento | `Pilares/04_Comercial.md` | `## Regras de Pagamento` |
 | Canais, tom de voz, conteúdo | `Pilares/05_Comunicacao.md` | — |
 | Fluxos de trabalho, ferramentas, POPs | `Pilares/06_Operacao.md` | — |
-<!-- Incluir linhas para 07_Juridico, 08_Inventario, 09_Identidade_Visual e pilares 10+ SOMENTE se os arquivos foram criados -->
+<!-- Include lines for 07_Juridico, 08_Inventario, 09_Identidade_Visual and pillars 10+ ONLY if those files were created -->
 | Decisões — preços e políticas | `Memoria/01_Decisoes.md` | `## Preços e Políticas` |
 | Decisões — posicionamento | `Memoria/01_Decisoes.md` | `## Posicionamento` |
 | Decisões — fornecedores e ferramentas | `Memoria/01_Decisoes.md` | `## Fornecedores e Ferramentas` |
@@ -53,8 +53,8 @@
 | Stakeholders (pessoas-chave) | `Memoria/04_Pessoas_Pendencias.md` | `## Stakeholders (Pessoas-Chave)` |
 | Pendências ativas | `Memoria/04_Pessoas_Pendencias.md` | `## Pendências Ativas` |
 | Anotações diversas | `Memoria/05_Registros_Gerais.md` | — |
-<!-- Incluir uma linha para Memoria/_Arquivo/ (com o(s) ano(s) disponível(is)) SOMENTE depois que a skill "consolidar" criar o primeiro arquivo lá -->
+<!-- Include a line for Memoria/_Arquivo/ (with the available year(s)) ONLY after the "consolidar" skill creates the first file there -->
 
 ## Pilares Customizados
 
-<!-- Se houver pilares 10+ criados no Bloco 9 do onboarding ou em revisões, liste-os aqui com uma linha curta do que cobrem -->
+<!-- If there are pillars 10+ created in Block 9 of onboarding or during reviews, list them here with a short line describing what they cover -->

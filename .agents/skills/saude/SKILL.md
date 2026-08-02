@@ -1,38 +1,38 @@
 ---
 name: saude
-description: "Faz um raio-x da estrutura do Córtex: pilares ausentes, marcadores REVISAR pendentes, META.md desatualizado e um índice de completude. Acione com: 'saúde do córtex', 'diagnóstico', 'cortex doctor', 'o que falta preencher'."
+description: "Runs an X-ray of the Córtex structure: missing pillars, pending REVISAR markers, an out-of-sync META.md, and a completeness index. Trigger with: 'saúde do córtex', 'diagnóstico', 'cortex doctor', 'o que falta preencher'."
 ---
 
 # Skill: Saúde do Córtex
 
-Esta skill não julga o conteúdo do negócio — ela audita a **estrutura** do Córtex e aponta lacunas de preenchimento, para o usuário saber exatamente o que falta completar (comum depois de um onboarding em modo Quickstart).
+This skill doesn't judge the business's content — it audits the Córtex's **structure** and points out filling gaps, so the user knows exactly what's left to complete (common after a Quickstart-mode onboarding).
 
-## Passo a Passo
+## Step by Step
 
-1. **Verifique se o Córtex existe.** Se não houver `Memoria/META.md`, informe que o Córtex ainda não foi montado e ofereça iniciar o onboarding. Pare aqui.
+1. **Check whether the Córtex exists.** If there's no `Memoria/META.md`, report that the Córtex hasn't been set up yet and offer to start onboarding. Stop here.
 
-2. **Leia `Memoria/META.md`** e extraia o Mapa de Arquivos declarado ali.
+2. **Read `Memoria/META.md`** and extract the File Map declared there.
 
-3. **Liste os arquivos reais** em `Pilares/` e `Memoria/` (nomes, não conteúdo).
+3. **List the real files** in `Pilares/` and `Memoria/` (names, not content).
 
-4. **Compare o mapa do META com a realidade do disco:**
-   - Arquivos no mapa que não existem no disco → `❌ Quebrado`
-   - Arquivos no disco que não estão no mapa → `⚠️ Não indexado`
-   - Os 6 pilares obrigatórios (`01` a `06`) que não existem → `🔴 Faltando (obrigatório)`
+4. **Compare the META's map against the disk's reality:**
+   - Files in the map that don't exist on disk → `❌ Quebrado`
+   - Files on disk that aren't in the map → `⚠️ Não indexado`
+   - The 6 mandatory pillars (`01` through `06`) that don't exist → `🔴 Faltando (obrigatório)`
 
-5. **Leia cada arquivo em `Pilares/`** e conte quantos marcadores `<!-- REVISAR -->` ou seções em branco (título seguido só de comentário HTML) cada um tem. Em `Pilares/03_Financeiro.md` e `Pilares/04_Comercial.md`, verifique também o frontmatter YAML no topo: cada campo (`margem_alvo`, `margem_minima`, `preco_piso`, `desconto_max`) que ainda estiver `null` conta como uma pendência — é um dado que o Modo "Guardião de Margem" precisa e ainda não tem.
+5. **Read each file in `Pilares/`** and count how many `<!-- REVISAR -->` markers or blank sections (a heading followed only by an HTML comment) each one has. In `Pilares/03_Financeiro.md` and `Pilares/04_Comercial.md`, also check the YAML frontmatter at the top: every field (`margem_alvo`, `margem_minima`, `preco_piso`, `desconto_max`) still set to `null` counts as a pending item — it's data the "Margin Guardian" Mode needs and doesn't have yet.
 
-6. **Verifique a camada do cérebro:**
-   - `Frameworks/CEREBRO.md` existe e contém os marcadores `CORTEX:BUSINESS` e `CORTEX:FRAMEWORK` → **formato atual**. Confirme que existe ao menos um arquivo de instrução compilado na raiz (o padrão é `AGENTS.md`; os alvos escolhidos ficam em `.cortex/targets.json`).
-   - `CEREBRO.md` existe mas **sem** os marcadores → formato intermediário: funciona, mas o `cortex update` não consegue atualizar as regras sozinho. Sugira `revisar córtex` para separar as duas camadas.
-   - `CEREBRO.md` não existe → formato antigo (conteúdo duplicado nos arquivos de raiz). Sugira `revisar córtex` para migrar.
-   - Se algum arquivo de raiz ainda for um **ponteiro** antigo (contém *"leia `Frameworks/CEREBRO.md`"* em vez do conteúdo completo), aponte isso: basta rodar `npx @aksp/cortex sync` para recompilar.
+6. **Check the brain layer:**
+   - `Frameworks/CEREBRO.md` exists and contains the `CORTEX:BUSINESS` and `CORTEX:FRAMEWORK` markers → **current format**. Confirm at least one compiled instruction file exists at the root (the default is `AGENTS.md`; chosen targets live in `.cortex/targets.json`).
+   - `CEREBRO.md` exists but **without** the markers → intermediate format: it works, but `cortex update` can't refresh the rules on its own. Suggest `revisar córtex` to split the two layers.
+   - `CEREBRO.md` doesn't exist → legacy format (content duplicated across root files). Suggest `revisar córtex` to migrate.
+   - If any root file is still an old-style **pointer** (contains *"leia `Frameworks/CEREBRO.md`"* instead of the full content), flag it: running `npx @aksp/cortex sync` recompiles it.
 
-7. **Calcule um índice de completude simples:** proporção de pilares obrigatórios sem nenhum marcador `REVISAR` restante. Não invente decimais de precisão — arredonde para a dezena mais próxima (ex: "~70% preenchido").
+7. **Calculate a simple completeness index:** the share of mandatory pillars with no remaining `REVISAR` markers. Don't invent decimal precision — round to the nearest ten (e.g. "~70% preenchido").
 
-8. **Gere o relatório** no formato abaixo.
+8. **Generate the report** in the format below.
 
-## Formato de Saída
+## Output Format
 
 ```
 🩺 **SAÚDE DO CÓRTEX — [Nome do Negócio]**
@@ -54,9 +54,9 @@ Esta skill não julga o conteúdo do negócio — ela audita a **estrutura** do 
 💡 Sugestão: [próximo passo mais útil — ex: "diga 'revisar córtex' para completar o Pilar Financeiro" ou "está tudo em dia!"]
 ```
 
-## Regras
+## Rules
 
-1. **Não reescreva nada sozinha.** Esta skill só diagnostica; qualquer correção deve ser feita via `registrar` ou `revisar córtex`, nunca automaticamente aqui.
-2. **Seja honesta sobre lacunas**, mas sem alarmismo — o tom é de "aqui está o que falta", não de erro grave.
-3. **Caminhos relativos.** Todos os caminhos são relativos à raiz do workspace.
-4. **Se estiver tudo completo**, comemore brevemente em vez de listar seções vazias de "nada a reportar".
+1. **Don't rewrite anything yourself.** This skill only diagnoses; any fix must go through `registrar` or `revisar córtex`, never automatically here.
+2. **Be honest about gaps**, but without alarm — the tone is "here's what's left," not "serious error."
+3. **Relative paths.** All paths are relative to the workspace root.
+4. **If everything is complete**, celebrate briefly instead of listing empty "nothing to report" sections.

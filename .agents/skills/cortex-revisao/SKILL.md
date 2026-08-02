@@ -1,95 +1,95 @@
 ---
 name: cortex-revisao
-description: "Revisão semestral do Córtex. Percorre cada pilar mostrando o que foi registrado no onboarding e pergunta se ainda reflete a realidade do negócio. Acione com: 'revisão do córtex', 'revisar pilares' ou quando o radar avisar que a data de revisão se aproxima."
+description: "Semi-annual Córtex review. Walks through each pillar, showing what was recorded during onboarding, and asks whether it still reflects the business's reality. Trigger with: 'revisão do córtex', 'revisar pilares', or when Radar warns the review date is near."
 ---
 
 # Skill: Córtex — Revisão Semestral
 
-Esta skill conduz uma **revisão estruturada** da base de conhecimento do Córtex. O objetivo é garantir que o que foi dito no onboarding ainda é verdade — e atualizar o que mudou.
+This skill runs a **structured review** of the Córtex knowledge base. The goal is to make sure what was said during onboarding is still true — and to update whatever changed.
 
-## Quando Acionar
+## When to Trigger
 
-- O `Memoria/META.md` contém a data do onboarding e a data sugerida para revisão
-- Se a data de revisão já passou ou está próxima (< 2 semanas), o Agente Sócio deve sugerir proativamente
-- O usuário também pode acionar manualmente a qualquer momento
+- `Memoria/META.md` holds the onboarding date and the suggested review date
+- If the review date has already passed or is close (< 2 weeks), the Business Partner Agent should proactively suggest it
+- The user can also trigger it manually at any time
 
-## Filosofia da Revisão
+## Review Philosophy
 
-> **Isso não é um retrabalho. É uma conversa de 15 minutos para manter o cérebro do negócio atualizado.**
+> **This is not rework. It's a 15-minute conversation to keep the business's brain up to date.**
 
-A revisão NÃO refaz o onboarding do zero. Ela:
-1. Mostra o que está registrado em cada pilar
-2. Pergunta: *"Isso ainda é verdade?"*
-3. Se sim → segue adiante
-4. Se não → pergunta o que mudou e atualiza o arquivo
+The review does NOT redo onboarding from scratch. It:
+1. Shows what's currently registered in each pillar
+2. Asks: *"Isso ainda é verdade?"*
+3. If yes → moves on
+4. If no → asks what changed and updates the file
 
-## Fluxo da Revisão
+## Review Flow
 
-### Preparação
+### Preparation
 
-1. Leia o `Memoria/META.md` para saber o nome do negócio e a data do último onboarding/revisão
-2. Liste todos os arquivos `.md` dentro de `Pilares/` para saber quais pilares existem (incluindo pilares customizados além dos 9 padrão)
-3. Leia cada arquivo de pilar encontrado
+1. Read `Memoria/META.md` to learn the business name and the date of the last onboarding/review
+2. List every `.md` file inside `Pilares/` to know which pillars exist (including custom pillars beyond the 9 standard ones)
+3. Read each pillar file found
 
-### Para Cada Pilar
+### For Each Pillar
 
-Siga este roteiro:
+Follow this script:
 
-1. **Mostre um resumo de 3-5 linhas** do conteúdo atual do pilar
-2. Pergunte: *"Isso ainda reflete a realidade do [nome do negócio]? Mudou algo?"*
-3. Se o usuário disser que mudou:
-   - Pergunte o que mudou
-   - Proponha a edição específica
-   - Mostre o antes e depois
-   - Peça confirmação antes de gravar
-4. Se o usuário disser que está ok → avance para o próximo pilar
+1. **Show a 3-5 line summary** of the pillar's current content
+2. Ask: *"Isso ainda reflete a realidade do [nome do negócio]? Mudou algo?"*
+3. If the user says something changed:
+   - Ask what changed
+   - Propose the specific edit
+   - Show before and after
+   - Ask for confirmation before saving
+4. If the user says it's fine → move to the next pillar
 
-### Verificação de Novos Pilares
+### Checking for New Pillars
 
-Após percorrer os pilares existentes:
+After going through the existing pillars:
 
-1. Pergunte: *"Surgiu alguma área nova no negócio que ainda não está registrada?"*
-2. Dê exemplos baseados no que NÃO existe ainda (Jurídico? Inventário? Identidade Visual? Ou algo totalmente diferente?)
-3. Se sim → conduza um mini-onboarding apenas daquele pilar novo e **adicione-o imediatamente ao Mapa de Arquivos do `Memoria/META.md`** (e à seção "Pilares Customizados" se for numerado 10+). Não deixe para o passo de Fechamento.
-4. Se não → siga para a Memória
+1. Ask: *"Surgiu alguma área nova no negócio que ainda não está registrada?"*
+2. Give examples based on what does NOT exist yet (Jurídico? Inventário? Identidade Visual? Or something totally different?)
+3. If yes → run a mini-onboarding for just that new pillar and **immediately add it to `Memoria/META.md`'s File Map** (and to the "Pilares Customizados" section if numbered 10+). Don't leave it for the Closing step.
+4. If no → move on to Memory
 
-### Revisão Rápida da Memória
+### Quick Memory Review
 
-1. Leia `Memoria/04_Pessoas_Pendencias.md`
-2. Mostre as pendências ativas e pergunte: *"Alguma dessas já foi resolvida ou pode ser removida?"*
-3. Mova as resolvidas para a seção "Pendências Resolvidas"
-4. Leia `Memoria/03_Projetos.md`
-5. Pergunte: *"Algum projeto mudou de status ou pode ser arquivado?"*
-6. Atualize conforme necessário
+1. Read `Memoria/04_Pessoas_Pendencias.md`
+2. Show the active pending items and ask: *"Alguma dessas já foi resolvida ou pode ser removida?"*
+3. Move resolved ones to the "Pendências Resolvidas" section
+4. Read `Memoria/03_Projetos.md`
+5. Ask: *"Algum projeto mudou de status ou pode ser arquivado?"*
+6. Update as needed
 
-### Consolidação da Memória (Protocolo de Memória Viva)
+### Memory Consolidation (Living Memory Protocol)
 
-Aplique agora o `Frameworks/PROTOCOLO_MEMORIA.md`: siga o fluxo da skill `consolidar` para identificar itens elegíveis para arquivamento (mais de 12 meses), decisões já marcadas `[REVOGADA ...]` prontas para mover, e duplicatas. Mostre o resumo do lote e peça confirmação antes de aplicar, exatamente como a skill `consolidar` descreve. Se não houver nada elegível, pule esta etapa silenciosamente e siga para o Fechamento.
+Now apply `Frameworks/PROTOCOLO_MEMORIA.md`: follow the `consolidar` skill's flow to identify items eligible for archiving (older than 12 months), decisions already marked `[REVOGADA ...]` ready to move, and duplicates. Show the batch summary and ask for confirmation before applying it, exactly as the `consolidar` skill describes. If nothing is eligible, silently skip this step and move to Closing.
 
-### Fechamento
+### Closing
 
-1. **Obtenha a data real do sistema** (via terminal/ferramenta de data disponível) — nunca estime. Atualize a data de revisão no `Memoria/META.md`:
+1. **Get the real system date** (via terminal/whatever date tool is available) — never estimate. Update the review date in `Memoria/META.md`:
    ```
    Última revisão: [data real de hoje]
    Próxima revisão sugerida: [data real de hoje + 6 meses]
    ```
-2. **Confira o Mapa de Arquivos do `Memoria/META.md` contra a lista real de arquivos em `Pilares/` e `Memoria/`.** Qualquer arquivo que exista no disco e não esteja no mapa deve ser adicionado agora — esta é a última chance da revisão de corrigir um META desatualizado.
-3. **Atualize o cérebro (`Frameworks/CEREBRO.md`).** Ele é a FONTE; os arquivos de raiz (`AGENTS.md` etc.) são artefatos compilados a partir dele. Identifique em qual dos três estados o Córtex está:
+2. **Check `Memoria/META.md`'s File Map against the real file list in `Pilares/` and `Memoria/`.** Any file that exists on disk and isn't in the map must be added now — this is the review's last chance to fix an out-of-sync META.
+3. **Update the brain (`Frameworks/CEREBRO.md`).** It is the SOURCE; the root files (`AGENTS.md` etc.) are artifacts compiled from it. Identify which of the three states the Córtex is in:
 
-   **(a) Tem `CEREBRO.md` COM os marcadores `CORTEX:BUSINESS` / `CORTEX:FRAMEWORK` (formato atual).**
-   Edite **somente dentro da região `CORTEX:BUSINESS`** — atualize as datas na seção "Ciclo de Revisão" e a lista de pilares, se mudou. **Nunca edite a região `CORTEX:FRAMEWORK`**: ela é regenerada pelo `npx @aksp/cortex update` e qualquer coisa escrita ali será perdida. Ao terminar, rode `npx @aksp/cortex sync` (ou peça ao usuário) para recompilar os arquivos de instrução.
+   **(a) Has `CEREBRO.md` WITH the `CORTEX:BUSINESS` / `CORTEX:FRAMEWORK` markers (current format).**
+   Edit **only inside the `CORTEX:BUSINESS` region** — update the dates in the "Ciclo de Revisão" section and the pillar list, if it changed. **Never edit the `CORTEX:FRAMEWORK` region**: it's regenerated by `npx @aksp/cortex update`, and anything written there will be lost. When done, run `npx @aksp/cortex sync` (or ask the user to) to recompile the instruction files.
 
-   **(b) Tem `CEREBRO.md` SEM os marcadores (Córtex entre a v0.7.0 e a v0.10.0).**
-   Ofereça a migração: *"Seu cérebro ainda é um bloco único. Posso separá-lo em duas áreas — a do seu negócio e a das regras do Córtex? A vantagem é que, daí em diante, as atualizações do framework chegam sozinhas sem nunca mexer nos seus dados."* Se sim:
-   - Envolva a parte do negócio (identidade, datas de revisão, lista de pilares) entre `<!-- CORTEX:BUSINESS:START -->` e `<!-- CORTEX:BUSINESS:END -->`.
-   - **Substitua** toda a parte de regras de operação pelo conteúdo literal de `.agents/cortex/brain.framework.md`, envolto em `<!-- CORTEX:FRAMEWORK:START -->` e `<!-- CORTEX:FRAMEWORK:END -->`. Se o usuário tinha regras próprias ali, mostre-as antes e pergunte onde ele quer preservá-las (o lugar natural é a região de negócio).
-   - Rode `npx @aksp/cortex sync` ao final.
+   **(b) Has `CEREBRO.md` WITHOUT the markers (Córtex between v0.7.0 and v0.10.0).**
+   Offer the migration: *"Seu cérebro ainda é um bloco único. Posso separá-lo em duas áreas — a do seu negócio e a das regras do Córtex? A vantagem é que, daí em diante, as atualizações do framework chegam sozinhas sem nunca mexer nos seus dados."* If yes:
+   - Wrap the business part (identity, review dates, pillar list) between `<!-- CORTEX:BUSINESS:START -->` and `<!-- CORTEX:BUSINESS:END -->`.
+   - **Replace** the entire operating-rules part with the literal content of `.agents/cortex/brain.framework.md`, wrapped in `<!-- CORTEX:FRAMEWORK:START -->` and `<!-- CORTEX:FRAMEWORK:END -->`. If the user had their own custom rules there, show them first and ask where they want to keep them (the natural place is the business region).
+   - Run `npx @aksp/cortex sync` at the end.
 
-   **(c) Não tem `CEREBRO.md` (Córtex anterior à v0.7.0, com o conteúdo duplicado nos 5 arquivos de raiz).**
-   Copie o conteúdo de qualquer um dos arquivos de raiz (eles devem ser idênticos) para `Frameworks/CEREBRO.md` e siga exatamente o caso (b) para separá-lo em duas camadas.
+   **(c) Doesn't have `CEREBRO.md` (Córtex older than v0.7.0, with content duplicated across the 5 root files).**
+   Copy the content of any one of the root files (they should be identical) into `Frameworks/CEREBRO.md` and follow case (b) exactly to split it into two layers.
 
-   > Em qualquer caso: se algum arquivo de raiz ainda contiver um "ponteiro" antigo (do tipo *"leia `Frameworks/CEREBRO.md`"*), ele está obsoleto — `sync` vai substituí-lo pelo cérebro completo, que é o que garante que a ferramenta de IA leia as instruções sem depender de seguir a indireção.
-4. **Mostre um resumo** do que foi alterado:
+   > In any case: if any root file still has an old-style "pointer" (something like *"leia `Frameworks/CEREBRO.md`"*), it's stale — `sync` will replace it with the full compiled brain, which is what guarantees the AI tool reads the instructions without depending on following any indirection.
+4. **Show a summary** of what changed:
 
 > *"✅ Revisão do Córtex concluída!*
 >
@@ -102,11 +102,11 @@ Aplique agora o `Frameworks/PROTOCOLO_MEMORIA.md`: siga o fluxo da skill `consol
 >
 > *Próxima revisão sugerida: [data]. Até lá, continue usando o radar e registrando suas decisões! 🧠"*
 
-## Regras
+## Rules
 
-1. **Nunca apague conteúdo sem confirmar.** Sempre mostre o que será removido ou alterado.
-2. **Seja rápido.** Se o pilar não mudou, gaste 10 segundos nele e siga.
-3. **Registre tudo.** Qualquer alteração feita deve ser refletida tanto no pilar quanto no META.md.
-4. **Sugira.** Se o usuário cresceu (contratou, mudou de modelo), sugira proativamente que novos pilares sejam adicionados.
-5. **Caminhos relativos.** Todos os caminhos são relativos à raiz do workspace. Nunca use caminhos absolutos.
-6. **Aponte lacunas.** Se encontrar marcadores `<!-- REVISAR -->` sobrando de um onboarding rápido (Quickstart) ou anterior, aproveite a revisão para completá-los junto com o usuário, ou sugira rodar a skill `saude` para um raio-x completo do que falta.
+1. **Never delete content without confirming.** Always show what will be removed or changed.
+2. **Be fast.** If a pillar hasn't changed, spend 10 seconds on it and move on.
+3. **Record everything.** Any change made must be reflected both in the pillar and in META.md.
+4. **Suggest proactively.** If the user's business grew (hired someone, changed models), proactively suggest adding new pillars.
+5. **Relative paths.** All paths are relative to the workspace root. Never use absolute paths.
+6. **Point out gaps.** If you find leftover `<!-- REVISAR -->` markers from a Quickstart (or older) onboarding, use the review to complete them together with the user, or suggest running the `saude` skill for a full X-ray of what's missing.

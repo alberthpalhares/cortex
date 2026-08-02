@@ -1,10 +1,10 @@
 # Inventário (Opcional)
 
 ## Equipamentos Principais
-<!-- Quais são as câmeras, lentes, iluminação, e máquinas principais? -->
+<!-- What are the main cameras, lenses, lighting, and machines? -->
 
 ## Softwares e Licenças
-<!-- Quais são as licenças de software ativas e necessárias? -->
+<!-- What software licenses are active and needed? -->
 
 ## Acessórios e Consumíveis
-<!-- Quais são os acessórios menores e materiais de consumo recorrentes? -->
+<!-- What are the smaller accessories and recurring consumables? -->

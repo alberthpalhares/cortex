@@ -1,29 +1,29 @@
 ---
 name: pesquisa-mercado
-description: "Faz um levantamento de concorrentes e atualiza o Panorama Competitivo do Pilar Estratégia. Acione com: 'pesquisar concorrência', 'mapear concorrentes', 'quem são meus concorrentes'."
+description: "Surveys competitors and updates the Strategy pillar's Competitive Landscape section. Trigger with: 'pesquisar concorrência', 'mapear concorrentes', 'quem são meus concorrentes'."
 ---
 
 # Skill: Pesquisa de Mercado (Concorrência)
 
-Mapeia a concorrência do negócio e propõe uma atualização da seção "Panorama Competitivo" em `Pilares/01_Estrategia.md` — sempre com confirmação antes de gravar.
+Maps the business's competition and proposes an update to the "Panorama Competitivo" section in `Pilares/01_Estrategia.md` — always with confirmation before writing.
 
-## Passo a Passo
+## Step by Step
 
-1. **Leia `Pilares/01_Estrategia.md`** para entender o posicionamento e o ICP já registrados — isso direciona quem realmente é concorrente.
+1. **Read `Pilares/01_Estrategia.md`** to understand the positioning and ICP already registered — that's what determines who actually counts as a competitor.
 
-2. **Pergunte ao usuário** quais concorrentes ele já tem em mente (2 a 4 nomes). Se ele não souber nenhum, pergunte setor e região de atuação para você sugerir candidatos.
+2. **Ask the user** which competitors they already have in mind (2 to 4 names). If they don't know any, ask about sector and region so you can suggest candidates.
 
-3. **Verifique se você tem acesso a uma ferramenta de busca/navegação na web** neste ambiente.
-   - **Se tiver:** pesquise cada concorrente — posicionamento público, faixa de preço aproximada (se divulgada), diferencial percebido, pontos fracos aparentes. Baseie-se apenas em informação pública real; **nunca invente dado que não encontrou**.
-   - **Se não tiver:** peça ao usuário para colar links, prints ou o que ele já sabe sobre cada concorrente, e trabalhe só com isso.
+3. **Check whether you have access to a web search/browsing tool** in this environment.
+   - **If you do:** research each competitor — public positioning, approximate price range (if disclosed), perceived differentiator, apparent weak points. Base this only on real public information; **never make up data you couldn't find**.
+   - **If you don't:** ask the user to paste links, screenshots, or whatever they already know about each competitor, and work only with that.
 
-4. **Monte um comparativo curto** (uma tabela ou lista) cruzando o negócio do usuário com cada concorrente pesquisado, focado no que é acionável: onde o negócio do usuário se diferencia e onde está exposto.
+4. **Build a short comparison** (a table or list) crossing the user's business against each researched competitor, focused on what's actionable: where the user's business differentiates itself, and where it's exposed.
 
-5. **Mostre o comparativo e a proposta de texto** para a seção "Panorama Competitivo" e peça confirmação antes de gravar em `Pilares/01_Estrategia.md`.
+5. **Show the comparison and the proposed text** for the "Panorama Competitivo" section and ask for confirmation before writing to `Pilares/01_Estrategia.md`.
 
-6. **Se algo relevante emergir** (ex: um concorrente lançou um produto que ameaça o posicionamento), sugira registrar como lição ou pendência via skill `registrar`.
+6. **If something relevant comes up** (e.g. a competitor launched a product that threatens the positioning), suggest registering it as a lesson or pending item via the `registrar` skill.
 
-## Formato de Saída
+## Output Format
 
 ```
 🔍 **PESQUISA DE MERCADO — [Nome do Negócio]**
@@ -38,10 +38,10 @@ Mapeia a concorrência do negócio e propõe uma atualização da seção "Panor
 Posso atualizar "Panorama Competitivo" em Pilares/01_Estrategia.md com esse resumo?
 ```
 
-## Regras
+## Rules
 
-1. **Nunca invente dado de concorrente.** Se não encontrou ou não tem informação confiável, diga "não encontrado" em vez de supor.
-2. **Só use fontes públicas.** Não tente acessar dados privados, login-protegidos ou pagos de terceiros.
-3. **Sempre confirme antes de gravar** no Pilar Estratégia — nunca escreva direto.
-4. **Caminhos relativos.** Todos os caminhos são relativos à raiz do workspace.
-5. **Seja objetiva.** O comparativo deve caber em poucas linhas por concorrente — nada de relatórios longos.
+1. **Never make up data about a competitor.** If you couldn't find it or don't have reliable information, say "não encontrado" instead of assuming.
+2. **Only use public sources.** Don't try to access private, login-protected, or paid third-party data.
+3. **Always confirm before writing** to the Strategy pillar — never write directly.
+4. **Relative paths.** All paths are relative to the workspace root.
+5. **Be objective.** The comparison should fit in a few lines per competitor — no long reports.

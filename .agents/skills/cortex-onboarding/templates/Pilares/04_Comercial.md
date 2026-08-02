@@ -6,15 +6,15 @@ desconto_max: null   # % máximo de desconto permitido sem aprovação especial 
 # Comercial
 
 ## Esteira de Produtos/Serviços
-<!-- Quais são os seus produtos e serviços de entrada, principal e de alto valor? -->
+<!-- What are your entry-level, flagship, and premium products/services? -->
 
 ## Estrutura de Precificação
-<!-- Como você calcula seus preços? Quais são as faixas de preço atuais? -->
-<!-- O piso numérico canônico fica no frontmatter acima (preco_piso); aqui vai o contexto (como o preço é calculado) -->
+<!-- How do you calculate your prices? What are the current price ranges? -->
+<!-- The canonical numeric floor lives in the frontmatter above (preco_piso); this is where the context goes (how the price is calculated) -->
 
 ## Regras de Pagamento
-<!-- Quais são as condições de pagamento aceitas (prazos, parcelamentos)? -->
+<!-- What payment terms are accepted (deadlines, installments)? -->
 
 ## Política de Descontos
-<!-- Até quanto e em quais condições é permitido aplicar descontos? -->
-<!-- O limite numérico canônico fica no frontmatter acima (desconto_max); aqui vão as condições em que ele se aplica -->
+<!-- Up to how much, and under what conditions, are discounts allowed? -->
+<!-- The canonical numeric ceiling lives in the frontmatter above (desconto_max); this is where the conditions it applies under go -->

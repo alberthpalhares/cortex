@@ -1,25 +1,25 @@
-# Protocolo de Memória Viva
+# Living Memory Protocol
 
-*Este protocolo garante que a Memória do Córtex permança enxuta e confiável com o tempo, sem jamais apagar histórico silenciosamente. É o "motor" por trás da skill `consolidar`.*
+*This protocol keeps Córtex's Memory lean and reliable over time, without ever silently deleting history. It's the "engine" behind the `consolidar` skill.*
 
-## Por que existe
+## Why it exists
 
-A promessa central do Córtex é economizar contexto: a IA lê `Pilares/` e `Memoria/` antes de responder. Se `Memoria/` só cresce, o custo de leitura sobe indefinidamente e decisões antigas — já revogadas ou superadas — continuam sendo lidas como se ainda valessem. Este protocolo evita as duas coisas ao mesmo tempo.
+Córtex's core promise is saving context: the AI reads `Pilares/` and `Memoria/` before answering. If `Memoria/` only ever grows, the reading cost climbs indefinitely, and old decisions — already revoked or superseded — keep being read as if they still applied. This protocol prevents both problems at once.
 
-## Regras
+## Rules
 
-1. **Arquivar, nunca apagar.** Itens de `Memoria/02_Licoes.md` (e, quando aplicável, decisões antigas e projetos concluídos) com mais de 12 meses — contados a partir da data real do sistema — são candidatos a arquivamento. Eles são movidos, nunca deletados, para `Memoria/_Arquivo/AAAA.md` (um arquivo por ano, criado sob demanda, onde `AAAA` é o ano do item mais antigo do lote).
-2. **Decisões revogadas são marcadas, não removidas.** Quando uma decisão em `01_Decisoes.md` deixa de valer, a linha original NUNCA é apagada. Ela recebe o prefixo `[REVOGADA em YYYY-MM-DD: motivo/nova decisão]` e permanece na seção original até a próxima consolidação, quando pode ser movida para o arquivo do ano correspondente em `_Arquivo/`.
-3. **Fusão de duplicatas.** Itens que dizem essencialmente a mesma coisa (a mesma decisão reafirmada, a mesma lição repetida com palavras diferentes) são fundidos em uma única linha, preservando a data mais recente e citando a data mais antiga entre parênteses.
-4. **Gatilhos de consolidação.** A skill `consolidar` roda:
-   - (a) como parte do Fechamento da `cortex-revisao`, a cada revisão semestral;
-   - (b) sob demanda, quando o usuário disser algo como "consolidar memória";
-   - (c) por sugestão do `radar`, quando um arquivo de `Memoria/` passar de um limite de tamanho legível (ver `radar/SKILL.md`).
-5. **Nada se perde.** Arquivar não é apagar. Tudo que sai de um arquivo ativo continua acessível em `Memoria/_Arquivo/`, e `Memoria/META.md` deve indexar essa pasta assim que o primeiro arquivo de arquivo for criado.
+1. **Archive, never delete.** Items in `Memoria/02_Licoes.md` (and, when applicable, old decisions and completed projects) older than 12 months — counted from the real system date — are candidates for archiving. They are moved, never deleted, to `Memoria/_Arquivo/AAAA.md` (one file per year, created on demand, where `AAAA` is the year of the batch's oldest item).
+2. **Revoked decisions are marked, not removed.** When a decision in `01_Decisoes.md` stops applying, the original line is NEVER deleted. It gets the prefix `[REVOGADA em YYYY-MM-DD: motivo/nova decisão]` and stays in its original section until the next consolidation, when it can be moved to the matching year's file in `_Arquivo/`.
+3. **Duplicate merging.** Items that essentially say the same thing (the same decision restated, the same lesson repeated in different words) are merged into a single line, keeping the most recent date and citing the oldest one in parentheses.
+4. **Consolidation triggers.** The `consolidar` skill runs:
+   - (a) as part of `cortex-revisao`'s Closing step, every semi-annual review;
+   - (b) on demand, when the user says something like "consolidar memória";
+   - (c) on `radar`'s suggestion, when a `Memoria/` file grows past a readable size limit (see `radar/SKILL.md`).
+5. **Nothing is lost.** Archiving is not deleting. Everything that leaves an active file stays accessible in `Memoria/_Arquivo/`, and `Memoria/META.md` must index that folder as soon as the first archive file is created.
 
-## Formato de `Memoria/_Arquivo/AAAA.md`
+## `Memoria/_Arquivo/AAAA.md` format
 
-Mesma estrutura de seções do arquivo de origem (ex: `## Preços e Políticas`, `## Erros e Oportunidades Perdidas`), com uma linha de cabeçalho no topo indicando a origem:
+Same section structure as the source file (e.g. `## Preços e Políticas`, `## Erros e Oportunidades Perdidas`), with a header line at the top stating its origin:
 
 ```markdown
 # Arquivo — AAAA
@@ -30,8 +30,8 @@ Mesma estrutura de seções do arquivo de origem (ex: `## Preços e Políticas`,
 - **[YYYY-MM-DD]** Descrição da decisão arquivada.
 ```
 
-## O que este protocolo NÃO faz
+## What this protocol does NOT do
 
-- Não decide sozinho o que é "irrelevante" — apenas o que é **antigo o suficiente** para sair do arquivo ativo.
-- Não apaga nada sem que o item já esteja preservado em `_Arquivo/`.
-- Não roda de forma totalmente silenciosa: a skill `consolidar` sempre mostra um resumo do que será movido/fundido antes de aplicar.
+- It doesn't decide on its own what's "irrelevant" — only what's **old enough** to leave the active file.
+- It never deletes anything before the item is already preserved in `_Arquivo/`.
+- It never runs fully silently: the `consolidar` skill always shows a summary of what will be moved/merged before applying it.

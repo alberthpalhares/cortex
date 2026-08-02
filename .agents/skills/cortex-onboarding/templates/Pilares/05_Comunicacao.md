@@ -1,13 +1,13 @@
 # Comunicação
 
 ## Canais Ativos
-<!-- Por onde os clientes te encontram e entram em contato? (Instagram, Site, WhatsApp, Indicação) -->
+<!-- Where do clients find you and reach out? (Instagram, website, WhatsApp, referral) -->
 
 ## Tom de Voz e Posicionamento
-<!-- Como a marca se comunica? Qual é o estilo e a personalidade da comunicação? -->
+<!-- How does the brand communicate? What's the style and personality of the communication? -->
 
 ## Estratégia de Conteúdo
-<!-- Que tipo de conteúdo você produz para atrair clientes? Qual a frequência? -->
+<!-- What kind of content do you produce to attract clients? How often? -->
 
 ## Presença Digital
-<!-- Em quais redes e formatos você deve focar sua presença online? -->
+<!-- Which networks and formats should you focus your online presence on? -->

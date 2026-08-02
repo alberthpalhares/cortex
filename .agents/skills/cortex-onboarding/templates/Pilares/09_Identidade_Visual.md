@@ -1,13 +1,13 @@
 # Identidade Visual (Opcional)
 
 ## Paleta de Cores
-<!-- Quais são as cores da marca (códigos HEX/RGB)? -->
+<!-- What are the brand's colors (HEX/RGB codes)? -->
 
 ## Tipografia
-<!-- Quais são as fontes primárias e secundárias utilizadas? -->
+<!-- What are the primary and secondary typefaces used? -->
 
 ## Logotipo e Variações
-<!-- Quais são as versões do logo e quando usar cada uma? -->
+<!-- What are the logo's versions, and when should each be used? -->
 
 ## Regras de Uso
-<!-- O que não pode ser feito com a marca (distorções, fundos inadequados)? -->
+<!-- What can't be done with the brand (distortions, unsuitable backgrounds)? -->

@@ -6,6 +6,14 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-08-02
+
+### Alterado
+- **Internals do framework passam a ser escritos em inglês.** As 11 skills, os dois protocolos (`PROTOCOLO_AUTONOMIA.md`, `PROTOCOLO_MEMORIA.md`), o template do cérebro (`CORTEX_TEMPLATE.md` / `brain.framework.md`) e os comentários-guia dos templates de Pilares/Memória agora têm sua prosa instrucional em inglês — o que é carregado repetidamente no contexto da IA a cada sessão. Isso reduz o custo de token do carregamento recorrente sem mudar em nada a experiência do usuário: **a conversa com o usuário continua sempre em português**, os gatilhos das skills (`"radar"`, `"registra que..."`, `"saúde do córtex"` etc.) continuam em português nas `description`, os "Formatos de Saída" mostrados ao usuário continuam em português, e os dados do próprio negócio (Pilares/Memória preenchidos, cabeçalhos das seções, comentários do frontmatter YAML) permanecem no idioma do usuário.
+- **Nova regra explícita de idioma no cérebro:** a primeira regra do framework agora instrui a IA a sempre responder ao usuário em português, independentemente do idioma das instruções — necessário porque, a partir desta versão, essas instruções passam a ser lidas em inglês.
+- **README, CONTRIBUTING e a documentação do onboarding continuam em português** — são conteúdos voltados ao GitHub/usuário final, fora do escopo desta mudança.
+- Relatórios de auditoria (`AUDITORIA*.md`) passam a ser sempre excluídos do repositório público via `.gitignore`, com um padrão glob cobrindo futuras versões do relatório.
+
 ## [0.11.0] - 2026-08-02
 
 ### Adicionado

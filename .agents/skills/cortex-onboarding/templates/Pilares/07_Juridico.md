@@ -1,10 +1,10 @@
 # Jurídico (Opcional)
 
 ## Contratos Padrão
-<!-- Quais são os modelos de contratos usados para diferentes serviços e clientes? -->
+<!-- What contract templates are used for different services and clients? -->
 
 ## Regulamentações do Setor
-<!-- Há normas ou regulamentações específicas que precisam ser seguidas? -->
+<!-- Are there any industry-specific rules or regulations that need to be followed? -->
 
 ## Proteções e Cláusulas
-<!-- Quais as cláusulas de proteção essenciais nos contratos (direitos de imagem, cancelamento, etc)? -->
+<!-- What are the essential protective clauses in your contracts (image rights, cancellation, etc.)? -->

@@ -1,36 +1,36 @@
 ---
 name: registrar
-description: "Registra rapidamente decisões, lições, projetos ou pendências nos arquivos de Memória. Acione digitando palavras como: 'registra', 'nova lição', 'pendência', 'decidi que' ou 'resolvido'."
+description: "Quickly records decisions, lessons, projects, or pending items into the Memory files. Trigger by typing words like: 'registra', 'nova lição', 'pendência', 'decidi que', or 'resolvido'."
 ---
 
 # Skill: Registrar
 
-Esta skill agiliza a entrada de dados nas pastas de memória. Quando o usuário invocar esta skill com uma instrução curta (ex: "lição: perdi cliente por conta do prazo"), você deve processar a entrada silenciosamente e gravar no arquivo correto.
+This skill speeds up data entry into the memory folders. When the user triggers it with a short instruction (e.g. "lição: perdi cliente por conta do prazo"), you should process the entry silently and save it to the right file.
 
-## 1. Classificação do Tipo de Registro
-Analise o pedido do usuário e decida para onde a informação deve ir. Todos os caminhos são **relativos à raiz do workspace**:
-- **Lição** (erros, acertos, campanhas) → `Memoria/02_Licoes.md`
-- **Decisão** (preços, políticas, fornecedores, manuais) → `Memoria/01_Decisoes.md`
-- **Pendência / Aguardando / Resolvido** → `Memoria/04_Pessoas_Pendencias.md`
-- **Projeto** (mudança de status, novo projeto) → `Memoria/03_Projetos.md`
-- **Informação geral** (parceiros, acessos, anotações diversas) → `Memoria/05_Registros_Gerais.md`
+## 1. Classifying the Entry Type
+Analyze the user's request and decide where the information should go. All paths are **relative to the workspace root**:
+- **Lesson** (mistakes, successes, campaigns) → `Memoria/02_Licoes.md`
+- **Decision** (prices, policies, suppliers, standards) → `Memoria/01_Decisoes.md`
+- **Pending / Waiting / Resolved** → `Memoria/04_Pessoas_Pendencias.md`
+- **Project** (status change, new project) → `Memoria/03_Projetos.md`
+- **General info** (partners, access credentials, misc notes) → `Memoria/05_Registros_Gerais.md`
 
-## 2. Padrão de Formatação (Obrigatório)
-Antes de escrever, formate mentalmente a entrada de acordo com os padrões já existentes nos arquivos.
-- **Lições:** Sempre inicie com `- **[YYYY-MM-DD]** **[CATEGORIA]** [Texto]`. Categorias comuns: `[COMERCIAL]`, `[OPERAÇÃO]`, `[COMUNICAÇÃO]`, `[GESTÃO]`.
-- **Decisões:** Inicie com `- **[YYYY-MM-DD]** [Texto]`.
-- **Pendências:** Inicie com `- 🔴 **[DEADLINE YYYY-MM-DD]** [Texto]` se tiver data, ou `- ⏳ **[AGUARDANDO]** [Texto]` se depender de terceiros.
-- **Resolvidos:** Mova/Adicione na seção "Pendências Resolvidas" com `- ✅ [Texto]`.
-- **Projetos:** Inicie com `- **[STATUS]** **[Nome do Projeto]**...` (Status como `[BRIEFING]`, `[EXECUÇÃO]`, `[ENTREGA]`, `[CONCLUÍDO]`).
-- **Revogar uma decisão:** se o usuário disser que uma decisão antiga não vale mais, NÃO apague a linha original em `Memoria/01_Decisoes.md`. Insira o prefixo `[REVOGADA em YYYY-MM-DD: motivo/nova decisão]` no início da linha existente. A skill `consolidar` move decisões revogadas para `Memoria/_Arquivo/` na próxima consolidação (ver `Frameworks/PROTOCOLO_MEMORIA.md`).
+## 2. Formatting Standard (Mandatory)
+Before writing, mentally format the entry to match the existing patterns in the files.
+- **Lessons:** Always start with `- **[YYYY-MM-DD]** **[CATEGORIA]** [Texto]`. Common categories: `[COMERCIAL]`, `[OPERAÇÃO]`, `[COMUNICAÇÃO]`, `[GESTÃO]`.
+- **Decisions:** Start with `- **[YYYY-MM-DD]** [Texto]`.
+- **Pending items:** Start with `- 🔴 **[DEADLINE YYYY-MM-DD]** [Texto]` if it has a date, or `- ⏳ **[AGUARDANDO]** [Texto]` if it depends on a third party.
+- **Resolved:** Move/add to the "Pendências Resolvidas" section with `- ✅ [Texto]`.
+- **Projects:** Start with `- **[STATUS]** **[Nome do Projeto]**...` (Status like `[BRIEFING]`, `[EXECUÇÃO]`, `[ENTREGA]`, `[CONCLUÍDO]`).
+- **Revoking a decision:** if the user says an old decision no longer holds, do NOT delete the original line in `Memoria/01_Decisoes.md`. Prepend the prefix `[REVOGADA em YYYY-MM-DD: motivo/nova decisão]` to the existing line. The `consolidar` skill moves revoked decisions to `Memoria/_Arquivo/` at the next consolidation (see `Frameworks/PROTOCOLO_MEMORIA.md`).
 
-## 3. Fluxo de Ação Silenciosa
-1. Obtenha a **data real do sistema** (via terminal/ferramenta de data disponível) antes de formatar qualquer carimbo `[YYYY-MM-DD]`. Nunca estime ou "chute" a data — o Radar e a revisão semestral dependem dela estar correta.
-2. Leia o arquivo destino (caminho relativo).
-3. Identifique a seção/cabeçalho onde o item se encaixa melhor.
-4. Use suas ferramentas de escrita de arquivo para injetar a nova linha sem modificar o resto.
-5. Se faltar um **deadline** de pendência (data futura, não o carimbo de criação), **pergunte ao usuário** em vez de inventar uma data — um deadline errado quebra o Radar. Se o usuário não souber, registre sem deadline usando `- ⏳ **[SEM PRAZO]** [Texto]`.
-6. Se o registro criar um arquivo novo em `Pilares/` ou `Memoria/` que ainda não conste no mapa de `Memoria/META.md`, atualize o META como parte da mesma ação.
-7. Após o registro feito com sucesso, retorne ao usuário apenas a linha formatada que foi inserida, acompanhada de um ✅.
+## 3. Silent Action Flow
+1. Get the **real system date** (via terminal/whatever date tool is available) before formatting any `[YYYY-MM-DD]` stamp. Never estimate or "guess" the date — Radar and the semi-annual review depend on it being correct.
+2. Read the target file (relative path).
+3. Identify the section/heading the item best fits into.
+4. Use your file-writing tools to inject the new line without touching the rest of the file.
+5. If a pending item is **missing a deadline** (a future date, not the creation stamp), **ask the user** instead of making one up — a wrong deadline breaks Radar. If the user doesn't know, register it without a deadline using `- ⏳ **[SEM PRAZO]** [Texto]`.
+6. If the entry creates a new file in `Pilares/` or `Memoria/` that isn't yet listed in `Memoria/META.md`'s map, update META as part of the same action.
+7. After a successful entry, return to the user only the formatted line that was inserted, followed by a ✅.
 
-*Não pergunte se pode fazer o registro em si. Não peça confirmação para gravar — apenas faça a alteração no arquivo imediatamente e mostre como ficou. A única pergunta permitida é por um deadline faltante (passo 5).*
+*Don't ask permission to make the entry itself. Don't ask for confirmation to write to the file — just make the change immediately and show how it turned out. The only question allowed is for a missing deadline (step 5).*

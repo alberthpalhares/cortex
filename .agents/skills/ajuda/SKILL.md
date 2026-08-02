@@ -1,19 +1,19 @@
 ---
 name: ajuda
-description: "Mostra os comandos disponíveis do Córtex e sugere o próximo passo. Acione com: 'ajuda', 'o que você faz?', 'comandos', 'help'."
+description: "Shows the available Córtex commands and suggests the next step. Trigger with: 'ajuda', 'o que você faz?', 'comandos', 'help'."
 ---
 
 # Skill: Ajuda
 
-Esta skill responde rapidamente "o que dá para fazer aqui" sem exigir que o usuário decore comandos.
+This skill quickly answers "what can I do here" without requiring the user to memorize commands.
 
-## Passo a Passo
+## Step by Step
 
-1. **Leia silenciosamente** o `Memoria/META.md`, se existir, para saber o nome do negócio e se há pilares customizados.
-2. Responda com a lista de comandos abaixo, adaptando a linha final ao estado atual do Córtex (ex: se `META.md` não existir, sugira "montar meu Córtex" em vez dos demais comandos).
-3. Seja direto — sem introdução longa.
+1. **Silently read** `Memoria/META.md`, if it exists, to find out the business name and whether there are custom pillars.
+2. Reply with the command list below, adapting the closing line to the Córtex's current state (e.g. if `META.md` doesn't exist, suggest "montar meu Córtex" instead of the other commands).
+3. Be direct — no long intro.
 
-## Formato de Saída
+## Output Format
 
 ```
 🧠 **O que eu sei fazer no Córtex de [Nome do Negócio]:**
@@ -34,8 +34,8 @@ Esta skill responde rapidamente "o que dá para fazer aqui" sem exigir que o usu
 👉 [Se souber algo do contexto — ex: uma revisão atrasada ou pendências críticas — sugira isso como próximo passo aqui]
 ```
 
-## Regras
+## Rules
 
-1. Se o Córtex ainda não foi montado (sem `Memoria/META.md`), não liste os comandos acima — diga apenas que é preciso rodar o onboarding e ofereça iniciar agora.
-2. Não invente comandos que não existem nas outras skills.
-3. Todos os caminhos de arquivo são **relativos à raiz do workspace**.
+1. If the Córtex hasn't been set up yet (no `Memoria/META.md`), don't list the commands above — just say the onboarding needs to run and offer to start it now.
+2. Don't invent commands that don't exist in the other skills.
+3. All file paths are **relative to the workspace root**.

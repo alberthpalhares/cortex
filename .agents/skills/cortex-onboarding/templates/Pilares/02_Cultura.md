@@ -1,10 +1,10 @@
 # Cultura
 
 ## Estrutura Atual e Futura
-<!-- Como a equipe está organizada hoje? E como deve ser no futuro? -->
+<!-- How is the team organized today? And how should it look in the future? -->
 
 ## Valores Inegociáveis
-<!-- Quais são os princípios que você não abre mão? O que não é tolerado? -->
+<!-- What principles won't you compromise on? What's not tolerated? -->
 
 ## Gestão de Parceiros/Equipe
-<!-- Como é o relacionamento com parceiros e equipe? Quais as expectativas? -->
+<!-- What's the relationship with partners and the team like? What are the expectations? -->

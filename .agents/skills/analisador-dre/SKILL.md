@@ -1,27 +1,27 @@
 ---
 name: analisador-dre
-description: "Lê um DRE ou planilha financeira que o usuário fornecer e cruza com as metas de margem do Pilar Financeiro. Acione com: 'analisar DRE', 'analisa essa planilha', 'como está minha margem'."
+description: "Reads a DRE or spreadsheet the user provides and cross-references it against the Financial pillar's margin targets. Trigger with: 'analisar DRE', 'analisa essa planilha', 'como está minha margem'."
 ---
 
 # Skill: Analisador de DRE
 
-Esta skill **não é um ERP e não faz contabilidade**. Ela só analisa os dados que o usuário trouxer (planilha, print, texto colado) e cruza com as metas já registradas no Córtex — nunca calcula fluxo de caixa ou projeções sozinha sem os números reais em mãos.
+This skill **is not an ERP and doesn't do accounting**. It only analyzes the data the user brings (spreadsheet, screenshot, pasted text) and cross-references it against the targets already registered in the Córtex — it never computes cash flow or projections on its own without real numbers in hand.
 
-## Passo a Passo
+## Step by Step
 
-1. **Verifique se o usuário forneceu dados.** Se ele só disse "analisa minha DRE" sem anexar nada, peça a planilha, o print ou os números colados em texto. Não prossiga sem dados reais.
+1. **Check whether the user provided data.** If they just said "analisa minha DRE" without attaching anything, ask for the spreadsheet, screenshot, or numbers pasted as text. Don't proceed without real data.
 
-2. **Leia `Pilares/03_Financeiro.md`** — extraia o frontmatter (`margem_alvo`, `margem_minima`) e os custos fixos registrados.
+2. **Read `Pilares/03_Financeiro.md`** — extract the frontmatter (`margem_alvo`, `margem_minima`) and the registered fixed costs.
 
-3. **Extraia do material fornecido pelo usuário:** receita total, custos/despesas totais, lucro líquido, e a margem líquida resultante (lucro líquido ÷ receita × 100). Se o material já trouxer a margem calculada, use-a; não recalcule com base em suposições.
+3. **Extract from the material the user provided:** total revenue, total costs/expenses, net profit, and the resulting net margin (net profit ÷ revenue × 100). If the material already brings the computed margin, use it; don't recompute it based on assumptions.
 
 4. **Compare:**
-   - Margem obtida vs. `margem_alvo` e `margem_minima`.
-   - Se houver mais de um período (ex: 2 meses), aponte a tendência (subindo/caindo/estável).
+   - The obtained margin vs. `margem_alvo` and `margem_minima`.
+   - If there's more than one period (e.g. 2 months), point out the trend (rising/falling/stable).
 
-5. **Gere o diagnóstico** no formato abaixo. Se algum dado necessário não veio no material (ex: só receita, sem custos), diga exatamente o que falta em vez de estimar.
+5. **Generate the diagnosis** in the format below. If some required data wasn't in the material (e.g. only revenue, no costs), say exactly what's missing instead of estimating it.
 
-## Formato de Saída
+## Output Format
 
 ```
 📊 **DIAGNÓSTICO FINANCEIRO — [Nome do Negócio]**
@@ -37,10 +37,10 @@ Esta skill **não é um ERP e não faz contabilidade**. Ela só analisa os dados
 💡 Observação: [1-2 linhas objetivas — nunca conselho financeiro genérico, só o que os números mostram]
 ```
 
-## Regras
+## Rules
 
-1. **Nunca invente números.** Só analisa o que o usuário trouxe. Se faltar um dado, pergunte ou aponte a lacuna — não estime.
-2. **Não é consultoria financeira.** Aponte o que os números dizem em relação às metas já registradas; não recomende decisões de investimento, crédito ou tributação.
-3. **Não decide sozinha atualizar o Pilar Financeiro.** Se o diagnóstico sugerir revisar `margem_alvo` ou `margem_minima`, pergunte antes de editar o frontmatter.
-4. **Caminhos relativos.** Todos os caminhos são relativos à raiz do workspace.
-5. **Sugira registrar.** Se o diagnóstico revelar algo importante (ex: margem consistentemente abaixo do mínimo), sugira `registra que...` para deixar uma decisão ou lição documentada.
+1. **Never make up numbers.** Only analyze what the user brought. If a number is missing, ask or point out the gap — don't estimate it.
+2. **Not financial consultancy.** Point out what the numbers say relative to the already-registered targets; don't recommend investment, credit, or tax decisions.
+3. **Never decides on its own to update the Financial pillar.** If the diagnosis suggests revisiting `margem_alvo` or `margem_minima`, ask before editing the frontmatter.
+4. **Relative paths.** All paths are relative to the workspace root.
+5. **Suggest registering it.** If the diagnosis reveals something important (e.g. margin consistently below the minimum), suggest `registra que...` to leave a documented decision or lesson.

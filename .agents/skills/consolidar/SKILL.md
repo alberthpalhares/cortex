@@ -1,27 +1,27 @@
 ---
 name: consolidar
-description: "Aplica o Protocolo de Memória Viva: arquiva itens antigos de Memória, marca decisões revogadas como movíveis e funde duplicatas — sem nunca apagar histórico. Acione com: 'consolidar memória', 'arquivar memória', 'a memória está grande'."
+description: "Applies the Living Memory Protocol: archives old Memory items, marks revoked decisions as movable, and merges duplicates — without ever deleting history. Trigger with: 'consolidar memória', 'arquivar memória', 'a memória está grande'."
 ---
 
 # Skill: Consolidar Memória
 
-Esta skill executa o `Frameworks/PROTOCOLO_MEMORIA.md`. Ela mantém `Memoria/` enxuta ao longo do tempo, movendo (nunca apagando) o que ficou velho ou redundante para `Memoria/_Arquivo/`.
+This skill executes `Frameworks/PROTOCOLO_MEMORIA.md`. It keeps `Memoria/` lean over time, moving (never deleting) what has gone stale or redundant into `Memoria/_Arquivo/`.
 
-## Passo a Passo
+## Step by Step
 
-1. **Verifique se há Memória.** Se não houver `Memoria/01_Decisoes.md` nem `Memoria/02_Licoes.md`, informe que ainda não há nada para consolidar. Pare aqui.
+1. **Check whether there's any Memory.** If neither `Memoria/01_Decisoes.md` nor `Memoria/02_Licoes.md` exist, tell the user there's nothing to consolidate yet. Stop here.
 
-2. **Obtenha a data real do sistema** (via terminal/ferramenta de data disponível) — nunca estime. Todo cálculo de "mais de 12 meses" depende dela.
+2. **Get the real system date** (via terminal/whatever date tool is available) — never estimate. Every "more than 12 months" calculation depends on it.
 
-3. **Leia os candidatos a consolidação:**
-   - `Memoria/01_Decisoes.md` — procure linhas já marcadas `[REVOGADA em ...]`.
-   - `Memoria/02_Licoes.md` — procure itens com mais de 12 meses a partir da data real de hoje.
-   - `Memoria/03_Projetos.md` — projetos com status `[CONCLUÍDO]` há mais de 12 meses (se aplicável).
-   - `Memoria/04_Pessoas_Pendencias.md` — itens antigos na seção "Pendências Resolvidas" (mais de 12 meses).
+3. **Read the consolidation candidates:**
+   - `Memoria/01_Decisoes.md` — look for lines already marked `[REVOGADA em ...]`.
+   - `Memoria/02_Licoes.md` — look for items older than 12 months from today's real date.
+   - `Memoria/03_Projetos.md` — projects with `[CONCLUÍDO]` status for more than 12 months (if applicable).
+   - `Memoria/04_Pessoas_Pendencias.md` — old items in the "Pendências Resolvidas" section (more than 12 months).
 
-4. **Identifique duplicatas.** Dentro de cada arquivo, procure itens que dizem essencialmente a mesma coisa (mesma decisão reafirmada, mesma lição repetida). Marque para fusão.
+4. **Identify duplicates.** Within each file, look for items that essentially say the same thing (the same decision restated, the same lesson repeated). Flag them for merging.
 
-5. **Monte um resumo do lote** — nunca aplique item a item sem mostrar o conjunto primeiro:
+5. **Assemble a batch summary** — never apply item by item without showing the whole set first:
 
    ```
    🗄️ **CONSOLIDAÇÃO DE MEMÓRIA — [Nome do Negócio]**
@@ -36,18 +36,18 @@ Esta skill executa o `Frameworks/PROTOCOLO_MEMORIA.md`. Ela mantém `Memoria/` e
    Isso vai mover esses itens para Memoria/_Arquivo/AAAA.md — nada é apagado, só sai dos arquivos ativos. Posso aplicar?
    ```
 
-6. **Só após confirmação do usuário**, aplique:
-   - Crie (ou atualize) `Memoria/_Arquivo/AAAA.md` para cada ano necessário, seguindo o formato descrito em `Frameworks/PROTOCOLO_MEMORIA.md`.
-   - Remova as linhas movidas dos arquivos de origem.
-   - Funda as duplicatas identificadas em uma única linha, mantendo a data mais recente.
-   - Se `Memoria/_Arquivo/` acabou de ser criada pela primeira vez, adicione uma linha para ela no Mapa de Arquivos de `Memoria/META.md`.
+6. **Only after the user confirms**, apply it:
+   - Create (or update) `Memoria/_Arquivo/AAAA.md` for each year needed, following the format described in `Frameworks/PROTOCOLO_MEMORIA.md`.
+   - Remove the moved lines from the source files.
+   - Merge the identified duplicates into a single line, keeping the most recent date.
+   - If `Memoria/_Arquivo/` was just created for the first time, add a line for it in `Memoria/META.md`'s File Map.
 
-7. **Mostre um resumo final** do que foi movido/fundido e onde encontrar (`Memoria/_Arquivo/AAAA.md`).
+7. **Show a final summary** of what was moved/merged and where to find it (`Memoria/_Arquivo/AAAA.md`).
 
-## Regras
+## Rules
 
-1. **Nunca apague informação.** Tudo que sai de um arquivo ativo tem que estar salvo em `Memoria/_Arquivo/` antes de ser removido da origem.
-2. **Sempre confirme em lote antes de aplicar.** Não pergunte item a item — mostre o pacote completo de uma vez (passo 5).
-3. **Se não houver nada elegível**, diga isso brevemente e não gere um relatório vazio.
-4. **Caminhos relativos.** Todos os caminhos são relativos à raiz do workspace.
-5. **Não julgue o conteúdo do negócio** — esta skill só organiza a estrutura da memória, não avalia se as decisões foram boas ou ruins.
+1. **Never delete information.** Everything that leaves an active file must already be saved in `Memoria/_Arquivo/` before being removed from the source.
+2. **Always confirm as a batch before applying.** Don't ask item by item — show the whole package at once (step 5).
+3. **If nothing is eligible**, say so briefly and don't generate an empty report.
+4. **Relative paths.** All paths are relative to the workspace root.
+5. **Don't judge the business's content** — this skill only organizes the memory's structure, it doesn't evaluate whether the decisions were good or bad.

@@ -6,11 +6,11 @@ margem_minima: null  # % mínimo aceitável antes de recusar ou renegociar (ex: 
 # Financeiro
 
 ## Custos Fixos (mensal)
-<!-- Quais são os custos operacionais recorrentes essenciais (aluguel, software, salários base)? -->
+<!-- What are the essential recurring operating costs (rent, software, base salaries)? -->
 
 ## Referências de Margem
-<!-- Qual é a margem de lucro alvo por projeto/produto? Qual o mínimo aceitável? -->
-<!-- Os valores numéricos canônicos ficam no frontmatter acima (margem_alvo, margem_minima); aqui vai o contexto e a explicação por trás deles -->
+<!-- What's the target profit margin per project/product? What's the acceptable minimum? -->
+<!-- The canonical numeric values live in the frontmatter above (margem_alvo, margem_minima); this is where the context and reasoning behind them goes -->
 
 ## Política de Investimentos
-<!-- Como os lucros são reinvestidos no negócio (ex: equipamentos, marketing, reserva)? -->
+<!-- How are profits reinvested in the business (e.g. equipment, marketing, reserve fund)? -->

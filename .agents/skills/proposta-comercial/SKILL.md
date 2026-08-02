@@ -1,31 +1,31 @@
 ---
 name: proposta-comercial
-description: "Monta uma proposta comercial pronta para envio, cruzando Comercial + Comunicação + Identidade Visual. Aplica o Modo 'Preencher Lacunas' do PROTOCOLO_AUTONOMIA. Acione com: 'gerar proposta', 'monta uma proposta pro cliente X', 'proposta comercial'."
+description: "Assembles a ready-to-send commercial proposal, cross-referencing Comercial + Comunicação + Identidade Visual. Applies the 'Fill the Gaps' Mode from PROTOCOLO_AUTONOMIA. Trigger with: 'gerar proposta', 'monta uma proposta pro cliente X', 'proposta comercial'."
 ---
 
 # Skill: Proposta Comercial
 
-Gera uma proposta comercial **90% pronta** a partir do que já está registrado no Córtex, para o usuário só revisar e enviar — nunca a partir de um formulário longo.
+Generates a commercial proposal that's **90% ready** to send from what's already registered in the Córtex — the user just reviews and sends it. Never built from a long form.
 
-## Passo a Passo
+## Step by Step
 
-1. **Identifique o pedido mínimo.** Você precisa de pelo menos: nome do cliente e o que ele quer contratar (pode ser um dos itens da Esteira de Produtos/Serviços ou algo sob medida). Se faltar um dos dois, pergunte objetivamente — só isso, nada além.
+1. **Identify the minimum request.** You need at least: the client's name and what they want to hire (can be one item from the Product/Service lineup or something custom). If either is missing, ask objectively — just that, nothing more.
 
-2. **Leia silenciosamente:**
-   - `Pilares/04_Comercial.md` — esteira de produtos, frontmatter (`preco_piso`, `desconto_max`) e regras de pagamento.
-   - `Pilares/05_Comunicacao.md` — tom de voz.
-   - `Pilares/09_Identidade_Visual.md`, se existir — cores, fonte, diretrizes de marca.
-   - `Memoria/01_Decisoes.md` — regras comerciais já batidas que afetem a proposta (ex: sinal obrigatório, prazo mínimo).
+2. **Silently read:**
+   - `Pilares/04_Comercial.md` — product lineup, frontmatter (`preco_piso`, `desconto_max`), and payment rules.
+   - `Pilares/05_Comunicacao.md` — tone of voice.
+   - `Pilares/09_Identidade_Visual.md`, if it exists — colors, font, brand guidelines.
+   - `Memoria/01_Decisoes.md` — commercial rules already settled that affect the proposal (e.g. mandatory deposit, minimum deadline).
 
-3. **Monte a proposta** no tom de voz do Pilar de Comunicação, usando os valores e condições reais encontrados. Nunca invente preço — se o serviço pedido não estiver na esteira nem tiver referência clara, monte a proposta com o valor entre `[A DEFINIR]` e avise o usuário.
+3. **Assemble the proposal** in the tone of voice from the Communication pillar, using the real values and terms you found. Never make up a price — if the requested service isn't in the lineup and has no clear reference, build the proposal with the value as `[A DEFINIR]` and warn the user.
 
-4. **Aplique o Modo "Preencher Lacunas":** destaque entre `[COLCHETES NEGRITO]` apenas os dados que exigem confirmação do usuário (nome fantasia exato do cliente, CNPJ, data de validade da proposta, prazo de entrega específico).
+4. **Apply "Fill the Gaps" Mode:** highlight, between `[BOLD BRACKETS]`, only the data that needs user confirmation (client's exact trade name, tax ID, proposal's validity date, specific delivery deadline).
 
-5. **Nunca ultrapasse `desconto_max`** do frontmatter de `04_Comercial.md` sem avisar explicitamente que a condição pedida foge da política padrão.
+5. **Never exceed `desconto_max`** from `04_Comercial.md`'s frontmatter without explicitly warning that the requested terms fall outside standard policy.
 
-6. **Salve a proposta** em `Ativos/Propostas/AAAA-MM-DD_Nome-do-Cliente.md` (crie a subpasta se não existir) usando a data real do sistema, e também mostre o conteúdo completo no chat.
+6. **Save the proposal** to `Ativos/Propostas/AAAA-MM-DD_Nome-do-Cliente.md` (create the subfolder if it doesn't exist) using the real system date, and also show the full content in chat.
 
-## Formato de Saída
+## Output Format
 
 ```markdown
 # Proposta Comercial — [Nome do Negócio] × [Cliente]
@@ -43,10 +43,10 @@ Gera uma proposta comercial **90% pronta** a partir do que já está registrado 
 [Como o cliente confirma — sinal, assinatura, contato]
 ```
 
-## Regras
+## Rules
 
-1. **Nunca invente preço, prazo ou condição de pagamento.** Use o que está registrado; se faltar, marque `[A DEFINIR]` e avise.
-2. **Respeite o piso e o teto de desconto do frontmatter.** Se o usuário pedir algo fora da política, avise antes de gerar.
-3. **Tom de voz é obrigatório.** Nunca gere uma proposta genérica de robô — sempre no estilo definido em `05_Comunicacao.md`.
-4. **Caminhos relativos.** Todos os caminhos são relativos à raiz do workspace.
-5. **Não envie nada.** Esta skill só gera o documento; enviar ao cliente é sempre ação do usuário.
+1. **Never make up a price, deadline, or payment term.** Use what's registered; if missing, mark `[A DEFINIR]` and warn.
+2. **Respect the frontmatter's discount floor and ceiling.** If the user asks for something outside policy, warn before generating.
+3. **Tone of voice is mandatory.** Never generate a generic, robotic proposal — always in the style defined in `05_Comunicacao.md`.
+4. **Relative paths.** All paths are relative to the workspace root.
+5. **Don't send anything.** This skill only generates the document; sending it to the client is always the user's action.
