@@ -113,8 +113,10 @@ test('update nunca altera os dados do usuário (Pilares, Memoria, Ativos)', () =
   const updatedRadarContent = fs.readFileSync(radarSkillPath, 'utf8');
   assert.equal(updatedRadarContent, templateRadarContent, 'update deveria ter trazido a skill radar para a versão atual do framework');
 
-  const backups = fs.readdirSync(dir).filter((f) => f.startsWith('.agents.backup-'));
-  assert.ok(backups.length > 0, 'update deveria criar um backup de .agents/ antes de aplicar mudanças');
+  const backupsDir = path.join(dir, '.cortex', 'backups');
+  const backups = fs.existsSync(backupsDir) ? fs.readdirSync(backupsDir).filter((f) => f.startsWith('update-')) : [];
+  assert.ok(backups.length > 0, 'update deveria criar um backup de .agents/ em .cortex/backups/');
+  assert.equal(fs.readdirSync(dir).filter((f) => f.startsWith('.agents.backup-')).length, 0, 'backups não devem mais ir para a raiz');
 });
 
 test('update mantém arquivos descontinuados pelo framework por padrão, e só remove com --prune', () => {

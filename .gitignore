@@ -21,6 +21,11 @@
 !/Memoria/.gitkeep
 !/Ativos/.gitkeep
 
+# Backups automáticos do Córtex (update/init) e restos de versões antigas
+/.cortex/backups/
+/.agents.backup-*/
+/Frameworks/CEREBRO.md.backup-*
+
 # Artefatos de build / cache locais
 /graphify-out/
 node_modules/

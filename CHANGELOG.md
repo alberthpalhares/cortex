@@ -6,6 +6,24 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-10-04
+
+Rodada de confiança: nada que o Córtex faça pode apagar ou confundir os dados do usuário.
+
+### Adicionado
+- **Arquivo `LICENSE` (MIT).** O `package.json` já declarava MIT, mas o repositório não tinha o arquivo.
+- **`update` recusa voltar no tempo:** se o projeto está numa versão mais nova que o comando, avisa e indica `npx @aksp/cortex@latest update`.
+
+### Corrigido
+- **`init` não destrói mais nada.** Em uma pasta onde o Córtex já está montado, recusa e manda usar `update` (antes sobrescrevia o `AGENTS.md` com o texto de inicialização, apagando o cérebro compilado). Em uma pasta com arquivos do usuário, guarda uma cópia em `.cortex/backups/`, **mantém** o `.gitignore` dele e só acrescenta as regras do Córtex, e preserva o `CLAUDE.md` dele acrescentando apenas a linha `@AGENTS.md`.
+- **`update` cria o `CLAUDE.md` que faltava** para quem veio de antes da 1.3.0 (só tinha `AGENTS.md`, que o Claude Code não lê sozinho) — sem nunca sobrescrever um `CLAUDE.md` que o usuário já tenha.
+- **Backups num lugar só e limitados.** Passam a ficar em `.cortex/backups/` (em vez de `.agents.backup-*` e `CEREBRO.md.backup-*` espalhados na raiz), guardando os 3 mais recentes, e entram no `.gitignore` padrão para não irem para o repositório nem confundirem a IA com skills duplicadas.
+- **`doctor` sem alarmes falsos:** o `Memoria/META.md` não aparece mais como "não indexado" (ele é o próprio índice); `custos_variaveis` em YAML de bloco ou objeto em linha deixa de ser lido como vazio; o parser de frontmatter passou a aguentar BOM do Bloco de Notas, `#` dentro de valores e `---` no meio do texto; e as linhas "nenhum faltando"/"sem inconsistências" não usam mais ícone de alerta.
+- A mensagem "já está na versão mais recente" deixa de sugerir que o npm foi consultado.
+
+### Migração
+- Rode `npx @aksp/cortex@latest update`. Os backups antigos (`.agents.backup-*`) na raiz podem ser apagados à mão.
+
 ## [1.3.0] - 2026-10-04
 
 Rodada "mais amigável": primeiro uso sem armadilhas e mais valor no dia a dia.

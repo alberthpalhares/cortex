@@ -450,6 +450,8 @@ function listRealFiles(targetDir) {
     if (!fs.existsSync(dir)) continue;
     for (const entry of fs.readdirSync(dir)) {
       if (entry === '.gitkeep') continue;
+      // META.md é o próprio índice: não faz sentido listá-lo no mapa que ele contém.
+      if (sub === 'Memoria' && entry === 'META.md') continue;
       const fullPath = path.join(dir, entry);
       if (fs.statSync(fullPath).isFile() && entry.endsWith('.md')) {
         files.push(toPosix(path.join(sub, entry)));
@@ -461,25 +463,46 @@ function listRealFiles(targetDir) {
 
 // Extrai o frontmatter YAML simples de um arquivo (bloco entre --- no topo).
 // Retorna um objeto chave→valor ou {} se não houver frontmatter.
+// Entende: números, null, `{}`, objeto em linha (`{"a": 1}`), objeto em bloco
+// (chave sem valor seguida de linhas indentadas), BOM e comentários `# ...`
+// (só quando precedidos de espaço, para não cortar um `#` dentro de um valor).
 function parseSimpleFrontmatter(content) {
-  const normalized = normalizeEol(content);
-  if (!normalized.startsWith('---')) return {};
-  const endIdx = normalized.indexOf('---', 3);
-  if (endIdx === -1) return {};
-  const fmBlock = normalized.slice(3, endIdx);
+  const normalized = normalizeEol(content).replace(/^\uFEFF/, '');
+  const match = normalized.match(/^---\n([\s\S]*?)\n---[ \t]*(\n|$)/);
+  if (!match) return {};
+  const lines = match[1].split('\n');
+  const stripComment = (v) => v.replace(/\s+#.*$/, '').trim();
   const result = {};
-  for (const line of fmBlock.split('\n')) {
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (/^\s/.test(line) || !line.includes(':')) continue; // linhas indentadas pertencem ao bloco anterior
     const colonIdx = line.indexOf(':');
-    if (colonIdx === -1) continue;
     const key = line.slice(0, colonIdx).trim();
-    const rawValue = line.slice(colonIdx + 1).trim();
-    // Remove comentários inline
-    const valueStr = rawValue.replace(/\s*#.*$/, '').trim();
     if (!key) continue;
-    if (valueStr === 'null' || valueStr === '') {
+    const valueStr = stripComment(line.slice(colonIdx + 1));
+
+    if (valueStr === '') {
+      // Valor vazio: pode ser um objeto em bloco (linhas indentadas) ou null.
+      const block = {};
+      let j = i + 1;
+      while (j < lines.length && (/^\s+\S/.test(lines[j]) || lines[j].trim() === '')) {
+        const sub = lines[j].trim();
+        const c = sub.indexOf(':');
+        if (sub && c > 0) {
+          const k = sub.slice(0, c).trim().replace(/^["']|["']$/g, '');
+          const v = stripComment(sub.slice(c + 1));
+          block[k] = /^-?\d+(\.\d+)?$/.test(v) ? parseFloat(v) : v;
+        }
+        j++;
+      }
+      result[key] = Object.keys(block).length > 0 ? block : null;
+    } else if (valueStr === 'null') {
       result[key] = null;
     } else if (valueStr === '{}') {
       result[key] = {};
+    } else if (valueStr.startsWith('{')) {
+      try { result[key] = JSON.parse(valueStr); } catch (e) { result[key] = valueStr; }
     } else if (/^-?\d+(\.\d+)?$/.test(valueStr)) {
       result[key] = parseFloat(valueStr);
     } else {
@@ -823,6 +846,63 @@ function pruneDeprecatedFiles(targetDir, removidosPeloFramework) {
   }
 }
 
+// Compara versões "x.y.z". Retorna -1, 0 ou 1.
+function compareVersions(a, b) {
+  const pa = String(a || '0').split('.').map((n) => parseInt(n, 10) || 0);
+  const pb = String(b || '0').split('.').map((n) => parseInt(n, 10) || 0);
+  for (let i = 0; i < 3; i++) {
+    if ((pa[i] || 0) !== (pb[i] || 0)) return (pa[i] || 0) > (pb[i] || 0) ? 1 : -1;
+  }
+  return 0;
+}
+
+// Todos os backups ficam num lugar só, fora da raiz do projeto e ignorado pelo git.
+const BACKUPS_REL = path.join(CORTEX_META_DIR, 'backups');
+const BACKUPS_TO_KEEP = 3;
+
+function timestampForPath() {
+  return new Date().toISOString().replace(/[:.]/g, '-');
+}
+
+function makeBackupDir(targetDir, label) {
+  const dir = path.join(targetDir, BACKUPS_REL, `${label}-${timestampForPath()}`);
+  fs.mkdirSync(dir, { recursive: true });
+  return dir;
+}
+
+// Mantém só os últimos N backups (por nome, que começa com data ordenável dentro do rótulo).
+function pruneBackups(targetDir, keep) {
+  const base = path.join(targetDir, BACKUPS_REL);
+  if (!fs.existsSync(base)) return 0;
+  const entries = fs.readdirSync(base)
+    .filter((n) => fs.statSync(path.join(base, n)).isDirectory())
+    .sort((x, y) => {
+      const tx = x.slice(x.indexOf('-') + 1);
+      const ty = y.slice(y.indexOf('-') + 1);
+      return tx < ty ? 1 : tx > ty ? -1 : 0;
+    });
+  const old = entries.slice(keep === undefined ? BACKUPS_TO_KEEP : keep);
+  for (const n of old) fs.rmSync(path.join(base, n), { recursive: true, force: true });
+  return old.length;
+}
+
+// Já existe um Córtex montado nesta pasta? (versão instalada ou cérebro gerado)
+function isCortexMounted(targetDir) {
+  return (
+    fs.existsSync(path.join(targetDir, CORTEX_META_DIR, CORTEX_VERSION_FILE)) ||
+    fs.existsSync(path.join(targetDir, CEREBRO_PATH))
+  );
+}
+
+// O arquivo é do Córtex (gerado ou texto de inicialização) ou foi escrito pelo usuário?
+function isCortexOwnedFile(content) {
+  return (
+    content.includes('ARQUIVO GERADO PELO CÓRTEX') ||
+    content.includes('cortex-onboarding') ||
+    content.trim() === CLAUDE_IMPORT_LINE
+  );
+}
+
 async function runInit() {
   // Primeiro argumento que não começa com "-" (pode estar após flags como --force)
   const targetArg = args.slice(1).find((a) => !a.startsWith('-')) || '.';
@@ -838,6 +918,14 @@ async function runInit() {
   if (!fs.existsSync(targetDir)) {
     fs.mkdirSync(targetDir, { recursive: true });
     console.log(`  ${dim}Criada pasta:${reset} ${targetDir}`);
+  }
+
+  if (isCortexMounted(targetDir)) {
+    console.log(`${yellow}Já existe um Córtex montado nesta pasta.${reset}`);
+    console.log(`  O \`init\` só serve para a primeira instalação — rodar de novo apagaria o seu cérebro compilado.`);
+    console.log(`  Para trazer as novidades sem mexer nos seus dados, use:`);
+    console.log(`    ${cyan}npx @aksp/cortex@latest update${reset}\n`);
+    process.exit(1);
   }
 
   const existingFiles = fs.readdirSync(targetDir);
@@ -858,9 +946,40 @@ async function runInit() {
   const bootstrapTargets = DEFAULT_TARGETS.concat(
     (toolsFlag || []).filter((t) => !DEFAULT_TARGETS.includes(t))
   );
-  const itemsToCopy = ['.agents', 'Frameworks', 'Memoria', 'Pilares', 'Ativos', '.gitignore'];
+  const itemsToCopy = ['.agents', 'Frameworks', 'Memoria', 'Pilares', 'Ativos'];
+
+  // Antes de escrever, guarda uma cópia de qualquer arquivo do usuário que vá
+  // ser substituído ou alterado — o init nunca pode apagar nada em silêncio.
+  const userFiles = ['.gitignore'].concat(bootstrapTargets).filter((f) => {
+    const fp = path.join(targetDir, f);
+    if (!fs.existsSync(fp)) return false;
+    return f === '.gitignore' || !isCortexOwnedFile(fs.readFileSync(fp, 'utf8'));
+  });
+  let initBackupDir = null;
+  if (userFiles.length > 0) {
+    initBackupDir = makeBackupDir(targetDir, 'init');
+    for (const f of userFiles) fs.copyFileSync(path.join(targetDir, f), path.join(initBackupDir, f.replace(/^\./, '_')));
+    console.log(`  ${yellow}Guardei uma cópia dos seus arquivos antes de mexer:${reset} ${userFiles.join(', ')}`);
+    console.log(`  ${dim}em ${toPosix(path.relative(targetDir, initBackupDir))}${reset}\n`);
+  }
 
   console.log(`  ${dim}Copiando arquivos do framework...${reset}`);
+
+  // .gitignore: se o usuário já tem um, mantém o dele e acrescenta o do Córtex.
+  const gitignoreSrc = fs.readFileSync(path.join(templateDir, '.gitignore'), 'utf8');
+  const gitignoreDest = path.join(targetDir, '.gitignore');
+  if (fs.existsSync(gitignoreDest)) {
+    const existing = fs.readFileSync(gitignoreDest, 'utf8');
+    if (!existing.includes('/Pilares/*')) {
+      fs.writeFileSync(gitignoreDest, existing.replace(/\s*$/, '\n\n') + gitignoreSrc);
+      console.log(`   ${green}✓${reset} .gitignore ${dim}— o seu foi mantido e as regras do Córtex foram acrescentadas${reset}`);
+    } else {
+      console.log(`   ${green}✓${reset} .gitignore ${dim}— já continha as regras do Córtex${reset}`);
+    }
+  } else {
+    fs.writeFileSync(gitignoreDest, gitignoreSrc);
+    console.log(`   ${green}✓${reset} .gitignore`);
+  }
 
   for (const item of itemsToCopy) {
     const srcPath = path.join(templateDir, item);
@@ -874,7 +993,13 @@ async function runInit() {
   // AGENTS.md do pacote). O CLAUDE.md apenas importa o AGENTS.md.
   const bootstrap = fs.readFileSync(path.join(templateDir, 'AGENTS.md'), 'utf8');
   for (const target of bootstrapTargets) {
-    const body = target === 'CLAUDE.md' ? `${CLAUDE_IMPORT_LINE}\n` : bootstrap;
+    let body = target === 'CLAUDE.md' ? `${CLAUDE_IMPORT_LINE}\n` : bootstrap;
+    // CLAUDE.md escrito pelo usuário: preserva o conteúdo e só acrescenta o import.
+    const existingPath = path.join(targetDir, target);
+    if (target === 'CLAUDE.md' && userFiles.includes('CLAUDE.md')) {
+      const mine = fs.readFileSync(existingPath, 'utf8');
+      body = mine.includes(CLAUDE_IMPORT_LINE) ? mine : mine.replace(/\s*$/, '\n\n') + CLAUDE_IMPORT_LINE + '\n';
+    }
     fs.writeFileSync(path.join(targetDir, target), body);
     console.log(`   ${green}✓${reset} ${target} ${dim}— ${KNOWN_TARGETS[target]}${reset}`);
   }
@@ -926,12 +1051,20 @@ async function runUpdate() {
     process.exit(1);
   }
 
+  if (installed && compareVersions(installed.version, VERSION) > 0 && !isForce) {
+    console.log(`${yellow}Este projeto está na v${installed.version}, mas o comando que você rodou é a v${VERSION} (mais antiga).${reset}`);
+    console.log(`  Atualizar agora faria o seu Córtex voltar no tempo. Use a versão mais recente:`);
+    console.log(`    ${cyan}npx @aksp/cortex@latest update${reset}\n`);
+    process.exit(1);
+  }
+
   if (!installed) {
     console.log(`  ${yellow}⚠️ Não encontrei ${CORTEX_META_DIR}/${CORTEX_VERSION_FILE}${reset} — este Córtex foi instalado antes do comando update existir.`);
     console.log(`  Vou tratar a versão atual como desconhecida e comparar diretamente os arquivos.\n`);
   } else if (installed.version === VERSION && !isForce) {
-    console.log(`  ${green}✓${reset} Já está na versão mais recente do CLI instalado (v${VERSION}).`);
-    console.log(`  ${dim}Use --force se quiser forçar uma nova checagem de arquivos mesmo assim.${reset}\n`);
+    console.log(`  ${green}✓${reset} Este projeto já está na v${VERSION}, a versão que este comando conhece.`);
+    console.log(`  ${dim}Para buscar uma versão mais nova no npm, rode: npx @aksp/cortex@latest update${reset}`);
+    console.log(`  ${dim}Use --force para conferir os arquivos mesmo assim.${reset}\n`);
     return;
   }
 
@@ -991,10 +1124,9 @@ async function runUpdate() {
     }
   }
 
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const backupDir = path.join(targetDir, `.agents.backup-${timestamp}`);
-  copyRecursiveSync(path.join(targetDir, '.agents'), backupDir);
-  console.log(`  ${dim}Backup salvo em:${reset} ${path.relative(targetDir, backupDir)}`);
+  const backupDir = makeBackupDir(targetDir, 'update');
+  copyRecursiveSync(path.join(targetDir, '.agents'), path.join(backupDir, 'agents'));
+  console.log(`  ${dim}Backup salvo em:${reset} ${toPosix(path.relative(targetDir, backupDir))}`);
 
   if (hasPruneWork) {
     pruneDeprecatedFiles(targetDir, removidosPeloFramework);
@@ -1007,8 +1139,10 @@ async function runUpdate() {
   // continuam invisíveis para a IA, porque nada as ensina a acioná-las.
   const cerebroPath = path.join(targetDir, CEREBRO_PATH);
   if (fs.existsSync(cerebroPath)) {
-    fs.copyFileSync(cerebroPath, `${cerebroPath}.backup-${timestamp}`);
+    fs.copyFileSync(cerebroPath, path.join(backupDir, 'CEREBRO.md'));
   }
+  const removidos = pruneBackups(targetDir, BACKUPS_TO_KEEP);
+  if (removidos > 0) console.log(`  ${dim}Backups antigos removidos (guardo os ${BACKUPS_TO_KEEP} mais recentes): ${removidos}${reset}`);
 
   const brain = refreshBrainFramework(targetDir, templateDir);
 
@@ -1021,6 +1155,16 @@ async function runUpdate() {
 
   if (fs.existsSync(cerebroPath)) {
     const targets = readTargets(targetDir);
+    // Instalações anteriores à 1.3.0 só tinham AGENTS.md, que o Claude Code não lê sozinho.
+    // Cria o CLAUDE.md (um import de uma linha) se ele ainda não existir — nunca sobrescreve o do usuário.
+    if (
+      installed && compareVersions(installed.version, '1.3.0') < 0 &&
+      targets.includes('AGENTS.md') && !targets.includes('CLAUDE.md') &&
+      !fs.existsSync(path.join(targetDir, 'CLAUDE.md'))
+    ) {
+      targets.push('CLAUDE.md');
+      console.log(`  ${green}✓${reset} CLAUDE.md criado ${dim}— o Claude Code passa a carregar o cérebro (importa o AGENTS.md)${reset}`);
+    }
     compileTargets(targetDir, targets, VERSION);
     writeTargets(targetDir, targets);
     console.log(`  ${green}✓${reset} Cérebro recompilado para: ${targets.join(', ')}`);
@@ -1255,7 +1399,7 @@ async function runDoctor() {
     }
     console.log('');
   } else {
-    console.log(`${green}⚠️ Inconsistências no META.md: Nenhuma ✅${reset}\n`);
+    console.log(`${green}✅ META.md: sem inconsistências${reset}\n`);
   }
 
   console.log(`${bold}🧠 System prompt:${reset}`, (() => {
@@ -1319,6 +1463,12 @@ module.exports = {
   MANDATORY_PILLAR_PREFIXES,
   MANDATORY_PILLAR_NAMES,
   KNOWN_TARGETS,
+  compareVersions,
+  pruneBackups,
+  makeBackupDir,
+  isCortexMounted,
+  isCortexOwnedFile,
+  BACKUPS_REL,
   RETIRED_TARGETS,
   DEFAULT_TARGETS,
   CLAUDE_IMPORT_LINE,
