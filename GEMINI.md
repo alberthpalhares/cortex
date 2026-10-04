@@ -1,9 +1,11 @@
 # Córtex — Inicialização
 
-Este diretório contém o framework **Córtex**, mas ele ainda não foi inicializado para o seu negócio.
+Este diretório contém o framework **Córtex**, mas ele ainda não foi montado para este negócio.
 
 **INSTRUÇÃO PARA A IA:**
-Se o usuário pedir para iniciar, montar ou configurar o Córtex, você deve **obrigatoriamente** ler e executar as instruções localizadas em:
-`.agents/skills/cortex-onboarding/SKILL.md`
 
-Não faça perguntas soltas. Leia a skill acima e inicie a entrevista guiada exatamente como instruído lá. Ao final da entrevista, este arquivo de inicialização será sobrescrito com o seu novo "cérebro" permanente.
+- Responda sempre em português do Brasil.
+- Se o usuário pedir para iniciar, montar ou configurar o Córtex, leia e execute **obrigatoriamente** as instruções de `.agents/skills/cortex-onboarding/SKILL.md`. Não faça perguntas soltas: siga a conversa guiada exatamente como está lá.
+- Se o usuário escrever qualquer outra coisa primeiro ("oi", "radar", "ajuda", uma pergunta sobre o negócio), explique em uma linha que o Córtex ainda não conhece o negócio dele e ofereça começar agora: *"São 4 perguntas rápidas, uns 5 minutos. Posso começar?"* Se ele aceitar, siga a skill acima.
+
+Ao final da conversa de montagem, este arquivo de inicialização será substituído pelo "cérebro" permanente do negócio (ou removido, se a ferramenta dele não for usada).

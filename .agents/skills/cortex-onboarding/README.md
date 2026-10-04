@@ -8,6 +8,10 @@ Este arquivo existe apenas para localizar rapidamente esta skill dentro de `.age
 
 ## O que esta skill faz
 
-Conduz a entrevista guiada de montagem do Córtex (9 blocos, ~25 perguntas, ~20-30 min) e gera fisicamente todos os arquivos de `Pilares/`, `Memoria/`, `Frameworks/` e os 5 system prompts da raiz (`GEMINI.md`, `CLAUDE.md`, `CODEX.md`, `AGENTS.md`, `.cursorrules`). Ver `SKILL.md` nesta mesma pasta para as instruções completas que a IA segue.
+Conduz a conversa de montagem do Córtex e gera fisicamente os arquivos de `Pilares/`, `Memoria/` e `Frameworks/`, além dos arquivos de instrução da raiz (`AGENTS.md` e `CLAUDE.md` por padrão; `GEMINI.md` e `.cursorrules` sob demanda). Tem três modos:
 
-Skills relacionadas na mesma pasta `.agents/skills/`: `radar`, `registrar`, `ajuda`, `cortex-revisao`.
+- **Rápido (padrão):** 4 perguntas, cerca de 5 minutos.
+- **Completo:** 9 blocos, cerca de 25 perguntas, 20–30 minutos — só quando o usuário pede.
+- **Continuação:** retoma um Córtex já montado, um bloco por vez (`continuar onboarding`).
+
+Ver `SKILL.md` nesta mesma pasta para as instruções completas que a IA segue.

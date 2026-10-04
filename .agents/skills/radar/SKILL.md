@@ -11,10 +11,13 @@ You've just been triggered to run the business's **Radar**. The goal of this ski
 
 1. **Silently read** `Memoria/META.md` to find out the business name.
 2. **Silently read** the pending items file: `Memoria/04_Pessoas_Pendencias.md`
-3. **Silently read** the projects file: `Memoria/03_Projetos.md`
+3. **Silently read** the projects file: `Memoria/03_Projetos.md`, including its `## Metas do Trimestre` section.
 4. **Get the real system date** (via terminal/whatever date tool is available) — never infer the date from the conversation text. Compare that real date against the listed deadlines to classify items as late/urgent.
-5. If the `Próxima revisão sugerida` in `META.md` has already passed or is less than 2 weeks from today's real date, include a line suggesting `revisar córtex`.
-5.5. Take a quick look at the size of `Memoria/01_Decisoes.md` and `Memoria/02_Licoes.md` (approximate line count). If either is large (more than ~80 lines), include a line suggesting `consolidar memória` (the `consolidar` skill) — no need to open the files in full for this, a quick scan is enough.
+5. **Pick at most ONE suggestion line**, the first that applies in this order — a radar with three nudges gets ignored:
+   1. The `Próxima revisão sugerida` in `META.md` has passed or is less than 2 weeks away → suggest `revisar córtex`.
+   2. `Memoria/01_Decisoes.md` or `Memoria/02_Licoes.md` is large (more than ~80 lines; a quick scan is enough) → suggest `consolidar memória`.
+   3. The most recent date stamp anywhere in `Memoria/` is more than 7 days old → the inactivity line.
+   4. A mandatory pillar still has `<!-- REVISAR -->` markers, or there is no quarterly goal → offer **one** small next step, naming how long it takes.
 6. Generate a **Mini Radar Report** strictly in this format (use emojis and be concise):
 
 ```
@@ -30,8 +33,13 @@ You've just been triggered to run the business's **Radar**. The goal of this ski
 📂 **PROJETOS ATIVOS:**
    • [Nome do Projeto] - [Status Atual]
 
-[🔄 **Sugestão:** já passou da data de revisão semestral do Córtex — quer rodar "revisar córtex"? — SOMENTE se aplicável, ver passo 5]
-[🗄️ **Sugestão:** a Memória está grande — quer rodar "consolidar memória"? — SOMENTE se aplicável, ver passo 5.5]
+🎯 **META DO TRIMESTRE:** [meta — progresso] — SOMENTE se houver meta registrada
+
+[UMA linha de sugestão, conforme o passo 5 — exemplos:]
+[🔄 Já passou da data de revisão do Córtex — quer rodar "revisar córtex"?]
+[🗄️ A Memória está grande — quer rodar "consolidar memória"?]
+[🕰️ Faz [N] dias que nada é registrado. Aconteceu algo que vale guardar? É só dizer "registra que..."]
+[🧩 Ainda não sei seu tom de voz — 2 minutos para eu aprender? Diga "continuar onboarding".]
 
 💡 O que você gostaria de focar hoje?
 ```
@@ -39,5 +47,7 @@ You've just been triggered to run the business's **Radar**. The goal of this ski
 ## Formatting Rules
 - Never bring up resolved pending items.
 - If there's nothing overdue, write "Nenhum atraso crítico hoje. ✅".
+- Omit a whole block (e.g. "AGUARDANDO TERCEIROS") when it has no items, instead of printing an empty heading.
 - Be extremely concise. Don't rewrite the whole task description, just its core. The user already knows the projects.
+- On Fridays (or when the user says the week is ending), the closing line may be: "Quer fechar a semana? Diga `fechar a semana`."
 - All file paths are **relative to the workspace root**. Never use absolute paths.

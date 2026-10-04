@@ -1,6 +1,6 @@
 ---
 name: ideias
-description: "Captura e analisa ideias de melhoria para o projeto Córtex. Registra no IDEIAS.md (não versionado) com análise de viabilidade estruturada. Trigger with: 'ideia', 'nova ideia', 'tenho uma ideia', 'analisar viabilidade', 'analisar ideia'."
+description: "Contributor-only skill (not shipped to end users): captures and analyzes improvement ideas for the Córtex framework itself, recording them in IDEIAS.md (untracked) with a structured viability analysis. Trigger with: 'ideia', 'nova ideia', 'tenho uma ideia', 'analisar viabilidade', 'analisar ideia'."
 ---
 
 # Skill: Ideias — Captura e Análise de Viabilidade
@@ -81,7 +81,7 @@ When the user says "lista de ideias", "priorização", or "o que temos no backlo
 
 ## Project Design Principles (for viability analysis)
 
-Always reference these when evaluating ideas (from `AUDITORIA_EVOLUCAO_v1.md`, section 6):
+Always reference these when evaluating ideas (from `CONTRACTS.md` and the "O que NÃO se encaixa" section of `CONTRIBUTING.md`):
 
 1. **Local-first e privado.** Sem telemetria. Testes rodam sobre fixtures, nunca sobre dados reais.
 2. **Markdown é a fonte humana; `.cortex/` é a fonte-máquina.** Estruturação leve (frontmatter, manifesto/metadados JSON) é permitida; banco de dados, não.

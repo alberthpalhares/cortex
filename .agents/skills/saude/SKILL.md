@@ -55,12 +55,12 @@ This skill doesn't judge the business's content — it audits the Córtex's **st
 
 🧠 System prompt: [Fonte única (Frameworks/CEREBRO.md) ✅ | Formato antigo — considere migrar]
 
-💡 Sugestão: [próximo passo mais útil — ex: "diga 'revisar córtex' para completar o Pilar Financeiro" ou "está tudo em dia!"]
+💡 Sugestão: [próximo passo mais útil — ex: "diga 'continuar onboarding' para completar o que falta, um bloco por vez" ou "está tudo em dia!"]
 ```
 
 ## Rules
 
-1. **Don't rewrite anything yourself.** This skill only diagnoses; any fix must go through `registrar` or `revisar córtex`, never automatically here.
+1. **Don't rewrite anything yourself.** This skill only diagnoses; any fix must go through `registrar`, `continuar onboarding` (to fill gaps) or `revisar córtex` (to migrate or update pillars), never automatically here.
 2. **Be honest about gaps**, but without alarm — the tone is "here's what's left," not "serious error."
 3. **Relative paths.** All paths are relative to the workspace root.
 4. **If everything is complete**, celebrate briefly instead of listing empty "nothing to report" sections.

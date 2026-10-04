@@ -23,8 +23,10 @@ const NAME_TO_AJUDA_MARKER = {
   'proposta-comercial': ['gerar proposta'],
   'pesquisa-mercado': ['pesquisar concorrência'],
   'saude': ['saúde do córtex'],
-  'cortex-onboarding': ['montar meu córtex'],
-  'ideias': ['nova ideia'],
+  'cortex-onboarding': ['continuar onboarding'],
+  'lembrar': ['o que você sabe sobre'],
+  'semana': ['fechar a semana'],
+  'conteudo': ['cria um post'],
 };
 
 function extractSkillName(skillDir) {

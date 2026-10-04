@@ -156,7 +156,10 @@ test('os gatilhos das skills continuam em português mesmo com as instruções e
     'registrar/SKILL.md': 'registra',
     'ajuda/SKILL.md': 'ajuda',
     'saude/SKILL.md': 'saúde do córtex',
-    'consolidar/SKILL.md': 'consolidar memória'
+    'consolidar/SKILL.md': 'consolidar memória',
+    'lembrar/SKILL.md': 'o que você sabe sobre',
+    'semana/SKILL.md': 'fechar a semana',
+    'conteudo/SKILL.md': 'cria um post'
   };
   for (const [rel, gatilho] of Object.entries(gatilhosEsperados)) {
     const conteudo = fs.readFileSync(path.join(skillsDir, rel), 'utf8');

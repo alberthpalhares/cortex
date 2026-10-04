@@ -1,11 +1,12 @@
 # Pessoas e Pendências
 
 ## Stakeholders (Pessoas-Chave)
-<!-- Ex: 👥 Nome - Papel/Empresa - Contato -->
+<!-- One line per person. Ex: - 👥 **Nome** — papel ou empresa — nota curta (preferência, combinado, última interação) *(YYYY-MM-DD)* -->
 
 ## Pendências Ativas
-<!-- Ex: 🔴 Tarefa urgente -->
-<!-- Ex: 🟡 Tarefa pendente -->
+<!-- Ex: - 🔴 **[DEADLINE YYYY-MM-DD]** Tarefa com prazo -->
+<!-- Ex: - ⏳ **[AGUARDANDO]** Tarefa que depende de outra pessoa -->
+<!-- Ex: - ⏳ **[SEM PRAZO]** Tarefa sem data definida -->
 
 ## Pendências Resolvidas
-<!-- Ex: 🟢 Tarefa resolvida -->
+<!-- Ex: - ✅ **[YYYY-MM-DD]** Tarefa resolvida (data em que foi resolvida) -->

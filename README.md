@@ -1,243 +1,235 @@
-# 🧠 Córtex — Central de Inteligência do Seu Negócio
+# 🧠 Córtex — o sócio que lembra de tudo
 
-O **Córtex** é um framework que transforma a IA em um **Sócio Inteligente** para o seu negócio. Ele guarda tudo que você já decidiu, aprendeu e planejou em arquivos locais — e a IA consulta esses arquivos antes de te responder, como se fosse um sócio que lembra de tudo.
+O **Córtex** transforma a sua IA em um **sócio que conhece o seu negócio**. Ele guarda em arquivos simples, no seu computador, tudo o que você já decidiu, aprendeu e planejou — e a IA consulta esses arquivos antes de te responder.
 
-**Não é um CRM. Não é um ERP. É o cérebro estratégico do seu negócio.**
+**Não é um CRM. Não é um ERP. É a memória e o bom senso do seu negócio, sempre à mão.**
 
----
-
-## O que você ganha
-
-- 📡 **Radar:** Diga "radar" e veja todas as pendências, projetos e atrasos em 10 linhas
-- 📝 **Registro rápido:** Diga "registra que decidi X" e a IA grava nos arquivos certos
-- 🧠 **Memória viva:** A IA nunca esquece suas regras de preço, lições e decisões
-- 🔄 **Revisão semestral:** A cada 6 meses, o sistema te convida a revisar o que mudou
-- 🏗️ **Pilares customizados:** Se o seu negócio tem áreas específicas que não se encaixam nos 9 pilares padrão, o Córtex cria pilares extras sob medida
+> **Para quem é:** MEI e autônomos · pequenas empresas com sócios e equipe · associações, clubes e ONGs · negócios de assinatura ou mensalidade. A conversa de montagem se adapta ao seu tipo de negócio.
 
 ---
 
-## Por que a IA precisa ser local?
+## Comece em 5 minutos
 
-O Córtex **não funciona dentro do ChatGPT, Gemini ou Claude pelo navegador** (GPTs, Gems, Projects). Ele precisa de uma ferramenta de IA que rode no seu computador e tenha acesso ao seu disco local. Aqui está o porquê:
+**Você precisa de duas coisas:** o [Node.js](https://nodejs.org) instalado (versão LTS) e uma ferramenta de IA que trabalhe com as pastas do seu computador — [veja qual escolher](#qual-ferramenta-de-ia-escolher).
 
-| Capacidade | 🧠 Córtex (Local) | 🌐 GPT / Gem (Browser) |
-|---|---|---|
-| **Ler seus arquivos automaticamente** | ✅ Lê Pilares, Memória e Frameworks direto do disco | ❌ Você precisa copiar e colar ou fazer upload manual toda vez |
-| **Gravar decisões e lições** | ✅ Diga "registra que..." e a IA grava no arquivo certo | ❌ A IA responde, mas não salva nada. Você precisa anotar por conta |
-| **Memória entre sessões** | ✅ Permanente — os arquivos ficam no seu computador para sempre | ⚠️ Limitada — depende da memória do chat, que pode ser apagada ou esquecida |
-| **Radar de pendências** | ✅ A IA cruza projetos, pendências e prazos em tempo real | ❌ Não tem acesso aos seus dados atualizados |
-| **Atualização automática** | ✅ A IA edita os arquivos quando você autoriza | ❌ Você precisa re-enviar os arquivos toda vez que algo muda |
-| **Privacidade dos dados** | ✅ Tudo fica no seu disco, sem upload para nuvem | ⚠️ Seus dados ficam nos servidores da OpenAI, Google ou Anthropic |
-| **System prompt persistente** | ✅ O "cérebro" fica salvo em arquivo e nunca se perde | ⚠️ Pode ser sobrescrito por atualizações da plataforma |
-| **Multi-ferramenta** | ✅ Mesmo projeto funciona no Gemini CLI, Claude Code, Cursor, etc. | ❌ Preso a uma única plataforma (seu GPT não funciona no Claude) |
-
-> 💡 **Resumindo:** Um GPT ou Gem é como um estagiário que lê suas anotações uma vez e depois esquece. O Córtex é um sócio que tem acesso permanente ao escritório, lê os arquivos sempre que precisa, e ainda anota as coisas novas pra você.
-
----
-
-## Como instalar
-
-### Pré-requisitos
-- Node.js instalado (recomendado) ou Git
-- Uma ferramenta de chat com IA que leia arquivos locais (ex: Google Antigravity, Gemini CLI, Claude Code, Cursor, OpenCode, Codex, etc.)
-
-> 🔒 **Privacidade:** prefira o Método 1 (NPX) — ele copia o framework sem o histórico Git. Se usar `git clone`, lembre-se de que o Córtex já inclui um `.gitignore` que impede `Pilares/`, `Memoria/` e `Ativos/` (os dados do seu negócio) de serem versionados por acidente.
-
----
-
-### Método 1: Via NPX (Recomendado 🚀)
-
-Abra o terminal na pasta do seu negócio e execute:
+**1. Instale** — abra o terminal dentro da pasta do seu negócio e rode:
 
 ```bash
 npx @aksp/cortex init
 ```
 
-> 💡 **Dica:** Se quiser criar uma nova pasta para o negócio, basta passar o nome no final: `npx @aksp/cortex init MinhaEmpresa`.
+**2. Abra essa mesma pasta na sua ferramenta de IA** e escreva no chat:
 
-Depois de montado, sempre que sair uma versão nova do framework, atualize as skills sem tocar nos seus dados:
+> Quero montar meu Córtex
 
-```bash
-npx @aksp/cortex update
-```
+**3. Responda 4 perguntas rápidas.** Pronto: a partir daí, é só conversar.
 
-`update` atualiza **apenas** a camada de framework (`.agents/`) e a região `CORTEX:FRAMEWORK` do cérebro — nunca mexe em `Pilares/`, `Memoria/`, `Ativos/` nem na área `CORTEX:BUSINESS` (os dados do seu negócio). Antes de aplicar qualquer mudança, ele mostra o que vai mudar e cria um backup automático de `.agents/`.
+> 💡 Não sabe abrir o terminal numa pasta? No Windows, abra a pasta no Explorador de Arquivos, clique na barra de endereço, digite `cmd` e aperte Enter. No Mac, abra o aplicativo Terminal, digite `cd ` (com espaço), arraste a pasta para a janela e aperte Enter.
 
 ---
 
-### Método 2: Via Git Clone
+## Como é usar
 
-#### 🍎 macOS & 🐧 Linux (Bash / Zsh)
-```bash
-git clone https://github.com/alberthpalhares/cortex.git "NomeDaPasta" && cd "NomeDaPasta"
+Você conversa em português, do seu jeito. Alguns exemplos reais:
+
+**Você diz `radar`:**
+
+```
+📡 RADAR ESTÚDIO LUMEN — 04/10/2026
+
+🔴 ATRASADOS / URGENTES:
+   • Enviar orçamento revisado para a Construtora Alfa (venceu ontem)
+   • Renovar licença do editor de vídeo (vence sexta)
+
+⏳ AGUARDANDO TERCEIROS:
+   • Aprovação do roteiro — cliente Beta
+
+📂 PROJETOS ATIVOS:
+   • Vídeo institucional Beta - EXECUÇÃO
+
+🎯 META DO TRIMESTRE: fechar 5 clientes novos — 2 de 5
+
+💡 O que você gostaria de focar hoje?
 ```
 
-#### 🪟 Windows (PowerShell)
-```powershell
-git clone https://github.com/alberthpalhares/cortex.git "NomeDaPasta"; cd "NomeDaPasta"
+**Você diz `registra que decidi não dar mais de 10% de desconto`:**
+
+```
+- [2026-10-04] Desconto máximo de 10%, sem exceção.  ✅
+(disse errado? é só falar "desfaz")
 ```
 
-#### 🪟 Windows (Prompt de Comando / CMD)
-```cmd
-git clone https://github.com/alberthpalhares/cortex.git "NomeDaPasta" && cd "NomeDaPasta"
+**Você pergunta `o que você sabe sobre o fornecedor de iluminação?`:**
+
+```
+🔎 O que está registrado sobre o fornecedor de iluminação:
+
+• Trocamos para a LuzPro por causa do prazo de entrega — Decisões, 12/03/2026
+• Atrasou a entrega do kit em maio; combinar sempre 3 dias de folga — Lições, 20/05/2026
 ```
 
-### Alternativa (Sem Terminal)
-1. Acesse o [repositório no GitHub](https://github.com/alberthpalhares/cortex)
-2. Clique no botão verde **"Code"** e depois em **"Download ZIP"**
-3. Extraia o ZIP na pasta do seu negócio
-
-### Iniciando o Córtex
-
-Independentemente de como você baixou:
-1. Abra a pasta do seu negócio na sua ferramenta de IA (IDE)
-2. Diga no chat:
-   > "Quero montar meu Córtex"
-
-3. **A IA oferece dois ritmos:** o **Completo** (~25 perguntas em 9 blocos, 20-30 min) ou o **Rápido** (4 perguntas, ~5 min — gera um Córtex funcional na hora e deixa o resto para completar depois).
-
-> 💡 **Já tem documentos sobre o negócio?** (PDFs, planilhas, arquivos antigos) — Não precisa organizar nada. Na abertura, o Agente vai te perguntar se você tem algo pronto e, se indicar onde estão, ele lê tudo e já pré-preenche a entrevista pra você. Vai ser bem mais rápido!
-
-4. **Ao final**, a IA gera automaticamente:
-   - Todos os arquivos de Pilares (Estratégia, Comercial, Cultura, etc.)
-   - Todos os arquivos de Memória (Decisões, Lições, Projetos, Pendências)
-   - O system prompt personalizado, na fonte única `Frameworks/CEREBRO.md`
-   - O `META.md` (índice de tudo)
-
-5. **Pronto!** A partir de agora:
-   - Diga **"radar"** para ver o panorama
-   - Diga **"registra que..."** para anotar decisões ou lições
-   - Diga **"saúde do córtex"** para ver o que ainda falta preencher (útil depois do modo Rápido)
-   - Pergunte qualquer coisa sobre o negócio
-   - Em 6 meses, diga **"revisar córtex"** para atualizar
+**Você pergunta `posso dar 15% de desconto para fechar com esse cliente?`** — e ela responde com base nas *suas* regras de preço e margem, não em conselho genérico.
 
 ---
 
-## Funciona em qualquer IDE
+## O que dá para pedir
 
-O cérebro vive em um único lugar — `Frameworks/CEREBRO.md` — e o Córtex **compila** esse conteúdo para o arquivo de instrução que a sua ferramenta lê. Cada arquivo gerado carrega o cérebro **completo**, então a IA nunca precisa "seguir um atalho" até outro arquivo para saber as regras:
+| Situação | Diga | O que acontece |
+|---|---|---|
+| **No dia a dia** | `radar` | O que está atrasado, parado e em que focar hoje |
+| | `registra que...` | Guarda uma decisão, lição, pendência ou pessoa (errou? `desfaz`) |
+| | `anota a reunião` | Você cola as anotações; ela separa decisões, pendências e lições |
+| | `o que você sabe sobre...` | Diz o que já está registrado, com data |
+| | `fechar a semana` | 5 minutos: o que andou, o que ficou e o foco da próxima |
+| **Para vender e comunicar** | `gerar proposta para [cliente]` | Proposta pronta, com seus preços e seu tom |
+| | `cria um post sobre...` | Post, legenda ou mensagem de WhatsApp do seu jeito |
+| | `analisar DRE` | Compara seus números com as suas metas de margem |
+| | `pesquisar concorrência` | Quem são, quanto cobram, onde você se diferencia |
+| **Para cuidar do Córtex** | `continuar onboarding` | Completa o que ficou faltando, um bloco de 2–5 minutos por vez |
+| | `saúde do córtex` | Mostra o que ainda está em branco |
+| | `revisar córtex` | A cada 6 meses, confere o que mudou |
+| | `consolidar memória` | Arquiva o que ficou antigo, sem apagar nada |
+| | `ajuda` | Mostra esta lista dentro do chat |
 
-| Arquivo gerado | Compatível com |
-|---|---|
-| `AGENTS.md` *(padrão)* | OpenCode, Hermes, Roo Code e demais ferramentas que seguem o padrão AGENTS.md |
-| `CLAUDE.md` | Claude Code |
-| `.cursorrules` | Cursor, Windsurf |
-| `GEMINI.md` | Gemini CLI, Google Antigravity |
-| `CODEX.md` | OpenAI Codex, Codex CLI, ChatGPT CLI |
-
-Por padrão só o `AGENTS.md` é gerado. Se você usa outra ferramenta, o onboarding pergunta — ou você mesmo escolhe a qualquer momento:
-
-```bash
-npx @aksp/cortex sync --targets=CLAUDE.md,.cursorrules
-```
-
-> ⚠️ Esses arquivos são **artefatos gerados**: edite sempre `Frameworks/CEREBRO.md` e rode `npx @aksp/cortex sync`. Como eles nunca são editados à mão, também não têm como ficar divergentes entre si.
+Quer ver um Córtex já preenchido? Veja [`examples/estudio-lumen/`](https://github.com/alberthpalhares/cortex/tree/master/examples/estudio-lumen), um estúdio de fotografia fictício.
 
 ---
 
-## Estrutura de pastas gerada
+## Qual ferramenta de IA escolher?
+
+O Córtex precisa de uma IA que **leia e escreva arquivos na pasta do seu negócio**. O ChatGPT, o Gemini e o Claude *pelo navegador* não fazem isso — por isso ele usa as ferramentas abaixo.
+
+| Ferramenta | Como é | Para quem |
+|---|---|---|
+| [**Claude Code**](https://www.anthropic.com/claude-code) | Aplicativo de computador com janela de chat (também funciona no terminal) | Quem nunca usou nada disso e quer o caminho mais simples |
+| [**Cursor**](https://cursor.com) | Editor com chat ao lado; você abre a pasta pelo menu | Quem prefere ver os arquivos enquanto conversa |
+| [**Gemini CLI**](https://github.com/google-gemini/gemini-cli) | Funciona dentro do terminal | Quem já se vira com terminal |
+| OpenAI Codex, OpenCode e outras | Leem o arquivo `AGENTS.md` | Quem já usa uma delas |
+
+**"Abrir a pasta" quer dizer:** no aplicativo ou editor, escolher *Abrir pasta* e apontar para a pasta do negócio; nas ferramentas de terminal, abrir o terminal *dentro* da pasta e digitar o nome da ferramenta (`claude`, `gemini`).
+
+**Quanto custa:** o Córtex é gratuito e de código aberto. A ferramenta de IA é à parte — algumas têm uso gratuito com limite, outras exigem assinatura. Os planos mudam com frequência; confira no site de cada uma antes de decidir.
+
+**O `init` já prepara** o Claude Code e as ferramentas que leem `AGENTS.md`. Para Cursor ou Gemini CLI, acrescente:
+
+```bash
+npx @aksp/cortex init --targets=.cursorrules,GEMINI.md
+```
+
+---
+
+## Seus dados
+
+- **Os arquivos são seus e ficam no seu computador.** Texto simples (Markdown), que você abre em qualquer editor, copia, faz backup e leva para outra ferramenta quando quiser.
+- **Sem conta, sem servidor do Córtex, sem coleta de dados.** O Córtex não envia nada para lugar nenhum.
+- **Mas a IA lê os arquivos para responder** — e o que ela lê é enviado ao fornecedor da ferramenta que você escolheu (Anthropic, Google, OpenAI…), como em qualquer conversa com IA. Vale conferir a política de privacidade da sua ferramenta, principalmente se você guarda dados de clientes.
+- **Não guarde senhas.** O Córtex registra *onde* um acesso fica guardado, nunca a senha em si.
+- Se você usa Git na pasta: o `.gitignore` que vem com o Córtex já deixa de fora `Pilares/`, `Memoria/` e `Ativos/`. Atenção: `Frameworks/CEREBRO.md`, `AGENTS.md` e `.cortex/meta.json` também trazem o nome e dados do negócio — não publique a pasta em repositório aberto.
+
+### Por que não dá para usar no navegador?
+
+| | 🧠 Córtex (na sua pasta) | 🌐 GPT / Gem / Projeto (navegador) |
+|---|---|---|
+| **Ler seus arquivos** | Lê sozinho, na hora | Você envia manualmente, toda vez |
+| **Guardar decisões e lições** | Grava no arquivo certo quando você diz "registra que…" | Responde, mas não guarda nada |
+| **Memória entre conversas** | Permanente — está nos arquivos | Limitada, pode se perder |
+| **Trocar de ferramenta** | Os mesmos arquivos funcionam em várias | Preso a uma plataforma |
+
+---
+
+## Problemas comuns
+
+**"npx não é reconhecido como comando"** — o Node.js não está instalado (ou o terminal foi aberto antes da instalação). Instale pelo [nodejs.org](https://nodejs.org), feche e abra o terminal de novo.
+
+**No Windows, o PowerShell reclama de "execução de scripts desabilitada"** — use o *Prompt de Comando* (`cmd`) em vez do PowerShell; lá o mesmo comando funciona.
+
+**"A pasta de destino não está vazia"** — o Córtex cria as pastas dele (`Pilares`, `Memoria`, `Frameworks`, `Ativos`, `.agents`) ao lado dos seus arquivos. **Atenção:** se a pasta já tiver um `.gitignore`, `AGENTS.md` ou `CLAUDE.md` seus, eles serão substituídos — guarde uma cópia antes de responder `s`. E não rode o `init` de novo numa pasta onde o Córtex já foi montado: para atualizar, use `update`.
+
+**A IA não começou a conversa de montagem** — confirme que você abriu *a pasta onde rodou o `init`* (e não uma pasta acima). Se usa Cursor ou Gemini CLI, rode o comando com `--targets=` mostrado acima. Em último caso, diga: *"Leia o arquivo `.agents/skills/cortex-onboarding/SKILL.md` e siga as instruções."*
+
+**Como faço backup?** — copie a pasta inteira do negócio para onde você já guarda seus backups (HD externo, nuvem pessoal). Não há nada escondido em outro lugar.
+
+**Quero conferir se está tudo certo, sem gastar com IA** — rode `npx @aksp/cortex doctor` no terminal.
+
+**Tem outra dúvida?** Abra uma [issue no GitHub](https://github.com/alberthpalhares/cortex/issues).
+
+---
+
+## O que fica na sua pasta
 
 ```
 SeuNegocio/
-├── CHANGELOG.md               ← Histórico de versões e melhorias do framework
-├── .gitignore                  ← Protege Pilares/Memoria/Ativos de irem para um repositório Git
-├── .cortex/
-│   ├── version.json           ← Versão do framework instalada (usado por `cortex update`)
-│   ├── targets.json           ← Quais arquivos de instrução gerar
-│   └── meta.json              ← Metadados do negócio (nome, tipo, datas)
-├── AGENTS.md                   ← Cérebro compilado (artefato gerado; edite Frameworks/CEREBRO.md)
-├── Pilares/
-│   ├── 01_Estrategia.md      ← Posicionamento, público-alvo, metas ✅
-│   ├── 02_Cultura.md         ← Valores, equipe, conduta ✅
-│   ├── 03_Financeiro.md      ← Custos, margens (opcional)
-│   ├── 04_Comercial.md       ← Preços, pagamento, descontos (opcional)
-│   ├── 05_Comunicacao.md     ← Canais, tom de voz, conteúdo ✅
-│   ├── 06_Operacao.md        ← Fluxos de trabalho, ferramentas ✅
-│   ├── 07_Juridico.md        ← Contratos, regulamentações (opcional)
-│   ├── 08_Inventario.md      ← Equipamentos, estoque (opcional)
-│   ├── 09_Identidade_Visual.md ← Manual de marca (opcional)
-│   └── 10_[Custom].md        ← Pilares extras do seu setor (opcional)
-├── Memoria/
-│   ├── META.md               ← Índice rápido (a IA lê primeiro)
-│   ├── 01_Decisoes.md        ← Regras já batidas
-│   ├── 02_Licoes.md          ← Erros e acertos
-│   ├── 03_Projetos.md        ← Projetos ativos
-│   ├── 04_Pessoas_Pendencias.md ← Pendências e stakeholders
-│   └── 05_Registros_Gerais.md ← Anotações diversas
+├── Pilares/                    ← O que o negócio É (muda pouco)
+│   ├── 01_Estrategia.md        ← Posicionamento, cliente ideal, metas ✅
+│   ├── 02_Cultura.md           ← Valores, equipe, conduta ✅
+│   ├── 03_Financeiro.md        ← Custos e margens (opcional)
+│   ├── 04_Comercial.md         ← Preços, pagamento, descontos (opcional)
+│   ├── 05_Comunicacao.md       ← Canais, tom de voz, conteúdo ✅
+│   ├── 06_Operacao.md          ← Rotina e ferramentas ✅
+│   ├── 07_Juridico.md          ← Contratos e regras do setor (opcional)
+│   ├── 08_Inventario.md        ← Equipamentos e estoque (opcional)
+│   ├── 09_Identidade_Visual.md ← Marca (opcional)
+│   └── 10_[Seu_Pilar].md       ← Áreas específicas do seu setor (opcional)
+├── Memoria/                    ← O que o negócio APRENDE (muda sempre)
+│   ├── META.md                 ← Índice — a IA lê primeiro
+│   ├── 01_Decisoes.md          ← Regras já batidas
+│   ├── 02_Licoes.md            ← Erros e acertos
+│   ├── 03_Projetos.md          ← Projetos e a meta do trimestre
+│   ├── 04_Pessoas_Pendencias.md← Pessoas-chave e pendências
+│   └── 05_Registros_Gerais.md  ← Anotações diversas
+├── Ativos/                     ← Seus logos e os documentos que a IA gera (propostas, textos)
 ├── Frameworks/
-│   ├── PROTOCOLO_AUTONOMIA.md ← Protocolo de Ação Automática da IA
-│   ├── PROTOCOLO_MEMORIA.md   ← Como a Memória é arquivada com o tempo, sem perder histórico
-│   └── CEREBRO.md             ← Fonte única do system prompt — editado aqui e compilado para os arquivos de raiz
-└── Ativos/                    ← Seus logos, templates, etc.
+│   ├── CEREBRO.md              ← As instruções da IA para o SEU negócio (fonte única)
+│   ├── PROTOCOLO_AUTONOMIA.md  ← Como a IA age com pedidos curtos
+│   └── PROTOCOLO_MEMORIA.md    ← Como a memória é arquivada sem perder histórico
+├── AGENTS.md / CLAUDE.md       ← Gerados a partir do CEREBRO.md — não edite à mão
+├── .agents/                    ← O framework (habilidades da IA) — atualizado pelo `update`
+└── .cortex/                    ← Versão instalada, ferramentas escolhidas e dados básicos do negócio
 ```
 
-`Memoria/_Arquivo/AAAA.md` aparece automaticamente assim que a skill `consolidar` arquivar o primeiro item — não é criado no onboarding.
+✅ = criado já na montagem rápida. Os demais entram quando fizerem sentido para você.
+
+Os arquivos `META.md`, `CEREBRO.md`, `AGENTS.md`/`CLAUDE.md` e parte do `.cortex/` só aparecem **depois** da conversa de montagem.
 
 ---
 
 ## Mantendo o Córtex atualizado
 
-O framework (`.agents/`) e os dados do seu negócio (`Pilares/`, `Memoria/`, `Ativos/`, e a região `CORTEX:BUSINESS` do cérebro) são camadas separadas.
+O framework (`.agents/`) e os dados do seu negócio são camadas separadas — atualizar um nunca apaga o outro.
 
-- `npx @aksp/cortex update` — traz skills novas e correções do framework, regenera as regras de operação (`CORTEX:FRAMEWORK`) e recompila os arquivos de instrução — sem nunca sobrescrever o que você já preencheu. Backup automático de `.agents/` antes de qualquer mudança.
-- `npx @aksp/cortex sync` — recompila os arquivos de instrução a partir de `Frameworks/CEREBRO.md`. Use depois de editar o cérebro à mão, ou com `--targets=` para incluir uma ferramenta nova.
-- `npx @aksp/cortex doctor` — auditoria estrutural do Córtex no terminal, sem gastar tokens de IA. Mostra pilares faltando, `REVISAR` pendentes, e a saúde do cérebro.
+| Comando | Para quê |
+|---|---|
+| `npx @aksp/cortex@latest update` | Traz habilidades novas e correções. Mostra o que vai mudar, pede confirmação e faz backup antes. **Nunca toca** em `Pilares/`, `Memoria/`, `Ativos/` nem nos dados do negócio dentro do `CEREBRO.md`. |
+| `npx @aksp/cortex sync` | Regera `AGENTS.md`/`CLAUDE.md` depois que você editar o `Frameworks/CEREBRO.md` à mão. Com `--targets=` inclui outra ferramenta. |
+| `npx @aksp/cortex doctor` | Confere a estrutura no terminal, sem usar IA: o que falta preencher e se o cérebro está em ordem. |
 
-> 💡 Desde a v0.11.0, o `update` também **atualiza as regras de operação dentro do seu cérebro** (a área `CORTEX:FRAMEWORK`) e recompila os arquivos de instrução — é isso que faz uma skill nova realmente passar a funcionar num Córtex antigo, em vez de só aparecer no disco. A área `CORTEX:BUSINESS`, com os dados do seu negócio, nunca é tocada.
+> Use sempre `@aksp/cortex` — o pacote `cortex`, sem o prefixo, é outro projeto.
 
----
+<details>
+<summary>Detalhes para quem gosta de saber como funciona</summary>
 
-## Comandos rápidos
+- O `CEREBRO.md` tem duas áreas marcadas: `CORTEX:BUSINESS` (identidade, datas e pilares do seu negócio) e `CORTEX:FRAMEWORK` (regras de funcionamento do Córtex). O `update` regenera só a segunda — é assim que uma habilidade nova passa a funcionar num Córtex antigo.
+- `AGENTS.md` recebe o cérebro completo. `CLAUDE.md` contém uma linha `@AGENTS.md`, que o Claude Code importa automaticamente — a fonte continua única.
+- As escolhas ficam em `.cortex/targets.json`. Os contratos estáveis do framework estão em [`CONTRACTS.md`](https://github.com/alberthpalhares/cortex/blob/master/CONTRACTS.md).
 
-| Comando | O que faz |
-|---------|-----------|
-| `montar meu córtex` | Inicia a configuração guiada do Córtex (entrevista inteligente) |
-| `continuar onboarding` | Retoma a configuração de onde parou |
-| `radar` | Mostra panorama do negócio (pendências, projetos, atrasos) |
-| `registra que...` | Grava uma decisão, lição ou pendência no arquivo correto |
-| `lição: ...` | Registra um aprendizado |
-| `pendência: ...` | Adiciona uma tarefa pendente |
-| `resolvido: ...` | Move uma pendência para "resolvidas" |
-| `revisar córtex` | Inicia a revisão semestral dos pilares |
-| `saúde do córtex` | Raio-x do que ainda falta preencher |
-| `consolidar memória` | Arquiva itens antigos sem apagar histórico |
-| `gerar proposta para [cliente]` | Monta uma proposta comercial pronta para envio |
-| `analisar DRE` | Cruza uma planilha financeira com suas metas de margem |
-| `pesquisar concorrência` | Mapeia concorrentes e atualiza o Panorama Competitivo |
-| `ideia` / `nova ideia` | Registra uma ideia de melhoria para o Córtex com análise de viabilidade |
-| `npx @aksp/cortex doctor` | Diagnóstico estrutural no terminal (sem gastar tokens) |
-| `ajuda` | Lista todos os comandos disponíveis |
+</details>
 
----
+### Outras formas de instalar
 
-## Veja um Córtex pronto
-
-Quer ver como fica um Córtex maduro antes de montar o seu? [`examples/estudio-lumen/`](examples/estudio-lumen/) é um negócio fictício (um estúdio de fotografia e vídeo corporativo) com todos os Pilares, a Memória e o "cérebro" completos — inclusive com o Panorama Competitivo e as skills de proposta comercial em ação.
-
----
-
-## Para quem é
-
-O Córtex se adapta automaticamente ao tipo de negócio durante a entrevista:
-
-- ✅ **Eu-presas / MEI** — autônomos, freelancers, profissionais liberais
-- ✅ **Pequenas empresas** — com sócios e equipe
-- ✅ **Entidades sem fins lucrativos** — associações, clubes, ONGs, projetos sociais
-- ✅ **Negócios recorrentes** — academias, SaaS, consultorias mensais, escolas
+- **Em uma pasta nova:** `npx @aksp/cortex init "Minha Empresa"`
+- **Sem Node.js:** baixe o [ZIP do repositório](https://github.com/alberthpalhares/cortex/archive/refs/heads/master.zip) ou use `git clone https://github.com/alberthpalhares/cortex.git "NomeDaPasta"`. Esses caminhos trazem também arquivos de desenvolvimento do framework (`bin/`, `test/`, `examples/`), que você pode apagar; prefira o `npx`.
 
 ---
 
 ## Como contribuir
 
-Quer ajudar a evoluir o Córtex? Aceitamos contribuições de novas skills, templates de pilares para setores específicos, novos frameworks estratégicos e melhorias no CLI.
-
-Leia o nosso [Guia de Contribuição (CONTRIBUTING.md)](CONTRIBUTING.md) para saber como enviar o seu Pull Request.
+Aceitamos novas habilidades, modelos de pilares para setores específicos e melhorias no instalador. Leia o [Guia de Contribuição](https://github.com/alberthpalhares/cortex/blob/master/CONTRIBUTING.md).
 
 ---
 
 ## Créditos
 
 Criado por **Alberth Klinsmann** — Mercadólogo e Produtor Audiovisual.
-Desenvolvido originalmente como sistema de gestão da **PALHARES Estúdio & Corporativo** e generalizado como framework open-source para qualquer negócio.
+Nasceu como o sistema de gestão da **PALHARES Estúdio & Corporativo** e foi generalizado como framework de código aberto para qualquer negócio.
 
 *"Seu negócio merece um cérebro que não esquece."*

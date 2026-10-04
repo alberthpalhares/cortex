@@ -6,6 +6,41 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-10-04
+
+Rodada "mais amigável": primeiro uso sem armadilhas e mais valor no dia a dia.
+
+### Adicionado
+- **Skill `lembrar`** — "o que você sabe sobre X?", "o que já decidimos sobre…": busca em Pilares, Memória e no arquivo morto, responde citando arquivo e data, e diz claramente quando não há nada registrado.
+- **Skill `semana`** — "fechar a semana": cinco minutos para ver o que foi resolvido, o que ficou para trás, registrar uma lição, definir as 3 prioridades da próxima semana e acompanhar a meta do trimestre (a seção "Metas do Trimestre" do template passa finalmente a ser usada).
+- **Skill `conteudo`** — posts, legendas, mensagens de WhatsApp e e-mails curtos no tom de voz do negócio, sempre em duas versões.
+- **`registrar` ganha desfazer, lote e pessoas:** "desfaz" / "corrige o último" remove ou corrige o registro recém-feito; "anota a reunião" extrai decisões, pendências e lições de um texto colado e grava tudo com uma única confirmação; "cliente novo" registra uma pessoa em uma linha na seção "Stakeholders". Itens resolvidos e projetos passam a levar data. A skill se recusa a gravar senhas.
+- **`radar`** mostra a meta do trimestre e, no máximo, **uma** sugestão por vez (revisão vencida, memória grande, dias sem registro, ou um bloco do onboarding ainda não feito).
+- **`CLAUDE.md` por padrão**, como import nativo do Claude Code (`@AGENTS.md`): o cérebro continua em um arquivo só, e quem usa Claude Code deixa de ficar sem arquivo de instrução após o `init`.
+- **Aviso de migração** em `sync` e `update` para um `CODEX.md` antigo, com remoção apenas mediante confirmação.
+
+### Alterado
+- **Onboarding começa pelo modo Rápido.** A abertura vai direto às 4 perguntas (uma por mensagem); o fluxo Completo só entra se o usuário pedir. O fechamento deixa de ser um inventário de arquivos e vira uma **"primeira vitória"**: três observações específicas sobre o negócio e uma ação pronta para fazer na hora.
+- **Continuação em gotas:** "continuar onboarding" passa a ser a única frase oficial de retomada (CLI, `saude`, `radar` e `ajuda` apontam para ela), e o modo continuação faz um bloco de 2–5 minutos por vez.
+- **`ajuda` reorganizada por situação** ("No dia a dia", "Para vender e comunicar", "Para cuidar do Córtex"), sem jargão técnico.
+- **Cérebro:** diz onde as skills ficam (`.agents/skills/<nome>/SKILL.md`); troca "nunca edite sem perguntar" por uma **política de escrita em dois níveis** — acréscimos na Memória são gravados na hora e mostrados; Pilares, frontmatter, arquivamento e exclusões pedem confirmação — o que resolve a contradição com o `registrar`; "tive uma ideia" passa a ser tratado como ideia do negócio.
+- **CLI:** ajuda e exemplos usam sempre `npx @aksp/cortex` (o nome sem escopo é outro pacote no npm) e documentam `doctor` e `--force`; a mensagem pós-`init` explica como abrir a pasta na ferramenta de IA, sem depender do VS Code; o erro do `sync` sem cérebro explica o que fazer.
+- **README reescrito para quem nunca usou:** "Comece em 5 minutos" no topo, exemplos reais de uso, guia "Qual ferramenta de IA escolher?" com nota de custo, seção "Seus dados" (a IA envia o que lê ao fornecedor da ferramenta) e "Problemas comuns".
+- **Texto de inicialização** (`AGENTS.md` antes do onboarding): qualquer primeira mensagem — "oi", "radar", "ajuda" — oferece começar a montagem.
+- Templates de Memória alinhados ao formato que o `registrar` realmente grava.
+
+### Removido
+- **`CODEX.md` deixa de ser um alvo.** O Codex lê `AGENTS.md` nativamente, então o arquivo era uma cópia redundante. Registrado como emenda no `CONTRACTS.md`.
+- **Skill `ideias` sai da instalação do usuário final.** Ela trata de melhorias do próprio framework e capturava a frase comum "tive uma ideia". Continua disponível para contribuidores em `contrib/skills/ideias/`.
+
+### Migração (de 1.2.0 ou anterior)
+- Rode `npx @aksp/cortex@latest update`. Nada precisa ser refeito.
+- Se existir um `CODEX.md` na raiz, o comando avisa e pergunta se pode remover; o Codex passa a usar o `AGENTS.md`.
+- Instalações que já têm `.cortex/targets.json` mantêm os alvos que escolheram. Quem usa Claude Code e só tinha `AGENTS.md` pode rodar `npx @aksp/cortex sync --targets=AGENTS.md,CLAUDE.md`.
+- A skill `ideias` antiga permanece em `.agents/skills/` até você rodar `update --prune`; ela já não é acionada pelo cérebro.
+
+> As versões `0.12.0` e `1.0.0` abaixo não têm *tag* própria no Git: o conteúdo delas entrou no mesmo commit da `1.1.0`.
+
 ## [1.2.0] - 2026-08-02
 
 ### Adicionado

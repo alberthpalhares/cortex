@@ -1,10 +1,11 @@
 {
-  "version": "1.2.0",
+  "version": "1.3.0",
   "files": [
     ".agents/cortex/brain.framework.md",
     ".agents/skills/ajuda/SKILL.md",
     ".agents/skills/analisador-dre/SKILL.md",
     ".agents/skills/consolidar/SKILL.md",
+    ".agents/skills/conteudo/SKILL.md",
     ".agents/skills/cortex-onboarding/README.md",
     ".agents/skills/cortex-onboarding/SKILL.md",
     ".agents/skills/cortex-onboarding/resources/CORTEX_TEMPLATE.md",
@@ -26,11 +27,12 @@
     ".agents/skills/cortex-onboarding/templates/Pilares/08_Inventario.md",
     ".agents/skills/cortex-onboarding/templates/Pilares/09_Identidade_Visual.md",
     ".agents/skills/cortex-revisao/SKILL.md",
-    ".agents/skills/ideias/SKILL.md",
+    ".agents/skills/lembrar/SKILL.md",
     ".agents/skills/pesquisa-mercado/SKILL.md",
     ".agents/skills/proposta-comercial/SKILL.md",
     ".agents/skills/radar/SKILL.md",
     ".agents/skills/registrar/SKILL.md",
-    ".agents/skills/saude/SKILL.md"
+    ".agents/skills/saude/SKILL.md",
+    ".agents/skills/semana/SKILL.md"
   ]
 }

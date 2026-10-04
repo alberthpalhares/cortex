@@ -1275,7 +1275,7 @@ async function runDoctor() {
   // --- 7. Sugestão ---
   console.log(`\n${bold}💡 Sugestão:${reset}`, (() => {
     if (mandatoryMissing.length > 0) return `Crie os pilares obrigatórios faltantes — diga "revisar córtex" no chat.`;
-    if (withPendencies.length > 0) return `Preencha os itens marcados como REVISAR — diga "completar meu córtex" no chat.`;
+    if (withPendencies.length > 0) return `Ainda há itens a completar — diga "continuar onboarding" no chat e fazemos um bloco por vez.`;
     if (!brain.hasLayers) return `Migre o cérebro para o formato com camadas — diga "revisar córtex" no chat.`;
     if (brain.isPointer) return `Recompile os arquivos de raiz — rode "npx @aksp/cortex sync".`;
     return `Está tudo em dia! 🎉`;

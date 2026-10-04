@@ -39,19 +39,21 @@ Adapt ALL questions in the following blocks to the identified type. This table i
 
 ### 🟢 Opening
 
-Introduce yourself like this (adapt to the user's tone):
+**The quick path is the default.** The first thing a new user needs is to feel the Córtex working, not to answer 25 questions. Introduce yourself like this (adapt to the user's tone) and go straight to the first Quickstart question — one message, one question:
 
-> *"Olá! Eu sou o seu Agente Sócio e vou te ajudar a montar o **Córtex** do seu negócio — uma central de inteligência onde tudo que você já decidiu, aprendeu e planejou fica salvo e acessível por IA.*
+> *"Olá! Eu sou o seu Agente Sócio. Vou montar o **Córtex** do seu negócio — o lugar onde fica guardado tudo que você já decidiu, aprendeu e planejou, para eu consultar antes de te responder.*
 >
-> *Tenho dois jeitos de fazer isso:*
-> *1️⃣ **Completo** (20-30 min, ~25 perguntas) — cobre tudo em detalhe, ideal se você já quer sair daqui com o Córtex pronto.*
-> *2️⃣ **Rápido** (5 min, 4 perguntas) — monta um Córtex funcional na hora e deixa o resto para você completar aos poucos, quando quiser.*
+> *São só **4 perguntas rápidas** (uns 5 minutos) e ele já sai funcionando. O resto a gente completa aos poucos, quando você quiser.*
 >
-> *Qual prefere?"*
+> *Se você já tem algum arquivo, PDF ou planilha sobre o negócio, pode me mostrar onde está que eu leio antes — mas não precisa.*
+>
+> *Primeira: qual o nome do seu negócio, em que área você atua, e você toca tudo sozinho ou tem equipe/sócios?"*
 
-If the user picks **Rápido**, follow the **Modo Quickstart** section below instead of the full flow. If they pick **Completo** or don't express a preference, continue normally.
+Then follow the **Modo Quickstart** section below.
 
-> *"Antes de começarmos as perguntas: **você já tem algum arquivo, PDF, planilha ou pasta com informações do seu negócio que quer que eu leia agora?** Se sim, me mostre onde está. Se não, podemos começar do zero."*
+**Switch to the full flow (Blocos 1–9) only if the user asks for it** — phrases like "quero o completo", "quero fazer tudo agora", "com todos os detalhes". In that case say in one line that it takes 20–30 minutes and about 25 questions, and start at Bloco 1.
+
+Never stack questions: ask one, wait for the answer, then ask the next.
 
 #### If the user points to files:
 1. Read ALL indicated files BEFORE proceeding.
@@ -60,13 +62,15 @@ If the user picks **Rápido**, follow the **Modo Quickstart** section below inst
 4. From here on, in each block, instead of asking open questions, **show what you already know** and ask for validation/additions.
 
 #### If the user has no files:
-Proceed to Block 1 normally.
+Carry on with the questions normally.
 
 ---
 
 ### 🔄 Modo Continuação (resume an incomplete Córtex)
 
-**Trigger:** "continuar onboarding", "completar meu córtex", or any phrase that implies the user wants to finish filling in an already-started Córtex.
+**Trigger:** "continuar onboarding" is the official phrase — it is the one every other skill and the CLI point the user to. Also accept "completar meu córtex" or any phrase that implies the user wants to finish filling in an already-started Córtex.
+
+**One block at a time.** Continuation is meant to happen in small sittings of 2–5 minutes, not as a second long interview. After finishing one block, stop and offer the next one instead of rolling straight into it: *"Pronto, isso já está guardado. Quer aproveitar e fazer mais um bloco agora ([nome], uns [N] minutos), ou deixamos para outro dia?"*
 
 **Detection:** Before starting the normal interview flow, check whether `Memoria/META.md` already exists and has real content (a business name filled in, not the template placeholder `[Nome do negócio]`).
 
@@ -86,7 +90,7 @@ If a Córtex already exists, do NOT restart the interview from scratch. Instead:
    > - *📝 Itens marcados como REVISAR: [resumo, se houver]*
    > - *⚠️ Campos numéricos ainda não preenchidos: [lista, se houver]*
    >
-   > *Por onde quer começar? Posso te guiar bloco a bloco ou você pode escolher um pilar específico."*
+   > *Sugiro começar por [o bloco que mais destrava o dia a dia — ex: tom de voz, se a pessoa pede textos; preços, se pede propostas]. Leva uns [N] minutos. Pode ser, ou prefere outro?"*
 
 4. **Guide the user through ONLY the incomplete blocks.** Skip blocks whose pillars already exist and have no `REVISAR` markers or `null` fields. For each incomplete block:
    - Show what already exists in that pillar (read the file)
@@ -116,7 +120,8 @@ Ask only these 4 questions, one at a time:
 - Follow Steps 1, 2, 5, 6, and 7 from the "Geração dos Arquivos" section normally (folder structure, Frameworks, META.md, system prompt/CEREBRO.md).
 - In Step 3 (Pillars), create only the 4 mandatory pillars (`01_Estrategia`, `02_Cultura`, `05_Comunicacao`, `06_Operacao`) from the templates, filling in only what the 4 questions covered. For any section with no information, insert a `<!-- REVISAR -->` marker instead of inventing content. Do NOT create the optional pillars (03_Financeiro, 04_Comercial, 07/08/09/10+) in Quickstart — they can be added later via review or continuation.
 - In Step 4 (Memory), create all 5 files normally; record the pricing/negotiation rule from question 4 in `01_Decisoes.md` and leave the rest with the empty base structure.
-- In Step 8 (final message), be explicit: *"Isso foi o modo rápido — seu Córtex já funciona, mas ficou resumido. Diga **`revisar córtex`** quando quiser completar os detalhes, ou pergunte **`saúde do córtex`** para ver exatamente o que ainda está marcado como pendente."*
+- In Step 7, do **not** ask the tools question as a fifth interview question; apply its default (see Step 7.2) and only ask if the user mentioned using more than one tool.
+- In Step 8 (final message), use the Quickstart closing shown there.
 
 ---
 
@@ -408,18 +413,20 @@ If the business has custom pillars (10+), add them to the template's `{{LISTA_PI
 
    > *"Última coisa: em quais ferramentas de IA você vai usar este Córtex? (ex: Claude Code, Cursor, Gemini CLI, Codex…) Posso deixar preparado só para as que você usa."*
 
-   | If the user uses | Generate the file |
+   | If the user uses | Generate |
    |---|---|
-   | Doesn't know / wants the default / more than one | `AGENTS.md` (cross-tool default, works for most) |
-   | Claude Code | `CLAUDE.md` |
-   | Cursor, Windsurf | `.cursorrules` |
-   | Gemini CLI, Google Antigravity | `GEMINI.md` |
-   | OpenAI Codex, Codex CLI | `AGENTS.md` (Codex reads it natively) |
+   | Doesn't know / didn't say (**default**) | `AGENTS.md` + `CLAUDE.md` |
+   | Claude Code | `AGENTS.md` + `CLAUDE.md` |
+   | OpenAI Codex, OpenCode and other AGENTS.md tools | `AGENTS.md` (they read it natively) |
+   | Cursor, Windsurf | add `.cursorrules` |
+   | Gemini CLI, Google Antigravity | add `GEMINI.md` |
+
+   `AGENTS.md` is always generated. **If the user names more than one tool, generate the file for each of them** — a tool whose file is missing never loads the brain. If you can tell which tool you are running in right now, include its file without asking.
 
    Record the choice in `./.cortex/targets.json`:
 
    ```json
-   { "targets": ["AGENTS.md"] }
+   { "targets": ["AGENTS.md", "CLAUDE.md"] }
    ```
 
    Also record the structured business metadata in `./.cortex/meta.json`:
@@ -435,7 +442,7 @@ If the business has custom pillars (10+), add them to the template's `{{LISTA_PI
 
    This file lets `cortex doctor` and `cortex sync` read the business name without fragile regex parsing of `META.md`.
 
-3. **Compile the brain into each chosen file.** Each one receives the **FULL content** of `Frameworks/CEREBRO.md` (not a pointer saying "go read another file" — a pointer only works if the tool follows the indirection, and not every IDE does), preceded by this header:
+3. **Compile the brain into each chosen file.** The simplest way is to run `npx @aksp/cortex sync --force` in the terminal, which does exactly this. If you can't run it, write the files yourself: each one receives the **FULL content** of `Frameworks/CEREBRO.md` (not a pointer saying "go read another file" — a pointer only works if the tool follows the indirection, and not every IDE does), preceded by the header below. **The one exception is `CLAUDE.md`:** it contains the header followed by the single line `@AGENTS.md` — a native Claude Code import, so the brain lives in one file only.
 
    ```markdown
    <!-- ============================================================
@@ -455,35 +462,38 @@ If the business has custom pillars (10+), add them to the template's `{{LISTA_PI
 
 #### Step 8: Final message
 
-After creating ALL the files above, show the user the complete list of what was created:
+After creating ALL the files above, close with a **first win**, not with a file inventory. The user does not care which files exist — they care that the Córtex already understood their business and can do something useful right now.
 
-> *"✅ Seu Córtex está montado! Aqui está tudo o que foi criado:*
+1. **Show that you understood.** Three short observations drawn from their own answers — a strength, a risk or tension, and an opportunity. Each must be specific to this business; if you could say it about any company, it is not good enough.
+2. **Offer one ready action**, chosen from what they told you — and do it immediately if they say yes:
+   - they mentioned a client or a sale → a short reply or proposal sketch in their tone
+   - they mentioned a deadline or something pending → register it and show their first `radar`
+   - nothing specific → a ready-to-post text introducing the business
+3. **Teach only three phrases.** More than that is not remembered.
+
+> *"✅ Pronto — o Córtex do [Nome do Negócio] está funcionando.*
 >
-> *📁 Pilares (X arquivos):*
-> - *`Pilares/01_Estrategia.md` — Posicionamento, público-alvo, metas*
-> - *`Pilares/02_Cultura.md` — Valores e regras de conduta*
-> - *[listar cada um]*
+> *Pelo que você me contou, três coisas me chamaram a atenção:*
+> - *💪 [ponto forte específico, ligado ao diferencial que ele citou]*
+> - *⚠️ [risco ou tensão específica — ex: dependência de um tipo de cliente, regra de preço sem margem definida]*
+> - *🎯 [oportunidade específica, ligada ao objetivo ou ao cliente ideal]*
 >
-> *📁 Memória (5 arquivos):*
-> - *`Memoria/META.md` — Índice geral*
-> - *`Memoria/01_Decisoes.md` — X decisões registradas*
-> - *[listar cada um]*
+> *Quer ver isso funcionando agora? [oferta de UMA ação pronta — ex: "Posso escrever a resposta para aquele cliente que você mencionou, no seu tom."]*
 >
-> *📁 Frameworks (3 arquivos):*
-> - *`Frameworks/PROTOCOLO_AUTONOMIA.md`*
-> - *`Frameworks/PROTOCOLO_MEMORIA.md`*
-> - *`Frameworks/CEREBRO.md` — a fonte única do seu system prompt*
->
-> *🧠 Cérebro compilado para as suas ferramentas:*
-> - *[listar apenas os arquivos efetivamente gerados no Passo 7 — ex: `AGENTS.md`]*
->
-> *A partir de agora, você pode:*
-> - *Dizer **radar** para ver o panorama do negócio*
-> - *Dizer **registra que...** para anotar uma decisão ou lição*
-> - *Perguntar qualquer coisa sobre o seu negócio que eu consulto os seus arquivos*
-> - *Dizer **ajuda** a qualquer momento para ver a lista de comandos disponíveis*
->
-> *Lembre-se: em [data real + 6 meses], vou sugerir uma revisão do Córtex para atualizar o que mudou. 🔄"*
+> *No dia a dia, três frases resolvem quase tudo:*
+> - ***radar** — o que está atrasado e em que focar hoje*
+> - ***registra que...** — guardo uma decisão, lição ou pendência*
+> - ***ajuda** — tudo o mais que eu sei fazer*"*
+
+**Quickstart closing** — add this line at the end, and nothing more about what is missing:
+
+> *"Montei só o essencial. Quando quiser que eu aprenda mais (seu tom de voz, seus preços, sua rotina), diga **continuar onboarding** — fazemos um bloco de 2 a 5 minutos por vez."*
+
+**Full-flow closing** — add instead:
+
+> *"Em [data real + 6 meses] eu te lembro de revisar o que mudou. 🔄"*
+
+Only if the user asks what was created, list the files (Pilares, Memória, Frameworks and the compiled instruction files).
 
 ---
 
@@ -498,5 +508,5 @@ After creating ALL the files above, show the user the complete list of what was 
 7. **Never edit the templates.** Files inside `.agents/skills/.../templates/` are read only.
 8. **The user's existing files are a SOURCE, not a DESTINATION.** If the workspace already had old files, use them as content reference but create the new files under Córtex's official naming.
 9. **`Memoria/META.md` must always be in sync.** Every pillar or memory file created during this interview must be listed in META's map before onboarding ends.
-10. **`Frameworks/CEREBRO.md` is the SOURCE of the system prompt; the root files are compiled artifacts.** Each generated root file carries the FULL brain content, with the "generated file" header. Never write a "go read another file" pointer — the AI tool might not follow it. And ALWAYS preserve the `CORTEX:BUSINESS` and `CORTEX:FRAMEWORK` markers in `CEREBRO.md`: without them, `cortex update` can't refresh the rules later.
+10. **`Frameworks/CEREBRO.md` is the SOURCE of the system prompt; the root files are compiled artifacts.** Each generated root file carries the FULL brain content, with the "generated file" header — except `CLAUDE.md`, which holds the header plus the native import line `@AGENTS.md`. Never write a prose "go read another file" pointer — the AI tool might not follow it. And ALWAYS preserve the `CORTEX:BUSINESS` and `CORTEX:FRAMEWORK` markers in `CEREBRO.md`: without them, `cortex update` can't refresh the rules later.
 11. **The financial/commercial pillars' frontmatter is numeric, not text.** `margem_alvo`, `margem_minima`, `preco_piso`, `desconto_max`, and `custo_variavel_padrao` must be numbers (or `null`), never sentences. `custos_variaveis` must be a JSON object mapping item names to their unit variable costs (or `{}`). These are what the "Margin Guardian" Mode reads first to compute `Custo Real → Margem Resultante → Veredito`.

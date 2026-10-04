@@ -71,15 +71,18 @@ Defina a estrutura esperada do resultado gerado.
 
 ### Convenção de Gatilhos (Trigger Discipline)
 
-Com 12+ skills convivendo no mesmo cérebro, a IA precisa saber qual acionar sem hesitar. Siga estas regras ao escrever a `description` de qualquer skill:
+Com mais de uma dúzia de skills convivendo no mesmo cérebro, a IA precisa saber qual acionar sem hesitar. Siga estas regras ao escrever a `description` de qualquer skill:
 
 **1. Verbo primário exclusivo.** Cada skill "possui" um verbo ou frase curta que nenhuma outra skill usa como gatilho principal:
 
 | Skill | Verbo primário | Gatilhos secundários |
 |-------|---------------|---------------------|
 | `radar` | `radar` | `status`, `como estamos?`, `briefing` |
-| `registrar` | `registra` | `nova lição`, `pendência`, `decidi que`, `resolvido` |
-| `cortex-onboarding` | `montar meu córtex` | `criar córtex`, `continuar onboarding`, `completar meu córtex` |
+| `registrar` | `registra` | `nova lição`, `pendência`, `decidi que`, `resolvido`, `desfaz`, `corrige o último`, `anota a reunião`, `cliente novo`, `meta do trimestre` |
+| `lembrar` | `o que você sabe sobre` | `lembra de`, `o que já decidimos sobre`, `procura na memória` |
+| `semana` | `fechar a semana` | `revisão da semana`, `resumo da semana` |
+| `conteudo` | `cria um post` | `escreve uma legenda`, `mensagem de WhatsApp`, `ideias de conteúdo` |
+| `cortex-onboarding` | `montar meu córtex` | `criar córtex`, `continuar onboarding` (frase oficial de retomada), `completar meu córtex` |
 | `cortex-revisao` | `revisar córtex` | `revisar pilares` |
 | `saude` | `saúde do córtex` | `diagnóstico` (do Córtex), `o que falta preencher` |
 | `ajuda` | `ajuda` | `o que você faz?`, `comandos` |
@@ -87,8 +90,11 @@ Com 12+ skills convivendo no mesmo cérebro, a IA precisa saber qual acionar sem
 | `proposta-comercial` | `gerar proposta` | `monta uma proposta`, `proposta comercial` |
 | `analisador-dre` | `analisar DRE` | `analisa essa planilha`, `como está minha margem` |
 | `pesquisa-mercado` | `pesquisar concorrência` | `mapear concorrentes`, `quem são meus concorrentes` |
-| `ideias` | `ideia` (sobre o framework) | `nova ideia`, `tenho uma ideia`, `analisar viabilidade` |
 | `cortex doctor` (CLI) | `cortex doctor` | `npx @aksp/cortex doctor` |
+
+> **"Tive uma ideia"** não dispara skill: o cérebro trata como ideia *do negócio* (avalia contra a Estratégia e oferece registrar).
+>
+> **Skill só para contribuidores:** `contrib/skills/ideias/SKILL.md` captura ideias de melhoria *do próprio framework* em `IDEIAS.md` (não versionado). Ela não vai no pacote nem é roteada pelo cérebro — para usar, peça à sua IA que leia esse arquivo.
 
 **2. Verbo novo = verbo livre.** Antes de propor uma skill, verifique se o verbo primário dela já não é usado por outra skill nesta tabela. Se for, escolha outro.
 
@@ -178,7 +184,7 @@ Cada ferramenta de IA lê um arquivo de instrução diferente. O Córtex gera es
 
 Ao publicar uma nova versão (adicionar/remover/renomear skill, ou qualquer mudança que afete o comportamento do framework), siga esta lista. O CI (`npm test && npm run verify:manifest`) cobre os itens marcados com ⚙️ automaticamente.
 
-- ⚙️ `npm test` passa (28+ testes)
+- ⚙️ `npm test` passa (toda a suíte)
 - ⚙️ `npm run verify:manifest` passa (manifesto em dia)
 - [ ] `npm run build:manifest` foi rodado e commitado (se arquivos em `.agents/` mudaram)
 - [ ] **Tabela de gatilhos** no `CONTRIBUTING.md` está atualizada (skill nova = nova linha na tabela)
