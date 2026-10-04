@@ -22,13 +22,17 @@ test('init cria a estrutura completa esperada', () => {
   const result = runCli(['init', '.', '--force'], dir);
   assert.equal(result.status, 0, result.stderr);
 
-  // init só cria AGENTS.md por padrão (cross-tool standard).
-  // Os demais targets são gerados sob demanda: onboarding Step 7 ou --targets= no init.
-  for (const entry of ['.agents', 'Frameworks', 'Memoria', 'Pilares', 'Ativos', 'AGENTS.md', '.gitignore']) {
+  // init cria AGENTS.md (padrão cross-tool) e CLAUDE.md (o Claude Code não lê
+  // AGENTS.md sozinho). Os demais são sob demanda: onboarding ou --targets=.
+  for (const entry of ['.agents', 'Frameworks', 'Memoria', 'Pilares', 'Ativos', 'AGENTS.md', 'CLAUDE.md', '.gitignore']) {
     assert.ok(fs.existsSync(path.join(dir, entry)), `esperava "${entry}" depois do init`);
   }
-  // Os outros targets NÃO devem ser criados sem --targets=
-  for (const f of ['CLAUDE.md', 'GEMINI.md', 'CODEX.md', '.cursorrules']) {
+  assert.equal(
+    fs.readFileSync(path.join(dir, 'CLAUDE.md'), 'utf8').trim(),
+    '@AGENTS.md',
+    'o CLAUDE.md do init deve apenas importar o AGENTS.md, sem duplicar conteúdo'
+  );
+  for (const f of ['GEMINI.md', 'CODEX.md', '.cursorrules']) {
     assert.equal(fs.existsSync(path.join(dir, f)), false, `${f} não deveria ser criado sem --targets=`);
   }
   assert.ok(fs.existsSync(path.join(dir, '.cortex', 'version.json')), 'esperava .cortex/version.json depois do init');
@@ -40,9 +44,14 @@ test('init --targets=all cria todos os targets', () => {
   const result = runCli(['init', '.', '--force', '--targets=all'], dir);
   assert.equal(result.status, 0, result.stderr);
 
-  for (const entry of ['AGENTS.md', 'CLAUDE.md', 'GEMINI.md', 'CODEX.md', '.cursorrules']) {
+  for (const entry of ['AGENTS.md', 'CLAUDE.md', 'GEMINI.md', '.cursorrules']) {
     assert.ok(fs.existsSync(path.join(dir, entry)), `esperava "${entry}" com --targets=all`);
   }
+  assert.equal(
+    fs.existsSync(path.join(dir, 'CODEX.md')),
+    false,
+    'CODEX.md foi aposentado: o Codex lê o AGENTS.md diretamente'
+  );
 });
 
 test('init --targets=CLAUDE.md,.cursorrules cria só os targets pedidos', () => {
@@ -225,14 +234,14 @@ test('sync compila o cérebro COMPLETO no arquivo de instrução (não um pontei
   );
 });
 
-test('sync gera apenas AGENTS.md por padrão e os demais alvos só sob demanda', () => {
+test('sync respeita os alvos que já existem e não cria os demais sem pedido', () => {
   const dir = mkTmpDir();
   let result = runCli(['init', '.', '--force'], dir);
   assert.equal(result.status, 0, result.stderr);
 
-  // Um projeto onde só AGENTS.md existe na raiz: os outros alvos não devem
-  // ser criados sem o usuário pedir.
-  for (const f of ['CLAUDE.md', 'GEMINI.md', 'CODEX.md', '.cursorrules']) {
+  // Um projeto onde só AGENTS.md existe na raiz (instalação da v1.1/v1.2):
+  // os outros alvos não devem aparecer sem o usuário pedir.
+  for (const f of ['CLAUDE.md', 'GEMINI.md', '.cursorrules']) {
     fs.rmSync(path.join(dir, f), { force: true });
   }
   fs.mkdirSync(path.join(dir, 'Frameworks'), { recursive: true });
@@ -241,7 +250,7 @@ test('sync gera apenas AGENTS.md por padrão e os demais alvos só sob demanda',
   result = runCli(['sync', '.', '--force'], dir);
   assert.equal(result.status, 0, result.stderr);
 
-  assert.ok(fs.existsSync(path.join(dir, 'AGENTS.md')), 'AGENTS.md é o alvo padrão e deveria existir');
+  assert.ok(fs.existsSync(path.join(dir, 'AGENTS.md')), 'AGENTS.md deveria ter sido compilado');
   for (const f of ['CLAUDE.md', 'GEMINI.md', 'CODEX.md', '.cursorrules']) {
     assert.equal(fs.existsSync(path.join(dir, f)), false, `${f} não deveria ser gerado sem --targets`);
   }
@@ -249,6 +258,50 @@ test('sync gera apenas AGENTS.md por padrão e os demais alvos só sob demanda',
   const targetsPath = path.join(dir, '.cortex', 'targets.json');
   assert.ok(fs.existsSync(targetsPath), 'sync deveria registrar os alvos escolhidos em .cortex/targets.json');
   assert.deepEqual(JSON.parse(fs.readFileSync(targetsPath, 'utf8')).targets, ['AGENTS.md']);
+});
+
+test('sync numa instalação nova: AGENTS.md leva o cérebro e CLAUDE.md só o importa', () => {
+  const dir = mkTmpDir();
+  let result = runCli(['init', '.', '--force'], dir);
+  assert.equal(result.status, 0, result.stderr);
+
+  const marca = 'REGRA-QUE-SO-EXISTE-NO-CEREBRO';
+  fs.writeFileSync(path.join(dir, 'Frameworks', 'CEREBRO.md'), `# Cérebro de teste\n\n${marca}\n`);
+
+  result = runCli(['sync', '.', '--force'], dir);
+  assert.equal(result.status, 0, result.stderr);
+
+  const agents = fs.readFileSync(path.join(dir, 'AGENTS.md'), 'utf8');
+  const claude = fs.readFileSync(path.join(dir, 'CLAUDE.md'), 'utf8');
+  assert.ok(agents.includes(marca), 'AGENTS.md precisa conter o cérebro completo');
+  assert.ok(/^@AGENTS\.md$/m.test(claude), 'CLAUDE.md precisa ter a linha de import @AGENTS.md');
+  assert.ok(!claude.includes(marca), 'CLAUDE.md não deve duplicar o cérebro quando o AGENTS.md existe');
+  assert.ok(claude.includes('ARQUIVO GERADO PELO CÓRTEX'), 'CLAUDE.md também é artefato gerado');
+});
+
+test('sync avisa sobre um CODEX.md antigo e não o apaga sem confirmação', () => {
+  const dir = mkTmpDir();
+  let result = runCli(['init', '.', '--force'], dir);
+  assert.equal(result.status, 0, result.stderr);
+
+  fs.writeFileSync(path.join(dir, 'Frameworks', 'CEREBRO.md'), '# Cérebro de teste\n');
+  // Sobra de uma versão anterior: CODEX.md compilado e listado nos alvos.
+  fs.writeFileSync(path.join(dir, 'CODEX.md'), '<!-- ARQUIVO GERADO PELO CÓRTEX — NÃO EDITE À MÃO. -->\n# antigo\n');
+  fs.writeFileSync(
+    path.join(dir, '.cortex', 'targets.json'),
+    JSON.stringify({ targets: ['AGENTS.md', 'CODEX.md'] })
+  );
+
+  result = runCli(['sync', '.', '--force'], dir);
+  assert.equal(result.status, 0, result.stderr);
+
+  assert.ok(result.stdout.includes('CODEX.md não é mais gerado'), 'deveria avisar que o alvo foi aposentado');
+  assert.ok(fs.existsSync(path.join(dir, 'CODEX.md')), 'com --force não há confirmação, então o arquivo é mantido');
+  assert.deepEqual(
+    JSON.parse(fs.readFileSync(path.join(dir, '.cortex', 'targets.json'), 'utf8')).targets,
+    ['AGENTS.md'],
+    'o alvo aposentado sai da lista de alvos'
+  );
 });
 
 test('doctor detecta córtex não montado', () => {
@@ -407,7 +460,7 @@ test('sync --targets=all gera todos os targets', () => {
   result = runCli(['sync', '.', '--force', '--targets=all'], dir);
   assert.equal(result.status, 0, result.stderr);
 
-  for (const f of ['AGENTS.md', 'CLAUDE.md', 'GEMINI.md', 'CODEX.md', '.cursorrules']) {
+  for (const f of ['AGENTS.md', 'CLAUDE.md', 'GEMINI.md', '.cursorrules']) {
     assert.ok(fs.existsSync(path.join(dir, f)), `${f} deveria existir com --targets=all`);
   }
 });

@@ -115,15 +115,23 @@ O CLI executa operações que tocam o disco do usuário (`init`, `update`, `sync
 npm test   # node --test — roda os testes em test/unit e test/integration
 ```
 
-A invariante mais importante do projeto — **`cortex update` nunca altera `Pilares/`, `Memoria/`, `Ativos/`, `Frameworks/` ou os arquivos de raiz** — é coberta por `test/integration/cli.test.js`. PRs que tocam `bin/cli.js` sem teste correspondente não serão aceitos.
+A invariante mais importante do projeto — **`cortex update` nunca altera `Pilares/`, `Memoria/`, `Ativos/` nem a área `CORTEX:BUSINESS` do cérebro** — é coberta por `test/integration/cli.test.js`. (O `update` regenera, de propósito, a área `CORTEX:FRAMEWORK` de `Frameworks/CEREBRO.md` e os arquivos de instrução compilados na raiz.) PRs que tocam `bin/cli.js` sem teste correspondente não serão aceitos.
 
 ---
 
 ## 💻 Compatibilidade Multi-IDE
 
-O Córtex é compatível com múltiplos assistentes de IA local ([AGENTS.md](AGENTS.md), [GEMINI.md](GEMINI.md), [CLAUDE.md](CLAUDE.md), [CODEX.md](CODEX.md), [.cursorrules](.cursorrules)).
+Cada ferramenta de IA lê um arquivo de instrução diferente. O Córtex gera esses arquivos a partir de uma fonte única:
 
-- Se você alterar regras de inicialização ou o system prompt base, certifique-se de replicar a alteração em todos os arquivos de instrução correspondentes para manter a sincronia.
+| Arquivo | Quem lê | Como é gerado |
+|---|---|---|
+| `AGENTS.md` | OpenAI Codex, OpenCode e demais ferramentas do padrão AGENTS.md | cérebro completo |
+| `CLAUDE.md` | Claude Code | uma linha `@AGENTS.md` (import nativo) |
+| `GEMINI.md` | Gemini CLI, Google Antigravity | cérebro completo, sob demanda |
+| `.cursorrules` | Cursor, Windsurf | cérebro completo, sob demanda |
+
+- **As regras do cérebro vivem em dois arquivos, sempre idênticos:** `.agents/cortex/brain.framework.md` e a região `CORTEX:FRAMEWORK` de `.agents/skills/cortex-onboarding/resources/CORTEX_TEMPLATE.md`. Um teste falha se divergirem — nunca edite os arquivos de raiz para mudar o comportamento da IA.
+- **Os arquivos de raiz deste repositório** (`AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.cursorrules`) são o texto de *inicialização* que vai para o usuário antes do onboarding ("este Córtex ainda não foi montado"). O `init` usa o `AGENTS.md` como molde único para todos.
 
 ---
 

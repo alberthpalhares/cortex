@@ -57,17 +57,29 @@ const MANIFEST_REL_PATH = path.join('.agents', 'manifest.json');
 // cérebro — não mais ponteiros dizendo "vá ler outro arquivo". Ponteiro só
 // funciona se a ferramenta seguir a indireção, e nem toda IDE faz isso.
 const KNOWN_TARGETS = {
-  'AGENTS.md': 'Padrão AGENTS.md — OpenCode, Hermes, Roo Code e ferramentas compatíveis',
+  'AGENTS.md': 'Padrão AGENTS.md — OpenAI Codex, OpenCode, Hermes, Roo Code e ferramentas compatíveis',
   'CLAUDE.md': 'Claude Code',
   'GEMINI.md': 'Gemini CLI, Google Antigravity',
-  'CODEX.md': 'OpenAI Codex, Codex CLI, ChatGPT CLI',
   '.cursorrules': 'Cursor, Windsurf'
 };
 
-// `AGENTS.md` virou a convenção cross-tool de fato, então é o único alvo gerado
-// por padrão. Os demais são gerados sob demanda (`cortex sync --targets=...`),
-// mantendo a raiz do projeto limpa e reduzindo a superfície de arquivos.
-const DEFAULT_TARGETS = ['AGENTS.md'];
+// Alvos que já foram suportados e deixaram de ser. O Codex lê `AGENTS.md`
+// nativamente, então um `CODEX.md` separado nunca foi necessário — a partir da
+// v1.3.0 ele é atendido pelo AGENTS.md. Instalações antigas são avisadas.
+const RETIRED_TARGETS = {
+  'CODEX.md': 'o Codex lê o AGENTS.md diretamente'
+};
+
+// `AGENTS.md` é a convenção cross-tool e leva o cérebro completo. `CLAUDE.md`
+// entra por padrão porque o Claude Code não lê AGENTS.md sozinho — mas ele é
+// gerado como um import nativo (`@AGENTS.md`), então a fonte continua única.
+// Os demais são gerados sob demanda (`cortex sync --targets=...`).
+const DEFAULT_TARGETS = ['AGENTS.md', 'CLAUDE.md'];
+
+// Sintaxe de import do Claude Code: uma linha `@caminho` dentro do CLAUDE.md é
+// resolvida pela própria ferramenta ao carregar a memória do projeto. Não é um
+// "ponteiro" que depende de a IA decidir abrir outro arquivo.
+const CLAUDE_IMPORT_LINE = '@AGENTS.md';
 
 const TARGETS_FILE = 'targets.json';
 const CEREBRO_PATH = path.join('Frameworks', 'CEREBRO.md');
@@ -223,8 +235,11 @@ function readTargets(targetDir) {
   if (fs.existsSync(targetsPath)) {
     try {
       const data = JSON.parse(fs.readFileSync(targetsPath, 'utf8'));
-      if (Array.isArray(data.targets) && data.targets.length > 0) {
-        return data.targets.filter((t) => Object.prototype.hasOwnProperty.call(KNOWN_TARGETS, t));
+      if (Array.isArray(data.targets)) {
+        // Alvos aposentados (ex.: CODEX.md) ou desconhecidos são descartados; se
+        // não sobrar nenhum, cai para a detecção/padrão em vez de compilar para nada.
+        const known = data.targets.filter((t) => Object.prototype.hasOwnProperty.call(KNOWN_TARGETS, t));
+        if (known.length > 0) return known;
       }
     } catch (e) {}
   }
@@ -265,18 +280,72 @@ function parseTargetsFlag(argv) {
   return valid.length > 0 ? valid : null;
 }
 
+// Conteúdo do CLAUDE.md quando o AGENTS.md também é gerado: só o import nativo.
+// O cérebro fica em um arquivo só, e o Claude Code o carrega por meio do `@`.
+function buildClaudeImport(version, eol) {
+  return applyEol(buildGeneratedHeader(version) + CLAUDE_IMPORT_LINE + '\n', eol || '\n');
+}
+
 // Compila o cérebro para cada alvo. Retorna a lista de arquivos escritos.
+// Todos recebem o cérebro completo, exceto o CLAUDE.md quando o AGENTS.md está
+// entre os alvos: nesse caso ele apenas importa o AGENTS.md.
 function compileTargets(targetDir, targets, version) {
   const cerebroPath = path.join(targetDir, CEREBRO_PATH);
   const cerebro = fs.readFileSync(cerebroPath, 'utf8');
   const content = compileBrain(cerebro, version);
+  const claudeImports = targets.includes('AGENTS.md');
 
   const written = [];
   for (const target of targets) {
-    fs.writeFileSync(path.join(targetDir, target), content);
+    const body = target === 'CLAUDE.md' && claudeImports
+      ? buildClaudeImport(version, detectEol(cerebro))
+      : content;
+    fs.writeFileSync(path.join(targetDir, target), body);
     written.push(target);
   }
   return written;
+}
+
+// Arquivos de alvos aposentados que ainda estão na raiz do projeto. Só conta
+// como "nosso" o que tem o cabeçalho de artefato gerado ou o texto de
+// bootstrap/ponteiro do próprio Córtex — um arquivo que o usuário escreveu à
+// mão com o mesmo nome nunca é oferecido para remoção.
+function findRetiredTargets(targetDir) {
+  return Object.keys(RETIRED_TARGETS).filter((name) => {
+    const filePath = path.join(targetDir, name);
+    if (!fs.existsSync(filePath)) return false;
+    try {
+      const content = fs.readFileSync(filePath, 'utf8');
+      return (
+        content.includes('ARQUIVO GERADO PELO CÓRTEX') ||
+        content.includes('cortex-onboarding') ||
+        content.includes('CEREBRO.md')
+      );
+    } catch (e) {
+      return false;
+    }
+  });
+}
+
+// Avisa sobre alvos aposentados e, com confirmação explícita, remove o arquivo.
+// Com --force não há a quem perguntar, então apenas avisa — nunca apaga calado.
+async function handleRetiredTargets(targetDir, isForce) {
+  const retired = findRetiredTargets(targetDir);
+  for (const name of retired) {
+    console.log(`  ${yellow}Aviso:${reset} ${name} não é mais gerado — ${RETIRED_TARGETS[name]}.`);
+    if (isForce) {
+      console.log(`  ${dim}Pode apagar ${name} quando quiser; ele não é mais atualizado.${reset}`);
+      continue;
+    }
+    const remove = await askConfirmation(`  Remover ${name} agora? (s/N): `);
+    if (remove) {
+      fs.rmSync(path.join(targetDir, name));
+      console.log(`   ${green}✓${reset} ${name} removido`);
+    } else {
+      console.log(`  ${dim}${name} foi mantido, mas não será mais atualizado.${reset}`);
+    }
+  }
+  return retired;
 }
 
 const CORTEX_META_FILE = 'meta.json';
@@ -519,16 +588,17 @@ ${bold}${cyan}🧠 Córtex CLI — Central de Inteligência do Seu Negócio${res
 
 ${bold}USO:${reset}
   $ npx @aksp/cortex init [nome-da-pasta]
-  $ npx cortex init [nome-da-pasta]
-  $ npx cortex update [pasta]
-  $ npx cortex sync [pasta]
+  $ npx @aksp/cortex update [pasta]
+  $ npx @aksp/cortex sync [pasta]
+  $ npx @aksp/cortex doctor [pasta]
+
+  ${dim}Sempre com o prefixo @aksp/ — "cortex" sozinho é outro pacote no npm.${reset}
 
 ${bold}COMANDOS:${reset}
-  ${green}init [pasta]${reset}   Inicializa a estrutura do Córtex na pasta especificada ou na pasta atual.
-                  Por padrão cria só AGENTS.md (padrão cross-tool). Use --targets= para
-                  gerar arquivos para outras ferramentas já na instalação.
-                  ${dim}--targets=CLAUDE.md,GEMINI.md${reset}   gera bootstrap para ferramentas específicas
-                  ${dim}--targets=all${reset}                   gera para todas as ferramentas conhecidas
+  ${green}init [pasta]${reset}   Instala o Córtex na pasta indicada (ou na pasta atual).
+                  Cria AGENTS.md (Codex, OpenCode e compatíveis) e CLAUDE.md (Claude Code).
+                  ${dim}--targets=GEMINI.md,.cursorrules${reset}   inclui Gemini CLI e Cursor
+                  ${dim}--targets=all${reset}                      inclui todas as ferramentas conhecidas
   ${green}update [pasta]${reset} Atualiza APENAS a camada de framework (.agents/) para a versão instalada do CLI.
                   Nunca toca em Pilares/, Memoria/, Ativos/ nem na área CORTEX:BUSINESS do cérebro.
                   Regenera a área CORTEX:FRAMEWORK do cérebro e recompila os arquivos de instrução.
@@ -536,23 +606,23 @@ ${bold}COMANDOS:${reset}
                                 manifesto da versão atual). Nunca remove customizações suas — só o que
                                 o próprio framework já possuiu e abandonou. Um backup já é feito antes.
   ${green}sync [pasta]${reset}   Compila Frameworks/CEREBRO.md nos arquivos de instrução que a sua ferramenta de IA lê.
-                  Cada arquivo gerado leva o cérebro COMPLETO — a IA não precisa seguir ponteiro nenhum.
-                  Por padrão gera só AGENTS.md (o padrão cross-tool); os demais, sob demanda.
-                  ${dim}--targets=CLAUDE.md,GEMINI.md${reset}   escolhe os alvos (grava em .cortex/targets.json)
-                  ${dim}--targets=all${reset}                   gera todos os alvos conhecidos
+                  AGENTS.md leva o cérebro completo; CLAUDE.md o importa (@AGENTS.md).
+                  ${dim}--targets=GEMINI.md,.cursorrules${reset}   escolhe os alvos (grava em .cortex/targets.json)
+                  ${dim}--targets=all${reset}                      gera todos os alvos conhecidos
   ${green}doctor [pasta]${reset} Audita a estrutura do Córtex sem depender de IA: pilares faltando,
                   marcadores REVISAR pendentes, frontmatter incompleto, saúde do cérebro.
                   ${dim}Aliases: checkup, diagnostico${reset}
+  ${green}--force, -f${reset}    Em init, update e sync: não pede confirmação.
   ${green}--help, -h${reset}     Exibe esta mensagem de ajuda.
   ${green}--version, -v${reset}  Exibe a versão atual do CLI.
 
 ${bold}EXEMPLOS:${reset}
   $ npx @aksp/cortex init
-  $ npx @aksp/cortex init MinhaEmpresa
-  $ npx cortex init "Meu Negocio"
-  $ npx cortex update
-  $ npx cortex update --prune
-  $ npx cortex sync
+  $ npx @aksp/cortex init "Minha Empresa"
+  $ npx @aksp/cortex@latest update
+  $ npx @aksp/cortex update --prune
+  $ npx @aksp/cortex sync --targets=all
+  $ npx @aksp/cortex doctor
 `);
 }
 
@@ -782,52 +852,54 @@ async function runInit() {
     }
   }
 
-  // init sempre cria AGENTS.md (o padrão cross-tool). Os demais targets são
-  // gerados sob demanda pelo onboarding Step 7, por --tools= no init, ou por
-  // `cortex sync --targets=...`. Isso evita a proliferação de 5 arquivos de
-  // instrução que o usuário talvez nunca use.
-  const extraTargets = (toolsFlag || []).filter((t) => t !== 'AGENTS.md');
-  const bootstrapTargets = ['AGENTS.md'].concat(extraTargets);
-  const itemsToCopy = [
-    '.agents',
-    'Frameworks',
-    'Memoria',
-    'Pilares',
-    'Ativos',
-    '.gitignore'
-  ].concat(bootstrapTargets);
+  // init cria os alvos padrão (AGENTS.md + CLAUDE.md). Os demais são gerados
+  // sob demanda: pelo onboarding (Step 7), por --targets= no init, ou por
+  // `cortex sync --targets=...`.
+  const bootstrapTargets = DEFAULT_TARGETS.concat(
+    (toolsFlag || []).filter((t) => !DEFAULT_TARGETS.includes(t))
+  );
+  const itemsToCopy = ['.agents', 'Frameworks', 'Memoria', 'Pilares', 'Ativos', '.gitignore'];
 
   console.log(`  ${dim}Copiando arquivos do framework...${reset}`);
 
-  let copiedCount = 0;
   for (const item of itemsToCopy) {
     const srcPath = path.join(templateDir, item);
-    const destPath = path.join(targetDir, item);
-
     if (fs.existsSync(srcPath)) {
-      copyRecursiveSync(srcPath, destPath);
-      copiedCount++;
+      copyRecursiveSync(srcPath, path.join(targetDir, item));
       console.log(`   ${green}✓${reset} ${item}`);
     }
   }
 
+  // Todos os arquivos de instrução nascem do mesmo texto de inicialização (o
+  // AGENTS.md do pacote). O CLAUDE.md apenas importa o AGENTS.md.
+  const bootstrap = fs.readFileSync(path.join(templateDir, 'AGENTS.md'), 'utf8');
+  for (const target of bootstrapTargets) {
+    const body = target === 'CLAUDE.md' ? `${CLAUDE_IMPORT_LINE}\n` : bootstrap;
+    fs.writeFileSync(path.join(targetDir, target), body);
+    console.log(`   ${green}✓${reset} ${target} ${dim}— ${KNOWN_TARGETS[target]}${reset}`);
+  }
+
   writeVersionFile(targetDir, VERSION);
 
-  const folderName = path.basename(targetDir);
+  const outrasFerramentas = Object.keys(KNOWN_TARGETS).filter((t) => !bootstrapTargets.includes(t));
 
   console.log(`
-${bold}${green}🎉 Córtex inicializado com sucesso!${reset}
+${bold}${green}🎉 Córtex instalado!${reset} Agora falta só a conversa que monta o cérebro do seu negócio.
 
-${bold}Próximos Passos:${reset}
-  1. Abra a pasta no seu terminal ou IDE:
-     ${cyan}${targetArg === '.' ? '' : `cd "${targetArg}" && `}code .${reset} (ou abra no Cursor, Gemini CLI, Claude Code, etc.)
+${bold}Próximos passos:${reset}
+  1. Abra ${bold}esta pasta${reset} na sua ferramenta de IA:
+     ${dim}${targetDir}${reset}
+     • Claude Code: abra o terminal dentro desta pasta e digite ${cyan}claude${reset}
+     • Cursor ou outro editor: menu Arquivo → Abrir Pasta
 
-  2. Peça para a sua IA no chat:
+  2. Escreva no chat:
      ${bold}${yellow}"Quero montar meu Córtex"${reset}
 
-  3. A IA vai guiar a entrevista inteligente e gerar todo o seu cérebro de negócios!
-
-${dim}Saiba mais em: https://github.com/alberthpalhares/cortex${reset}
+  3. São 4 perguntas rápidas (uns 5 minutos). Depois é só dizer ${bold}radar${reset} ou ${bold}ajuda${reset}.
+${outrasFerramentas.length > 0 ? `
+${dim}Usa ${outrasFerramentas.map((t) => KNOWN_TARGETS[t].split(',')[0]).join(' ou ')}? Rode: npx @aksp/cortex init --targets=${outrasFerramentas.join(',')}${reset}
+` : ''}
+${dim}Dúvidas e exemplos: https://github.com/alberthpalhares/cortex${reset}
 `);
 }
 
@@ -952,6 +1024,7 @@ async function runUpdate() {
     compileTargets(targetDir, targets, VERSION);
     writeTargets(targetDir, targets);
     console.log(`  ${green}✓${reset} Cérebro recompilado para: ${targets.join(', ')}`);
+    await handleRetiredTargets(targetDir, isForce);
   }
 
   writeVersionFile(targetDir, VERSION);
@@ -978,9 +1051,10 @@ async function runSync() {
 
   const cerebroPath = path.join(targetDir, CEREBRO_PATH);
   if (!fs.existsSync(cerebroPath)) {
-    console.log(`${red}Não encontrei ${CEREBRO_PATH}.${reset}`);
-    console.log(`  ${dim}Este comando só se aplica a Córtex montados a partir da v0.7.0, com fonte única do system prompt.${reset}`);
-    console.log(`  ${dim}Se o seu Córtex é mais antigo (conteúdo duplicado nos 5 arquivos de raiz), rode "revisar córtex" no chat com sua IA para migrar.${reset}\n`);
+    console.log(`${red}Ainda não há um cérebro para compilar${reset} (${toPosix(CEREBRO_PATH)} não existe).`);
+    console.log(`  O mais provável: o Córtex foi instalado, mas a conversa de montagem ainda não aconteceu.`);
+    console.log(`  Abra esta pasta na sua ferramenta de IA e escreva ${bold}"Quero montar meu Córtex"${reset}.`);
+    console.log(`  ${dim}Se o seu Córtex é anterior à v0.7.0, diga "revisar córtex" no chat para migrar.${reset}\n`);
     process.exit(1);
   }
 
@@ -1020,11 +1094,13 @@ async function runSync() {
     console.log(`   ${green}✓${reset} ${file}`);
   }
 
+  await handleRetiredTargets(targetDir, isForce);
+
   console.log(`
 ${bold}${green}🎉 Cérebro compilado!${reset}
 
-${dim}Cada arquivo acima contém o cérebro COMPLETO — a ferramenta de IA lê tudo direto, sem depender de seguir nenhum ponteiro.${reset}
-${dim}Eles são artefatos gerados: edite sempre ${toPosix(CEREBRO_PATH)} e rode "cortex sync" de novo.${reset}
+${dim}A sua ferramenta de IA carrega o cérebro completo ao abrir a pasta${targets.includes('AGENTS.md') && targets.includes('CLAUDE.md') ? ' (o CLAUDE.md importa o AGENTS.md)' : ''}.${reset}
+${dim}Esses arquivos são gerados: edite sempre ${toPosix(CEREBRO_PATH)} e rode "npx @aksp/cortex sync" de novo.${reset}
 `);
 }
 
@@ -1243,7 +1319,11 @@ module.exports = {
   MANDATORY_PILLAR_PREFIXES,
   MANDATORY_PILLAR_NAMES,
   KNOWN_TARGETS,
+  RETIRED_TARGETS,
   DEFAULT_TARGETS,
+  CLAUDE_IMPORT_LINE,
+  buildClaudeImport,
+  findRetiredTargets,
   CEREBRO_PATH,
   MANIFEST_REL_PATH,
   BRAIN_FRAMEWORK_REL_PATH,

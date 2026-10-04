@@ -414,7 +414,7 @@ If the business has custom pillars (10+), add them to the template's `{{LISTA_PI
    | Claude Code | `CLAUDE.md` |
    | Cursor, Windsurf | `.cursorrules` |
    | Gemini CLI, Google Antigravity | `GEMINI.md` |
-   | OpenAI Codex, Codex CLI | `CODEX.md` |
+   | OpenAI Codex, Codex CLI | `AGENTS.md` (Codex reads it natively) |
 
    Record the choice in `./.cortex/targets.json`:
 

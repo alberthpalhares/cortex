@@ -81,9 +81,10 @@
 }
 ```
 
-- `targets` é um subconjunto de `["AGENTS.md", "CLAUDE.md", "GEMINI.md", "CODEX.md", ".cursorrules"]`
-- Escrito pelo onboarding (Step 7) e por `cortex sync --targets=...`
-- Se o arquivo não existe, o CLI detecta quais targets já existem na raiz ou usa `["AGENTS.md"]` como padrão
+- `targets` é um subconjunto de `["AGENTS.md", "CLAUDE.md", "GEMINI.md", ".cursorrules"]`
+- Escrito pelo onboarding (Step 7), por `cortex sync` e por `cortex update`
+- Se o arquivo não existe, o CLI detecta quais targets já existem na raiz ou usa `["AGENTS.md", "CLAUDE.md"]` como padrão
+- Alvos aposentados (ver emenda da v1.3.0 abaixo) presentes em um `targets.json` antigo são ignorados na leitura
 
 ### 3.3 `.cortex/meta.json`
 
@@ -128,9 +129,12 @@
 **Regras:**
 - O cabeçalho é gerado por `buildGeneratedHeader(version)` em `bin/cli.js`
 - O conteúdo é a concatenação direta do header + `CEREBRO.md` completo (não um ponteiro, não um resumo)
+- **Exceção — `CLAUDE.md`:** quando `AGENTS.md` também está entre os targets, o `CLAUDE.md` contém o header + a linha `@AGENTS.md`. Isso é um *import nativo* do Claude Code (resolvido pela ferramenta ao carregar a memória do projeto), não um ponteiro que dependa de a IA decidir abrir outro arquivo. Sem `AGENTS.md` entre os targets, o `CLAUDE.md` recebe o conteúdo completo.
 - Quebras de linha (CRLF/LF) são preservadas do `CEREBRO.md` original
-- Os targets válidos são: `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `CODEX.md`, `.cursorrules`
+- Os targets válidos são: `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.cursorrules`
 - **Garantia de breaking change:** alterar o formato do cabeçalho de forma que o teste `sync compila o cérebro COMPLETO` quebre, ou mudar a lista de targets (`KNOWN_TARGETS`)
+
+> **Emenda — v1.3.0 (2026-10-04).** `CODEX.md` foi retirado da lista de targets. Pela regra acima isso seria uma quebra de contrato; registramos como emenda, e não como major version, porque **nenhuma instalação perde funcionalidade**: o Codex lê `AGENTS.md` nativamente, então o `CODEX.md` era uma cópia redundante. Córtex existentes continuam funcionando sem ação: `cortex sync`/`update` avisam sobre um `CODEX.md` antigo e só o removem com confirmação explícita. Na mesma versão, o padrão de targets passou de `["AGENTS.md"]` para `["AGENTS.md", "CLAUDE.md"]` (o Claude Code não lê `AGENTS.md` sozinho) — instalações que já têm `targets.json` não são alteradas.
 
 ---
 
@@ -152,7 +156,7 @@
 - `Pilares/09_Identidade_Visual.md` — se aplicável
 - `Pilares/10_*.md` — pilares customizados do Bloco 9
 
-**Garantia de breaking change:** alterar a lista de prefixos obrigatórios (`mandatoryPrefixes` em `bin/cli.js`).
+**Garantia de breaking change:** alterar a lista de prefixos obrigatórios (`MANDATORY_PILLAR_PREFIXES` em `bin/cli.js`).
 
 ---
 
