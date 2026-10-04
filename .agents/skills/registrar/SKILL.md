@@ -39,6 +39,9 @@ Before writing, mentally format the entry to match the existing patterns in the 
 
 *Don't ask permission to make the entry itself. Don't ask for confirmation to write to the file — just make the change immediately and show how it turned out. The only question allowed is for a missing deadline (step 5).*
 
+## 3.5 Price and Discount Decisions
+When the decision records a price, a price floor or a discount, write it as usual and then check it against `Pilares/04_Comercial.md` (`preco_piso`, `desconto_max`) and `Pilares/03_Financeiro.md` (`margem_minima`), if those exist. If it conflicts (e.g. a 20% discount when `desconto_max` is 10), add ONE line after the ✅: *"⚠️ Isso passa do desconto máximo que você definiu (10%). Quer que eu atualize o pilar Comercial?"* — and change nothing in the pillar without a yes. If the pillars or the numbers do not exist, say nothing.
+
 ## 4. Undo and Correct
 - **"desfaz" / "apaga o último registro":** remove exactly the line you inserted most recently in this conversation, and confirm with `↩️ Removido: [linha]`. If the last action was moving a pending item to "resolved", move it back.
 - **"corrige o último" / "na verdade era...":** replace that same line with the corrected version and show `✏️ Antes: ... → Agora: ...`.

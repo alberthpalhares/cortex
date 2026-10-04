@@ -27,7 +27,10 @@ Generates a commercial proposal that's **90% ready** to send from what's already
 
 4. **Apply "Fill the Gaps" Mode:** highlight, between `[BOLD BRACKETS]`, only the data that needs user confirmation (client's exact trade name, tax ID, proposal's validity date, specific delivery deadline).
 
-5. **Never exceed `desconto_max`** from `04_Comercial.md`'s frontmatter without explicitly warning that the requested terms fall outside standard policy.
+5. **Margin check BEFORE saving** — apply the "Margin Guardian" steps 2–3 of `Frameworks/PROTOCOLO_AUTONOMIA.md` to the price and any discount in this proposal, using the real variable cost of the quoted item:
+   - net price below `preco_piso`, or discount above `desconto_max` → warn before generating and ask whether to go ahead anyway
+   - margin below `margem_minima` → warn in one line with the figures (*"Com esse valor, de cada R$ 100 sobram R$ X — abaixo do mínimo que você definiu (Y%)."*) and offer a counter-price that respects the minimum; generate the proposal only after the user decides
+   - **if the cost or the margins are unknown, do not block and do not guess:** generate the proposal and add one line at the end — *"💡 Não consegui conferir sua margem neste preço porque falta [o custo deste serviço / sua margem mínima]. Diga 'descobrir minha margem' e a gente resolve em 5 minutos."*
 
 6. **Save the proposal** to `Ativos/Propostas/AAAA-MM-DD_Nome-do-Cliente.md` (create the subfolder if it doesn't exist) using the real system date, and also show the full content in chat.
 

@@ -68,7 +68,15 @@ Você conversa em português, do seu jeito. Alguns exemplos reais:
 • Atrasou a entrega do kit em maio; combinar sempre 3 dias de folga — Lições, 20/05/2026
 ```
 
-**Você pergunta `posso dar 15% de desconto para fechar com esse cliente?`** — e ela responde com base nas *suas* regras de preço e margem, não em conselho genérico.
+**Você pergunta `posso dar 15% de desconto para fechar com esse cliente?`** — e ela responde com base nas *suas* regras de preço e margem, não em conselho genérico:
+
+```
+Custo Real: R$ 150 de custo direto + 9% de imposto e taxa
+Margem Resultante: 62% — de cada R$ 100 cobrados, sobram R$ 62
+Veredito: Aprovar com ressalva — passa do seu desconto máximo (10%); só com contrato recorrente.
+```
+
+Se você ainda não sabe a sua margem, ela não trava nem chuta: conduz você a descobrir, com um trabalho que você já fez.
 
 ---
 
@@ -83,6 +91,7 @@ Você conversa em português, do seu jeito. Alguns exemplos reais:
 | | `fechar a semana` | 5 minutos: o que andou, o que ficou e o foco da próxima |
 | **Para vender e comunicar** | `gerar proposta para [cliente]` | Proposta pronta, com seus preços e seu tom |
 | | `cria um post sobre...` | Post, legenda ou mensagem de WhatsApp do seu jeito |
+| | `descobrir minha margem` | Em 5 minutos, com um trabalho seu de verdade, descobrimos quanto sobra de cada venda — não precisa saber nada antes |
 | | `analisar DRE` | Compara seus números com as suas metas de margem |
 | | `pesquisar concorrência` | Quem são, quanto cobram, onde você se diferencia |
 | **Para cuidar do Córtex** | `continuar onboarding` | Completa o que ficou faltando, um bloco de 2–5 minutos por vez |

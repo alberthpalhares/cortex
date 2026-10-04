@@ -29,6 +29,7 @@ This skill quickly answers "what can I do here" without requiring the user to me
 **Para vender e comunicar**
 🧾 `gerar proposta para [cliente]` — proposta pronta, com seus preços e seu tom
 ✍️ `cria um post sobre...` — post, legenda ou mensagem de WhatsApp do seu jeito
+💰 `descobrir minha margem` — em 5 minutos descobrimos quanto sobra de verdade nos seus trabalhos
 📊 `analisar DRE` — comparo seus números com as suas metas de margem
 🔍 `pesquisar concorrência` — quem são, quanto cobram e onde você se diferencia
 

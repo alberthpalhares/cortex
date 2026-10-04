@@ -3,6 +3,8 @@ margem_alvo: null          # % target profit per project/product (e.g. 30). Read
 margem_minima: null        # % minimum acceptable before refusing or renegotiating (e.g. 15).
 custos_variaveis: {}        # per-item unit variable cost mapping (e.g. {"fotografia corporativa": 150, "video institucional": 800}).
 custo_variavel_padrao: null # default % of price that is variable cost, when per-item isn't specified (e.g. 20).
+imposto_pct: null           # % of the price that goes to tax (e.g. 6). Leave null if unknown — never guess a rate.
+taxas_pct: null             # % of the price lost to card/marketplace fees (e.g. 3).
 ---
 
 # Financeiro

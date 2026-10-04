@@ -1355,7 +1355,7 @@ async function runDoctor() {
     }
     console.log('');
   } else {
-    console.log(`${green}🔴 Pilares obrigatórios faltando: Nenhum ✅${reset}\n`);
+    console.log(`${green}✅ Pilares obrigatórios: nenhum faltando${reset}\n`);
   }
 
   // Pilares opcionais não configurados (03_, 04_, 07_, 08_, 09_) — informativo, não alarmante

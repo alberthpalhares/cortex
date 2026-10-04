@@ -6,6 +6,22 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-10-04
+
+O Guardião de Margem passa a funcionar para quem ainda não sabe os próprios números, e o cérebro fica bem mais enxuto.
+
+### Adicionado
+- **Guardião de Margem que orienta em vez de travar.** O protocolo agora define a fórmula (preço líquido, custo real com imposto e taxas, margem), a **ordem de checagem** (piso de preço → teto de desconto → margem mínima → margem-alvo) e o veredito em quatro níveis (Aprovar, Aprovar com ressalva, Recusar, Contraproposta com número concreto). Quando faltam dados, ele diz exatamente o que falta e oferece ajuda em uma linha — nunca recusa, nunca inventa número e nunca sugere uma margem "de mercado".
+- **Modo guiado "descobrir minha margem":** com um trabalho real que o usuário já fez (quanto o cliente pagou, quanto custou entregar, quanto sobrou), o Córtex mostra "de cada R$ 100, sobraram R$ X", repete com um trabalho bom e um que não valeu a pena, e propõe a margem-alvo e a mínima — sempre com confirmação antes de gravar.
+- **Onboarding (Bloco 3) pergunta margem-alvo e mínima**, antes inexistentes (por isso os campos centrais ficavam sempre vazios), com o mesmo caminho guiado para quem não sabe, e pergunta por impostos e taxas (`imposto_pct`, `taxas_pct`, novos campos do frontmatter financeiro).
+- **`proposta-comercial` confere a margem antes de salvar** e avisa, com os números, se o valor fica abaixo do mínimo — sem bloquear quando faltam dados. **`registrar`** avisa, em uma linha, quando uma decisão de preço ou desconto conflita com a política já definida.
+
+### Alterado
+- **Cérebro 37% mais curto** (1350 → 853 palavras, carregadas a cada sessão): as regras de roteamento viraram uma tabela "frase → skill", sem perder nenhuma; a regra de margem entrou. A data de revisão passa a ter uma única fonte autoritativa, o `META.md`, e o lembrete deixa de dizer "6 meses desde que montamos".
+- **`analisador-dre`** deixa de comparar com "médias de mercado" quando o pilar financeiro não existe, e passa a distinguir margem líquida (depois dos custos fixos) de margem por trabalho (a das metas), para não dizer "abaixo da meta" por engano.
+- Templates de Memória: as linhas-modelo (`- **[YYYY-MM-DD]** Descrição…`) viraram comentários e não sobram mais nos arquivos gerados; o título "Acessos e Logins" virou "Onde Ficam os Acessos (nunca a senha)".
+- **Exemplo `estudio-lumen`** atualizado: datas que não nascem vencidas, pendências no formato que o `registrar` grava, meta do trimestre em formato de meta, chaves de custo iguais aos nomes dos produtos, protocolos atuais.
+
 ## [1.3.1] - 2026-10-04
 
 Rodada de confiança: nada que o Córtex faça pode apagar ou confundir os dados do usuário.

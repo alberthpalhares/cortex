@@ -15,12 +15,13 @@ This skill **is not an ERP and doesn't do accounting**. It only analyzes the dat
 
    **If the file exists:** Extract the frontmatter (`margem_alvo`, `margem_minima`, `custos_variaveis`, `custo_variavel_padrao`) and the registered fixed costs. If per-item variable costs are filled in, use them to compute the real contribution margin instead of a generic one. Continue to steps 3-4 normally.
 
-   **If the file doesn't exist:** The user hasn't configured the financial pillar yet. Still analyze whatever data the user provided (revenue, costs, margin from the spreadsheet), but compare against common-sense benchmarks instead of the user's own targets. Skip steps 3-4 below (they depend on `03_Financeiro.md` existing) and go straight to the diagnosis. End with: *"💡 Você ainda não configurou o pilar financeiro no Córtex. Se quiser, posso te ajudar a registrar suas metas de margem e custos — aí na próxima análise eu cruzo com os seus números de verdade, não com médias de mercado."*
+   **If the file doesn't exist:** The user hasn't configured the financial pillar yet. Still analyze whatever data the user provided (revenue, costs, margin from the spreadsheet) and show the user's own result plainly — **do not compare against "market" or "typical" margins**, which are not the user's reality. Skip the target comparison in step 4 and go straight to the diagnosis. End with: *"💡 Você ainda não definiu suas metas de margem no Córtex. Diga 'descobrir minha margem' e em 5 minutos a gente descobre quanto sobra de verdade nos seus trabalhos — aí eu cruzo suas planilhas com os seus números."*
 
 3. **Extract from the material the user provided:** total revenue, total costs/expenses, net profit, and the resulting net margin (net profit ÷ revenue × 100). If the material already brings the computed margin, use it; don't recompute it based on assumptions.
 
 4. **Compare:**
-   - The obtained margin vs. `margem_alvo` and `margem_minima`.
+   - **Mind what each margin means.** `margem_alvo` / `margem_minima` are *per job*, after variable costs only. A DRE's net margin also deducts fixed costs, so it is naturally lower. Compare targets against the **contribution margin** (revenue − variable costs) when the material allows it; if only the net margin is available, show it, say it is after fixed costs, and do not call it "below target" on that basis alone.
+   - The obtained margin vs. `margem_alvo` and `margem_minima` (see the note above).
    - If `custos_variaveis` has per-item data, compute the contribution margin per item: `(price − variable_cost) ÷ price × 100`. Flag items whose contribution margin is below `margem_minima` — they're the ones dragging the overall result down, even if the blended margin looks healthy.
    - If `custo_variavel_padrao` is set but per-item data isn't, use it as a rough estimate and note that it's an approximation.
    - If there's more than one period (e.g. 2 months), point out the trend (rising/falling/stable).

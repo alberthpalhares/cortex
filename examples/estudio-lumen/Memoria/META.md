@@ -3,9 +3,9 @@
 **Negócio:** Estúdio Lumen — Fotografia e Vídeo Corporativo
 **Setor:** Fotografia e produção audiovisual corporativa
 **Tipo:** Eu-presa
-**Onboarding realizado em:** 2025-01-15
-**Última revisão:** 2025-07-15
-**Próxima revisão sugerida:** 2026-01-15
+**Onboarding realizado em:** 2026-01-15
+**Última revisão:** 2026-07-15
+**Próxima revisão sugerida:** 2027-01-15
 
 ## Mapa de Arquivos
 

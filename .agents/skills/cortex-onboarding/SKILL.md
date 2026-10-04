@@ -205,8 +205,21 @@ Ask only these 4 questions, one at a time:
 
 5. *"Você dá desconto? Se sim, tem algum limite?"*
    - Hint: *"O importante é que a IA saiba o seu piso para não sugerir promoções que te prejudiquem."*
+   - Record the lowest price they will accept as `preco_piso` and the maximum discount as `desconto_max`.
 
-> 💡 When generating `Pilares/03_Financeiro.md` and `Pilares/04_Comercial.md` in Step 3, fill in the YAML frontmatter at the top of each (`margem_alvo`, `margem_minima`, `custos_variaveis`, `custo_variavel_padrao`, `preco_piso`, `desconto_max`) with the real numbers gathered here. For `custos_variaveis`, use the format `{"item name": unit_cost, ...}` — this is what the Margin Guardian uses to compute real margin per project. If a value wasn't provided, leave it as `null` (or `{}` for `custos_variaveis`) and mark the corresponding text section with `<!-- REVISAR -->` instead of making up a number.
+6. *"Em cada venda, de tudo que o cliente paga, quanto você gostaria que sobrasse como lucro? E qual é o mínimo abaixo do qual não vale a pena fazer o trabalho?"*
+   - These two answers are `margem_alvo` and `margem_minima` (percentages of the price, after variable costs).
+   - **Most small-business owners have never calculated this. Do not skip, do not invent, and do not make the user feel behind.** If they say "não sei", offer to work it out together in three short steps, using a job they actually did:
+     1. *"Pensa num serviço que você fez recentemente. Quanto o cliente pagou?"*
+     2. *"E quanto você gastou diretamente para entregar aquilo — material, ajudante, deslocamento, taxas?"*
+     3. *"Sobrou quanto?"*
+     Then compute `(sobrou ÷ cobrado) × 100` and show it plainly: *"Nesse trabalho, de cada R$ 100 que o cliente pagou, sobraram R$ [X]. Essa é a sua margem real nele."* Repeat once with a job they considered **good** and once with one that felt **not worth it**: the first suggests `margem_alvo`, the second suggests `margem_minima`. Propose those two numbers and ask if they sound right.
+   - If they still cannot or do not want to do it now: leave both as `null`, add `<!-- REVISAR -->`, and say once: *"Sem problema. Quando quiser, é só dizer 'descobrir minha margem' que a gente faz isso em 5 minutos."*
+
+7. *"Tem imposto ou taxa que fica no meio do caminho? Tipo imposto do Simples/MEI, taxa da maquininha ou do marketplace?"*
+   - Record the combined percentage of the price as `imposto_pct` (tax) and `taxas_pct` (card/marketplace fees). If they don't know, leave `null` — do not guess a tax rate.
+
+> 💡 When generating `Pilares/03_Financeiro.md` and `Pilares/04_Comercial.md` in Step 3, fill in the YAML frontmatter at the top of each (`margem_alvo`, `margem_minima`, `custos_variaveis`, `custo_variavel_padrao`, `imposto_pct`, `taxas_pct`, `preco_piso`, `desconto_max`) with the real numbers gathered here. For `custos_variaveis`, use the format `{"item name": unit_cost, ...}` — this is what the Margin Guardian uses to compute real margin per project. If a value wasn't provided, leave it as `null` (or `{}` for `custos_variaveis`) and mark the corresponding text section with `<!-- REVISAR -->` instead of making up a number.
 
 #### 3B — For nonprofits:
 

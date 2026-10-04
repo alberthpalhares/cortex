@@ -88,6 +88,7 @@ Com mais de uma dúzia de skills convivendo no mesmo cérebro, a IA precisa sabe
 | `ajuda` | `ajuda` | `o que você faz?`, `comandos` |
 | `consolidar` | `consolidar memória` | `arquivar memória`, `a memória está grande` |
 | `proposta-comercial` | `gerar proposta` | `monta uma proposta`, `proposta comercial` |
+| *(modo do protocolo)* Guardião de Margem | `descobrir minha margem` | `posso dar desconto?`, `quanto cobrar`, `vale a pena?` |
 | `analisador-dre` | `analisar DRE` | `analisa essa planilha`, `como está minha margem` |
 | `pesquisa-mercado` | `pesquisar concorrência` | `mapear concorrentes`, `quem são meus concorrentes` |
 | `cortex doctor` (CLI) | `cortex doctor` | `npx @aksp/cortex doctor` |

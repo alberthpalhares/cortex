@@ -2,10 +2,12 @@
 margem_alvo: 35
 margem_minima: 20
 custos_variaveis:
-  "ensaio corporativo": 150
-  "vídeo institucional": 800
-  "evento corporativo": 200
+  "Ensaio Corporativo Simples": 150
+  "Cobertura de Evento + Edição": 350
+  "Vídeo Institucional Completo": 1400
 custo_variavel_padrao: 20
+imposto_pct: 6
+taxas_pct: 3
 ---
 
 # Financeiro
