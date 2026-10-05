@@ -38,6 +38,7 @@ This skill quickly answers "what can I do here" without requiring the user to me
 🩺 `saúde do córtex` — mostro o que ainda está em branco
 🔄 `revisar córtex` — a cada 6 meses, conferimos o que mudou
 🗄️ `consolidar memória` — arquivo o que ficou antigo, sem apagar nada
+✨ `novidades` — o que mudou na última atualização do Córtex
 
 💬 E pode perguntar qualquer coisa sobre o negócio — "posso dar 15% de desconto?", "qual era o combinado com o fornecedor?" — eu consulto o que está registrado antes de responder.
 

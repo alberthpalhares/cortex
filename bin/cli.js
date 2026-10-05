@@ -634,6 +634,8 @@ ${bold}COMANDOS:${reset}
                   ${dim}--targets=all${reset}                      gera todos os alvos conhecidos
   ${green}doctor [pasta]${reset} Audita a estrutura do Córtex sem depender de IA: pilares faltando,
                   marcadores REVISAR pendentes, frontmatter incompleto, saúde do cérebro.
+                  Avisa se existe versão nova (consulta só o número da versão no npm).
+                  ${dim}--offline${reset}     não consulta o npm
                   ${dim}Aliases: checkup, diagnostico${reset}
   ${green}--force, -f${reset}    Em init, update e sync: não pede confirmação.
   ${green}--help, -h${reset}     Exibe esta mensagem de ajuda.
@@ -696,9 +698,10 @@ function writeVersionFile(targetDir, version) {
     fs.mkdirSync(metaDir, { recursive: true });
   }
   const versionPath = path.join(metaDir, CORTEX_VERSION_FILE);
+  const now = new Date().toISOString();
   fs.writeFileSync(
     versionPath,
-    JSON.stringify({ version, updatedAt: new Date().toISOString() }, null, 2) + '\n'
+    JSON.stringify({ version, updatedAt: now, checkedAt: now }, null, 2) + '\n'
   );
 }
 
@@ -710,6 +713,112 @@ function readVersionFile(targetDir) {
   } catch (e) {
     return null;
   }
+}
+
+// Registra que o usuário conferiu se há versão nova, sem mexer em updatedAt.
+// O radar usa checkedAt para lembrar de atualizar só quando faz tempo de verdade.
+function touchVersionCheck(targetDir) {
+  const current = readVersionFile(targetDir);
+  if (!current || !current.version) return;
+  const versionPath = path.join(targetDir, CORTEX_META_DIR, CORTEX_VERSION_FILE);
+  fs.writeFileSync(
+    versionPath,
+    JSON.stringify({ ...current, checkedAt: new Date().toISOString() }, null, 2) + '\n'
+  );
+}
+
+const REGISTRY_LATEST_URL = 'https://registry.npmjs.org/@aksp/cortex/latest';
+
+// Pergunta ao npm qual é a versão mais recente. Só lê o número da versão — nada
+// do projeto do usuário é enviado. Qualquer falha (sem internet, timeout, proxy)
+// vira null em silêncio: o aviso de versão nova é um extra, nunca um bloqueio.
+function fetchLatestVersion(timeoutMs) {
+  if (process.env.CORTEX_NO_UPDATE_CHECK || args.includes('--offline')) return Promise.resolve(null);
+  const limit = timeoutMs || 2500;
+  return new Promise((resolve) => {
+    let req = null;
+    let done = false;
+    const finish = (value) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      if (req) req.destroy();
+      resolve(value);
+    };
+    const timer = setTimeout(() => finish(null), limit);
+    try {
+      req = require('https').get(REGISTRY_LATEST_URL, { headers: { accept: 'application/json' } }, (res) => {
+        if (res.statusCode !== 200) return finish(null);
+        let body = '';
+        res.setEncoding('utf8');
+        res.on('data', (chunk) => {
+          body += chunk;
+          if (body.length > 1000000) finish(null);
+        });
+        res.on('end', () => {
+          try {
+            const latest = JSON.parse(body).version;
+            finish(typeof latest === 'string' ? latest : null);
+          } catch (e) {
+            finish(null);
+          }
+        });
+      });
+      req.on('error', () => finish(null));
+    } catch (e) {
+      finish(null);
+    }
+  });
+}
+
+// Novidades que valem ser contadas ao usuário depois de um update: ficam em
+// .agents/cortex/novidades.json (framework) e viram .cortex/novidades.md, que a
+// skill "novidades" apresenta uma vez no chat e apaga.
+const NOVIDADES_SRC_REL_PATH = path.join('.agents', 'cortex', 'novidades.json');
+const NOVIDADES_FILE = 'novidades.md';
+
+function selectNovidades(entries, fromVersion, toVersion) {
+  if (!Array.isArray(entries)) return [];
+  return entries.filter((e) =>
+    e && e.version && e.texto &&
+    compareVersions(e.version, fromVersion) > 0 &&
+    compareVersions(e.version, toVersion) <= 0
+  );
+}
+
+function formatNovidade(entry) {
+  return `- ${entry.texto}` + (entry.diga ? ` — diga: \`${entry.diga}\`` : '');
+}
+
+function writeNovidades(targetDir, templateDir, fromVersion, toVersion) {
+  let entries;
+  try {
+    entries = JSON.parse(fs.readFileSync(path.join(templateDir, NOVIDADES_SRC_REL_PATH), 'utf8'));
+  } catch (e) {
+    return [];
+  }
+  const selected = selectNovidades(entries, fromVersion || '0.0.0', toVersion);
+  if (selected.length === 0) return [];
+
+  const filePath = path.join(targetDir, CORTEX_META_DIR, NOVIDADES_FILE);
+  // Novidades de um update anterior que o usuário ainda não viu continuam na lista.
+  const lines = fs.existsSync(filePath)
+    ? normalizeEol(fs.readFileSync(filePath, 'utf8')).split('\n').filter((l) => l.startsWith('- '))
+    : [];
+  for (const entry of selected) {
+    const line = formatNovidade(entry);
+    if (!lines.includes(line)) lines.push(line);
+  }
+
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, [
+    '<!-- Gerado por "cortex update". A skill "novidades" apresenta esta lista uma vez no chat e apaga este arquivo. -->',
+    `# Novidades do Córtex (v${toVersion})`,
+    '',
+    ...lines,
+    ''
+  ].join('\n'));
+  return selected;
 }
 
 // Lê o manifesto de framework (.agents/manifest.json) de uma raiz de projeto
@@ -1062,9 +1171,21 @@ async function runUpdate() {
     console.log(`  ${yellow}⚠️ Não encontrei ${CORTEX_META_DIR}/${CORTEX_VERSION_FILE}${reset} — este Córtex foi instalado antes do comando update existir.`);
     console.log(`  Vou tratar a versão atual como desconhecida e comparar diretamente os arquivos.\n`);
   } else if (installed.version === VERSION && !isForce) {
-    console.log(`  ${green}✓${reset} Este projeto já está na v${VERSION}, a versão que este comando conhece.`);
-    console.log(`  ${dim}Para buscar uma versão mais nova no npm, rode: npx @aksp/cortex@latest update${reset}`);
-    console.log(`  ${dim}Use --force para conferir os arquivos mesmo assim.${reset}\n`);
+    const latest = await fetchLatestVersion();
+    if (latest && compareVersions(latest, VERSION) > 0) {
+      console.log(`  ${yellow}Este projeto está na v${VERSION}, mas já existe a v${latest}.${reset}`);
+      console.log(`  O comando que você rodou usou uma versão antiga guardada no computador. Rode assim:`);
+      console.log(`    ${cyan}npx @aksp/cortex@latest update${reset}\n`);
+      return;
+    }
+    touchVersionCheck(targetDir);
+    if (latest) {
+      console.log(`  ${green}✓${reset} Este projeto já está na v${VERSION}, a mais recente. Nada a fazer.\n`);
+    } else {
+      console.log(`  ${green}✓${reset} Este projeto já está na v${VERSION}, a versão que este comando conhece.`);
+      console.log(`  ${dim}Para buscar uma versão mais nova no npm, rode: npx @aksp/cortex@latest update${reset}`);
+      console.log(`  ${dim}Use --force para conferir os arquivos mesmo assim.${reset}\n`);
+    }
     return;
   }
 
@@ -1172,6 +1293,7 @@ async function runUpdate() {
   }
 
   writeVersionFile(targetDir, VERSION);
+  const novidades = writeNovidades(targetDir, templateDir, installed && installed.version, VERSION);
 
   console.log(`
 ${bold}${green}🎉 Framework atualizado para v${VERSION}!${reset}
@@ -1179,6 +1301,12 @@ ${bold}${green}🎉 Framework atualizado para v${VERSION}!${reset}
 ${dim}Se você tinha personalizado algum arquivo dentro de .agents/skills, confira o backup acima para recuperar suas mudanças.${reset}
 ${dim}Pilares/, Memoria/, Ativos/ e a área CORTEX:BUSINESS do seu cérebro não foram tocados.${reset}
 `);
+
+  if (novidades.length > 0) {
+    console.log(`${bold}✨ O que há de novo para você:${reset}`);
+    novidades.forEach((n) => console.log(`  • ${n.texto}${n.diga ? ` ${dim}— diga:${reset} ${cyan}${n.diga}${reset}` : ''}`));
+    console.log(`\n  ${dim}Na próxima conversa com a sua IA, diga${reset} ${cyan}novidades${reset} ${dim}que ela te mostra tudo isso com calma.${reset}\n`);
+  }
 }
 
 async function runSync() {
@@ -1416,12 +1544,30 @@ async function runDoctor() {
     console.log(`  ${dim}Alvos compilados: ${brain.compiledTargets.join(', ')}${reset}`);
   }
 
-  // --- 7. Sugestão ---
+  // --- 7. Versão ---
+  const installedVersion = readVersionFile(targetDir);
+  const latest = await fetchLatestVersion();
+  if (installedVersion && installedVersion.version) {
+    const current = installedVersion.version;
+    if (latest && compareVersions(latest, current) > 0) {
+      console.log(`\n${bold}📦 Versão:${reset} ${yellow}v${current} — já existe a v${latest}.${reset} Para atualizar (seus dados não são tocados):`);
+      console.log(`  ${cyan}npx @aksp/cortex@latest update${reset}`);
+    } else if (latest) {
+      console.log(`\n${bold}📦 Versão:${reset} ${green}v${current}, a mais recente ✅${reset}`);
+    } else {
+      console.log(`\n${bold}📦 Versão:${reset} v${current} ${dim}(não consegui consultar o npm para saber se há uma mais nova)${reset}`);
+    }
+  }
+
+  // --- 8. Sugestão ---
   console.log(`\n${bold}💡 Sugestão:${reset}`, (() => {
     if (mandatoryMissing.length > 0) return `Crie os pilares obrigatórios faltantes — diga "revisar córtex" no chat.`;
     if (withPendencies.length > 0) return `Ainda há itens a completar — diga "continuar onboarding" no chat e fazemos um bloco por vez.`;
     if (!brain.hasLayers) return `Migre o cérebro para o formato com camadas — diga "revisar córtex" no chat.`;
     if (brain.isPointer) return `Recompile os arquivos de raiz — rode "npx @aksp/cortex sync".`;
+    if (latest && installedVersion && compareVersions(latest, installedVersion.version) > 0) {
+      return `A estrutura está em ordem. Falta só atualizar — rode "npx @aksp/cortex@latest update".`;
+    }
     return `Está tudo em dia! 🎉`;
   })() + '\n');
 }
@@ -1508,6 +1654,12 @@ module.exports = {
   copyRecursiveSync,
   writeVersionFile,
   readVersionFile,
+  touchVersionCheck,
+  fetchLatestVersion,
+  selectNovidades,
+  formatNovidade,
+  writeNovidades,
+  NOVIDADES_SRC_REL_PATH,
   readManifestFiles,
   listFilesRecursive,
   diffFrameworkLayer,

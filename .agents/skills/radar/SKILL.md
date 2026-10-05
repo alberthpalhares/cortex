@@ -13,12 +13,16 @@ You've just been triggered to run the business's **Radar**. The goal of this ski
 2. **Silently read** the pending items file: `Memoria/04_Pessoas_Pendencias.md`
 3. **Silently read** the projects file: `Memoria/03_Projetos.md`, including its `## Metas do Trimestre` section.
 4. **Get the real system date** (via terminal/whatever date tool is available) — never infer the date from the conversation text. Compare that real date against the listed deadlines to classify items as late/urgent.
-5. **Pick at most ONE suggestion line**, the first that applies in this order — a radar with three nudges gets ignored:
-   1. The `Próxima revisão sugerida` in `META.md` has passed or is less than 2 weeks away → suggest `revisar córtex`.
-   2. `Memoria/01_Decisoes.md` or `Memoria/02_Licoes.md` is large (more than ~80 lines; a quick scan is enough) → suggest `consolidar memória`.
-   3. The most recent date stamp anywhere in `Memoria/` is more than 7 days old → the inactivity line.
-   4. A mandatory pillar still has `<!-- REVISAR -->` markers, or there is no quarterly goal → offer **one** small next step, naming how long it takes.
-6. Generate a **Mini Radar Report** strictly in this format (use emojis and be concise):
+5. **Silently read**, if they exist, `.cortex/novidades.md` and `.cortex/version.json` (two tiny files; skip quietly if missing or unreadable).
+6. **Pick at most ONE suggestion line**, the first that applies in this order — a radar with three nudges gets ignored:
+   1. `.cortex/novidades.md` exists and has at least one `- ` line → the "novidades" line.
+   2. The `Próxima revisão sugerida` in `META.md` has passed or is less than 2 weeks away → suggest `revisar córtex`.
+   3. `Memoria/01_Decisoes.md` or `Memoria/02_Licoes.md` is large (more than ~80 lines; a quick scan is enough) → suggest `consolidar memória`.
+   4. The most recent date stamp anywhere in `Memoria/` is more than 7 days old → the inactivity line.
+   5. `Pilares/03_Financeiro.md` exists but `margem_alvo` or `margem_minima` is empty → offer `descobrir minha margem`.
+   6. A mandatory pillar still has `<!-- REVISAR -->` markers, or there is no quarterly goal → offer **one** small next step, naming how long it takes.
+   7. `checkedAt` (or, if absent, `updatedAt`) in `.cortex/version.json` is more than 90 days old → the "atualizar" line.
+7. Generate a **Mini Radar Report** strictly in this format (use emojis and be concise):
 
 ```
 📡 **RADAR [NOME DO NEGÓCIO] — [Data de Hoje]**
@@ -35,7 +39,10 @@ You've just been triggered to run the business's **Radar**. The goal of this ski
 
 🎯 **META DO TRIMESTRE:** [meta — progresso] — SOMENTE se houver meta registrada
 
-[UMA linha de sugestão, conforme o passo 5 — exemplos:]
+[UMA linha de sugestão, conforme o passo 6 — exemplos:]
+[✨ O Córtex foi atualizado e tem novidade para você — diga "novidades".]
+[💰 Ainda não sei a sua margem, então não consigo conferir preços e descontos. 5 minutos? Diga "descobrir minha margem".]
+[📦 Faz [N] meses que o Córtex não é atualizado. Para buscar a versão nova, rode no terminal desta pasta: npx @aksp/cortex@latest update (seus dados não são tocados).]
 [🔄 Já passou da data de revisão do Córtex — quer rodar "revisar córtex"?]
 [🗄️ A Memória está grande — quer rodar "consolidar memória"?]
 [🕰️ Faz [N] dias que nada é registrado. Aconteceu algo que vale guardar? É só dizer "registra que..."]

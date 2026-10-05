@@ -6,6 +6,20 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-10-04
+
+Quem já usa o Córtex passa a saber quando há versão nova e o que mudou depois de atualizar.
+
+### Adicionado
+- **`doctor` avisa se existe versão nova.** Consulta apenas o número da versão no npm (nada da pasta do usuário é enviado), com limite de 2,5 segundos e falha silenciosa sem internet. `--offline` (ou a variável `CORTEX_NO_UPDATE_CHECK`) desliga a consulta.
+- **`update` percebe quando rodou uma versão antiga guardada pelo `npx`** e manda usar `npx @aksp/cortex@latest update`, em vez de dizer "já está em dia".
+- **Novidades depois do update.** O `update` lista no terminal o que há de novo desde a versão que estava instalada e grava `.cortex/novidades.md`. A nova skill **`novidades`** ("novidades", "o que mudou?") apresenta a lista uma vez no chat, oferece testar o item mais útil e apaga o aviso. A lista vem de `.agents/cortex/novidades.json`, mantida a cada versão.
+- **`radar` ganhou três lembretes** (continua mostrando no máximo um por vez): novidades pendentes de um update; margem-alvo ou mínima ainda em branco, oferecendo "descobrir minha margem" — o que cobre quem montou o Córtex antes da 1.4.0; e mais de 90 dias sem atualizar, com o comando pronto.
+
+### Alterado
+- `.cortex/version.json` passa a guardar `checkedAt` (última vez que o usuário conferiu se havia versão nova), além de `updatedAt`.
+- README: corrigida a nota sobre `init` em pasta com arquivos do usuário, que ainda descrevia o comportamento anterior à 1.3.1.
+
 ## [1.4.0] - 2026-10-04
 
 O Guardião de Margem passa a funcionar para quem ainda não sabe os próprios números, e o cérebro fica bem mais enxuto.

@@ -86,6 +86,7 @@ Com mais de uma dúzia de skills convivendo no mesmo cérebro, a IA precisa sabe
 | `cortex-revisao` | `revisar córtex` | `revisar pilares` |
 | `saude` | `saúde do córtex` | `diagnóstico` (do Córtex), `o que falta preencher` |
 | `ajuda` | `ajuda` | `o que você faz?`, `comandos` |
+| `novidades` | `novidades` | `o que mudou?`, `o que tem de novo?` |
 | `consolidar` | `consolidar memória` | `arquivar memória`, `a memória está grande` |
 | `proposta-comercial` | `gerar proposta` | `monta uma proposta`, `proposta comercial` |
 | *(modo do protocolo)* Guardião de Margem | `descobrir minha margem` | `posso dar desconto?`, `quanto cobrar`, `vale a pena?` |

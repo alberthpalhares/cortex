@@ -2,7 +2,7 @@
      ARQUIVO GERADO PELO CÓRTEX — NÃO EDITE À MÃO.
 
      Fonte:   Frameworks/CEREBRO.md
-     Gerado:  cortex sync (v1.3.1) em 2026-10-04
+     Gerado:  cortex sync (v1.4.1) em 2026-10-05
 
      Qualquer alteração feita aqui será perdida no próximo
      "npx @aksp/cortex sync". Edite a fonte acima.
@@ -71,6 +71,7 @@ O Estúdio Lumen não tem pilares customizados (10+).
 | a spreadsheet/DRE or "como está minha margem" | `analisador-dre` |
 | "pesquisar concorrência", "mapear concorrentes" | `pesquisa-mercado` |
 | "ajuda", "o que você faz?", "comandos" | `ajuda` |
+| "novidades", "o que mudou?", "o que tem de novo?" | `novidades` |
 | "saúde do córtex", "diagnóstico", "o que falta preencher" | `saude` (for a zero-token check, suggest `npx @aksp/cortex doctor`) |
 | "continuar onboarding", "completar meu córtex" | `cortex-onboarding` (continuation mode, one block at a time). When YOU point the user to it, always say "continuar onboarding" |
 | "revisar córtex", "revisão do córtex", "revisar pilares" | `cortex-revisao` |

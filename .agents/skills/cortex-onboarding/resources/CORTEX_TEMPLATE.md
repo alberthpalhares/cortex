@@ -56,6 +56,7 @@ O seu "cérebro" vive nestes arquivos locais.
 | a spreadsheet/DRE or "como está minha margem" | `analisador-dre` |
 | "pesquisar concorrência", "mapear concorrentes" | `pesquisa-mercado` |
 | "ajuda", "o que você faz?", "comandos" | `ajuda` |
+| "novidades", "o que mudou?", "o que tem de novo?" | `novidades` |
 | "saúde do córtex", "diagnóstico", "o que falta preencher" | `saude` (for a zero-token check, suggest `npx @aksp/cortex doctor`) |
 | "continuar onboarding", "completar meu córtex" | `cortex-onboarding` (continuation mode, one block at a time). When YOU point the user to it, always say "continuar onboarding" |
 | "revisar córtex", "revisão do córtex", "revisar pilares" | `cortex-revisao` |

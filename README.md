@@ -152,7 +152,7 @@ npx @aksp/cortex init --targets=.cursorrules,GEMINI.md
 
 **No Windows, o PowerShell reclama de "execução de scripts desabilitada"** — use o *Prompt de Comando* (`cmd`) em vez do PowerShell; lá o mesmo comando funciona.
 
-**"A pasta de destino não está vazia"** — o Córtex cria as pastas dele (`Pilares`, `Memoria`, `Frameworks`, `Ativos`, `.agents`) ao lado dos seus arquivos. **Atenção:** se a pasta já tiver um `.gitignore`, `AGENTS.md` ou `CLAUDE.md` seus, eles serão substituídos — guarde uma cópia antes de responder `s`. E não rode o `init` de novo numa pasta onde o Córtex já foi montado: para atualizar, use `update`.
+**"A pasta de destino não está vazia"** — o Córtex cria as pastas dele (`Pilares`, `Memoria`, `Frameworks`, `Ativos`, `.agents`) ao lado dos seus arquivos. Se a pasta já tiver um `.gitignore`, `AGENTS.md` ou `CLAUDE.md` seus, o Córtex guarda uma cópia em `.cortex/backups` antes de mexer, mantém as suas regras do `.gitignore` e não sobrescreve o seu `CLAUDE.md`. E não rode o `init` de novo numa pasta onde o Córtex já foi montado: para atualizar, use `update`.
 
 **A IA não começou a conversa de montagem** — confirme que você abriu *a pasta onde rodou o `init`* (e não uma pasta acima). Se usa Cursor ou Gemini CLI, rode o comando com `--targets=` mostrado acima. Em último caso, diga: *"Leia o arquivo `.agents/skills/cortex-onboarding/SKILL.md` e siga as instruções."*
 
@@ -210,7 +210,9 @@ O framework (`.agents/`) e os dados do seu negócio são camadas separadas — a
 |---|---|
 | `npx @aksp/cortex@latest update` | Traz habilidades novas e correções. Mostra o que vai mudar, pede confirmação e faz backup antes. **Nunca toca** em `Pilares/`, `Memoria/`, `Ativos/` nem nos dados do negócio dentro do `CEREBRO.md`. |
 | `npx @aksp/cortex sync` | Regera `AGENTS.md`/`CLAUDE.md` depois que você editar o `Frameworks/CEREBRO.md` à mão. Com `--targets=` inclui outra ferramenta. |
-| `npx @aksp/cortex doctor` | Confere a estrutura no terminal, sem usar IA: o que falta preencher e se o cérebro está em ordem. |
+| `npx @aksp/cortex doctor` | Confere a estrutura no terminal, sem usar IA: o que falta preencher, se o cérebro está em ordem e se existe versão nova. |
+
+**Como eu fico sabendo que saiu versão nova?** O `doctor` avisa na hora (ele consulta só o número da versão no npm; nada da sua pasta é enviado, e `--offline` desliga a consulta). O `radar` lembra quando faz mais de 3 meses que você não atualiza. E depois de cada `update`, é só dizer **`novidades`** no chat: a IA conta o que mudou e oferece testar o que for mais útil para você.
 
 > Use sempre `@aksp/cortex` — o pacote `cortex`, sem o prefixo, é outro projeto.
 

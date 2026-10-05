@@ -1,0 +1,32 @@
+[
+  {
+    "version": "1.3.0",
+    "texto": "Eu procuro na memória para você: pergunte o que já foi decidido ou combinado sobre qualquer assunto",
+    "diga": "o que você sabe sobre..."
+  },
+  {
+    "version": "1.3.0",
+    "texto": "Fechamento da semana em 5 minutos: o que andou, o que ficou e o foco da próxima",
+    "diga": "fechar a semana"
+  },
+  {
+    "version": "1.3.0",
+    "texto": "Posts, legendas e mensagens de WhatsApp escritos no seu tom de voz",
+    "diga": "cria um post sobre..."
+  },
+  {
+    "version": "1.3.0",
+    "texto": "Registrou algo errado? Dá para desfazer ou corrigir o último registro, e para colar as anotações de uma reunião inteira",
+    "diga": "desfaz"
+  },
+  {
+    "version": "1.4.0",
+    "texto": "Antes de você fechar um preço ou dar um desconto, eu confiro se ainda sobra o que precisa sobrar. Para isso preciso saber a sua margem; se você não sabe, descobrimos juntos em uns 5 minutos",
+    "diga": "descobrir minha margem"
+  },
+  {
+    "version": "1.4.1",
+    "texto": "Depois de cada atualização eu te conto o que mudou, e o radar avisa quando fizer muito tempo sem atualizar",
+    "diga": "novidades"
+  }
+]

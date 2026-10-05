@@ -1,7 +1,8 @@
 {
-  "version": "1.4.0",
+  "version": "1.4.1",
   "files": [
     ".agents/cortex/brain.framework.md",
+    ".agents/cortex/novidades.json",
     ".agents/skills/ajuda/SKILL.md",
     ".agents/skills/analisador-dre/SKILL.md",
     ".agents/skills/consolidar/SKILL.md",
@@ -28,6 +29,7 @@
     ".agents/skills/cortex-onboarding/templates/Pilares/09_Identidade_Visual.md",
     ".agents/skills/cortex-revisao/SKILL.md",
     ".agents/skills/lembrar/SKILL.md",
+    ".agents/skills/novidades/SKILL.md",
     ".agents/skills/pesquisa-mercado/SKILL.md",
     ".agents/skills/proposta-comercial/SKILL.md",
     ".agents/skills/radar/SKILL.md",

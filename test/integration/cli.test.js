@@ -3,6 +3,9 @@ const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
+
+// Os testes nunca consultam o npm (o doctor e o update fariam isso).
+process.env.CORTEX_NO_UPDATE_CHECK = '1';
 const { mkTmpDir } = require('../support/tmp');
 
 // Testes de ponta a ponta: rodam o CLI real (bin/cli.js) como um subprocesso,
