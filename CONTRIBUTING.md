@@ -8,7 +8,7 @@ O **Córtex** existe para transformar a Inteligência Artificial em uma parceira
 
 ## Bem-vindo(a)
 
-Buscamos contribuidores que compartilhem da nossa missão: **democratizar a inteligência de negócios com IA local, privada e autônoma.**
+Buscamos contribuidores que compartilhem da nossa missão: **dar a qualquer pequeno negócio uma memória organizada, em arquivos que ficam no computador do dono, para a ferramenta de IA que ele escolher.**
 
 ### Quem pode contribuir
 - **Designers de IA & Prompt Engineers:** Entendem a estrutura de system prompts, instruções concisas e orquestração de assistentes.
@@ -21,7 +21,7 @@ Antes de começar, leia o [README.md](README.md) para entender a arquitetura do 
 
 ## A Regra de Ouro: Arquivos Locais & Simplicidade
 
-O Córtex foi desenhado para ser **100% local, privado e leve**. Ele roda com um único comando:
+O Córtex foi desenhado para ser **leve e feito de arquivos locais**: sem servidor, sem banco de dados e sem dependências. (Os arquivos ficam no computador do usuário; o que a IA lê para responder passa pelo fornecedor da ferramenta que ele usa — nunca prometa "IA local".) Ele roda com um único comando:
 
 ```bash
 npx @aksp/cortex init
@@ -184,10 +184,12 @@ Cada ferramenta de IA lê um arquivo de instrução diferente. O Córtex gera es
 
 ## Checklist de Release
 
-Ao publicar uma nova versão (adicionar/remover/renomear skill, ou qualquer mudança que afete o comportamento do framework), siga esta lista. O CI (`npm test && npm run verify:manifest`) cobre os itens marcados com ⚙️ automaticamente.
+Ao publicar uma nova versão (adicionar/remover/renomear skill, ou qualquer mudança que afete o comportamento do framework), siga esta lista. O CI (`npm test && npm run verify:manifest`) cobre os itens marcados com ⚙️ automaticamente, e o `npm publish` roda os dois antes de publicar (`prepublishOnly`).
 
-- ⚙️ `npm test` passa (toda a suíte)
+- ⚙️ `npm test` passa (toda a suíte). Ela inclui `test/integration/package.test.js`, que empacota o projeto, instala o pacote e roda o CLI instalado — é o que pega diferenças entre o repositório e o que chega pelo `npx` (ex.: o npm não publica arquivos chamados `.gitignore`).
 - ⚙️ `npm run verify:manifest` passa (manifesto em dia)
+- [ ] **O CI está verde** no commit que vai ser publicado (Ubuntu, Windows e macOS)
+- [ ] **Depois de publicar:** `npx @aksp/cortex@latest init` numa pasta nova e vazia termina sem erro
 - [ ] `npm run build:manifest` foi rodado e commitado (se arquivos em `.agents/` mudaram)
 - [ ] **Tabela de gatilhos** no `CONTRIBUTING.md` está atualizada (skill nova = nova linha na tabela)
 - [ ] **Skill `ajuda`** lista o novo comando (se for skill acionável pelo usuário)

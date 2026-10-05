@@ -53,8 +53,18 @@ function main() {
   const isCheck = process.argv.includes('--check');
 
   if (isCheck) {
-    const current = fs.existsSync(MANIFEST_PATH) ? fs.readFileSync(MANIFEST_PATH, 'utf8') : null;
-    if (current !== content) {
+    // Compara o conteúdo interpretado, não o texto cru: o fim de linha do arquivo
+    // muda conforme o sistema e a configuração do Git de quem fez o checkout.
+    let current = null;
+    try {
+      current = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf8'));
+    } catch (e) {}
+    const upToDate =
+      current &&
+      current.version === manifest.version &&
+      Array.isArray(current.files) &&
+      JSON.stringify(current.files) === JSON.stringify(manifest.files);
+    if (!upToDate) {
       console.error('❌ .agents/manifest.json está desatualizado em relação a .agents/.');
       console.error('   Rode: npm run build:manifest');
       process.exit(1);

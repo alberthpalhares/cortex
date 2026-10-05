@@ -1,7 +1,7 @@
 {
   "name": "@aksp/cortex",
-  "version": "1.4.1",
-  "description": "O cérebro estratégico do seu negócio impulsionado por IA local e autônoma.",
+  "version": "1.4.2",
+  "description": "O sócio que lembra de tudo: a memória do seu negócio em arquivos simples, no seu computador, que a sua ferramenta de IA consulta antes de responder.",
   "main": "bin/cli.js",
   "bin": {
     "cortex": "bin/cli.js",
@@ -11,7 +11,8 @@
   "scripts": {
     "test": "node --test",
     "build:manifest": "node scripts/build-manifest.js",
-    "verify:manifest": "node scripts/build-manifest.js --check"
+    "verify:manifest": "node scripts/build-manifest.js --check",
+    "prepublishOnly": "npm run verify:manifest && npm test"
   },
   "keywords": [
     "cortex",
@@ -35,7 +36,7 @@
   },
   "homepage": "https://github.com/alberthpalhares/cortex#readme",
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   },
   "files": [
     "bin",
@@ -49,7 +50,6 @@
     "GEMINI.md",
     "CLAUDE.md",
     ".cursorrules",
-    ".gitignore",
     "README.md",
     "CONTRIBUTING.md"
   ]

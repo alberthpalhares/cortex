@@ -119,7 +119,7 @@ O Córtex precisa de uma IA que **leia e escreva arquivos na pasta do seu negóc
 
 **Quanto custa:** o Córtex é gratuito e de código aberto. A ferramenta de IA é à parte — algumas têm uso gratuito com limite, outras exigem assinatura. Os planos mudam com frequência; confira no site de cada uma antes de decidir.
 
-**O `init` já prepara** o Claude Code e as ferramentas que leem `AGENTS.md`. Para Cursor ou Gemini CLI, acrescente:
+**O `init` já prepara** o Claude Code e as ferramentas que leem `AGENTS.md`. Para Cursor ou Gemini CLI, rode também (pode ser depois do `init`, antes da conversa de montagem):
 
 ```bash
 npx @aksp/cortex init --targets=.cursorrules,GEMINI.md
@@ -209,8 +209,10 @@ O framework (`.agents/`) e os dados do seu negócio são camadas separadas — a
 | Comando | Para quê |
 |---|---|
 | `npx @aksp/cortex@latest update` | Traz habilidades novas e correções. Mostra o que vai mudar, pede confirmação e faz backup antes. **Nunca toca** em `Pilares/`, `Memoria/`, `Ativos/` nem nos dados do negócio dentro do `CEREBRO.md`. |
-| `npx @aksp/cortex sync` | Regera `AGENTS.md`/`CLAUDE.md` depois que você editar o `Frameworks/CEREBRO.md` à mão. Com `--targets=` inclui outra ferramenta. |
+| `npx @aksp/cortex sync` | Regera `AGENTS.md`/`CLAUDE.md` depois que você editar o `Frameworks/CEREBRO.md` à mão. Com `--targets=` você escolhe para quais ferramentas gerar: liste **todas** as que usa (ex.: `--targets=AGENTS.md,CLAUDE.md,GEMINI.md`), porque a lista substitui a anterior. |
 | `npx @aksp/cortex doctor` | Confere a estrutura no terminal, sem usar IA: o que falta preencher, se o cérebro está em ordem e se existe versão nova. |
+
+**Se quem roda o comando é a sua IA:** peça para ela acrescentar `--force` (por exemplo, `npx @aksp/cortex@latest update --force`). Sem terminal para confirmar, o comando só mostra o que faria e não altera nada.
 
 **Como eu fico sabendo que saiu versão nova?** O `doctor` avisa na hora (ele consulta só o número da versão no npm; nada da sua pasta é enviado, e `--offline` desliga a consulta). O `radar` lembra quando faz mais de 3 meses que você não atualiza. E depois de cada `update`, é só dizer **`novidades`** no chat: a IA conta o que mudou e oferece testar o que for mais útil para você.
 

@@ -1,14 +1,13 @@
 # ============================================================
 # Córtex — .gitignore
 #
-# Este arquivo é copiado para todo projeto inicializado com
-# `npx @aksp/cortex init`. Ele protege por padrão os DADOS DO
-# SEU NEGÓCIO (Pilares, Memória, Ativos) de irem parar em um
-# repositório Git — inclusive um público.
+# Este é o .gitignore do repositório de desenvolvimento do Córtex.
+# O .gitignore que o `npx @aksp/cortex init` grava na pasta do
+# usuário NÃO é este arquivo: é o texto USER_GITIGNORE, dentro de
+# bin/cli.js (o npm não publica arquivos chamados ".gitignore").
 #
-# O Córtex é local-first e privado por design. Se você quiser
-# versionar seus próprios dados propositalmente (ex: em um repo
-# PRIVADO seu, como backup), remova ou ajuste as linhas abaixo.
+# As regras abaixo impedem que um onboarding de teste feito na raiz
+# deste repositório seja commitado junto com o framework.
 # ============================================================
 
 # Dados do negócio (o "cérebro" gerado pelo onboarding)

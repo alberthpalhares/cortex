@@ -1,0 +1,4 @@
+# Fim de linha único (LF) em todos os sistemas. Sem isto, o Git no Windows
+# converte os arquivos no checkout e o pacote publicado no npm passa a depender
+# da máquina de quem publica.
+* text=auto eol=lf

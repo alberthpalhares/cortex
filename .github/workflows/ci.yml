@@ -12,8 +12,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        node-version: [18.x, 20.x]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [18.x, 20.x, 22.x, 24.x]
 
     steps:
       - name: Checkout
@@ -27,5 +27,7 @@ jobs:
       - name: Verificar que .agents/manifest.json está em dia
         run: npm run verify:manifest
 
+      # Inclui o teste que empacota o projeto (npm pack), instala o pacote e
+      # roda o CLI instalado — o que o usuário recebe pelo npx.
       - name: Rodar testes (node --test)
         run: npm test

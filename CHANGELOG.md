@@ -6,6 +6,30 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.4.2] - 2026-10-05
+
+Correção: a instalação nova pelo npm estava quebrada nas versões 1.4.0 e 1.4.1.
+
+### Corrigido
+- **`npx @aksp/cortex init` voltou a funcionar em instalações novas.** Nas versões 1.4.0 e 1.4.1 o comando terminava em erro (`ENOENT … .gitignore`) logo depois de "Copiando arquivos do framework...": o `init` lia o `.gitignore` de dentro do pacote, e o npm não publica arquivos com esse nome. As regras passaram a ficar dentro do próprio CLI. Quem já tinha o Córtex instalado não foi afetado; o `update` funcionava.
+- **O `.gitignore` que protege os dados do negócio agora chega de verdade.** Pelo mesmo motivo, quem instalou pelo npm até a 1.3.0 nunca o recebeu. O `update` passa a criá-lo quando a pasta não tem um. Um `.gitignore` escrito pelo usuário não é tocado, e numa pasta que já é repositório Git o `update` não cria nem altera nada: só mostra as regras que faltam, uma por linha (quem versiona os próprios dados de propósito não é surpreendido).
+- **A dica que o próprio `init` imprime deixou de ser recusada.** `init --targets=GEMINI.md,.cursorrules` logo depois do `init` respondia "Já existe um Córtex montado". Agora "instalado" e "montado" são coisas diferentes: montado é quando já existe o cérebro (`Frameworks/CEREBRO.md`) ou o índice da Memória. Em pasta só instalada, repetir o `init` acrescenta o que falta (inclusive a pasta `.agents/`, se tiver sumido), não sobrescreve nada, avisa quando um arquivo seu com o mesmo nome foi mantido e lembra o próximo passo. A dica também passou a levar o nome da pasta quando o Córtex foi instalado numa subpasta (`init "Minha Empresa"`).
+- **O `doctor` não manda mais instalar o que já está instalado.** Em pasta instalada e ainda não montada, ele diz que falta só a conversa de montagem. Ele também distingue a instalação incompleta (sem `.agents/`) e o Córtex que tem cérebro mas perdeu o índice da Memória, em vez de mandar refazer a montagem.
+- **`update` repetível.** Se uma atualização parava no meio (um arquivo preso pelo OneDrive, por exemplo), a segunda tentativa respondia "Nada para atualizar" e deixava o arquivo que a IA lê com as regras antigas. Agora arquivos de instrução desatualizados contam como trabalho pendente: rodar o mesmo comando de novo termina o serviço e registra as novidades.
+- **`sync --targets=` avisa quando tira da lista uma ferramenta em uso.** A lista passada substitui a anterior; o README dizia "inclui", o que levava a deixar o `AGENTS.md` sem atualização. O comando agora mostra quais ferramentas saem e a linha pronta para manter todas, e o README foi corrigido.
+- **Sem terminal interativo, o CLI não finge sucesso.** Quando quem roda o comando é uma IA ou um script e falta o `--force`, `init`, `update` e `sync` mostram o plano, dizem "Nada foi alterado" e saem com código 2 (antes saíam com sucesso sem ter feito nada). As skills de revisão e de continuação do onboarding passaram a chamar `sync --force`. No Git Bash do Windows o Node não enxerga um terminal interativo: lá, use `--force`.
+- **Erro inesperado em português**, dizendo que Pilares, Memória e Ativos não foram alterados e o que fazer (por exemplo, quando um arquivo está preso pelo OneDrive ou pelo antivírus). O detalhe técnico continua aparecendo, por último.
+- **CI:** no Windows a conferência do manifesto falhava por diferença de fim de linha e os testes nunca chegavam a rodar. Entraram um `.gitattributes` (LF em todos os sistemas), a conferência do manifesto pelo conteúdo e uma matriz com Node 18 a 24 em Ubuntu, Windows e macOS.
+
+### Adicionado
+- **Teste do pacote como o usuário recebe** (`test/integration/package.test.js`): empacota o projeto, instala o pacote numa pasta temporária e roda por ele `init`, `init --targets`, `doctor`, `sync` e `update`. Também falha se dados de negócio ou arquivos internos entrarem no pacote. `npm publish` passa a rodar a suíte antes (`prepublishOnly`).
+
+### Alterado
+- Cores desligadas quando a saída não é um terminal (ou com `NO_COLOR`), para não sujar o texto lido por uma IA.
+- `engines`: Node 18 ou mais novo, que é o que o CI testa.
+- A descrição do pacote e o CONTRIBUTING deixam de falar em "IA local": os arquivos ficam no computador do usuário, mas o que a IA lê passa pelo fornecedor da ferramenta, como o README já dizia.
+- Os arquivos de `.agents/` passam a ser publicados sempre com o mesmo fim de linha. No primeiro `update` depois desta versão, alguns podem aparecer como "atualizados" só por isso.
+
 ## [1.4.1] - 2026-10-04
 
 Quem já usa o Córtex passa a saber quando há versão nova e o que mudou depois de atualizar.

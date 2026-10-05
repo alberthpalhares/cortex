@@ -4,14 +4,18 @@ const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
 
-// Formatadores ANSI para saída visual no terminal
-const reset = '\x1b[0m';
-const bold = '\x1b[1m';
-const cyan = '\x1b[36m';
-const green = '\x1b[32m';
-const yellow = '\x1b[33m';
-const red = '\x1b[31m';
-const dim = '\x1b[2m';
+// Formatadores ANSI para saída visual no terminal. Só valem quando a saída é um
+// terminal de verdade: quando quem lê é uma IA, um arquivo ou outro programa,
+// os códigos de cor viram lixo no meio do texto.
+const useColor = Boolean(process.stdout.isTTY) && !process.env.NO_COLOR;
+const ansi = (code) => (useColor ? `\x1b[${code}m` : '');
+const reset = ansi(0);
+const bold = ansi(1);
+const cyan = ansi(36);
+const green = ansi(32);
+const yellow = ansi(33);
+const red = ansi(31);
+const dim = ansi(2);
 
 const PKG_PATH = path.join(__dirname, '..', 'package.json');
 let VERSION = '0.9.0';
@@ -43,6 +47,52 @@ const USER_DATA_ITEMS = [
 
 const CORTEX_META_DIR = '.cortex';
 const CORTEX_VERSION_FILE = 'version.json';
+
+// Regras de .gitignore que o Córtex grava na pasta do usuário. Ficam aqui, como
+// texto, e não num arquivo ".gitignore" dentro do pacote: o npm troca esse
+// arquivo por ".npmignore" ao publicar, então ele nunca chega a quem instala.
+// Como saber se um .gitignore já tem as regras do Córtex: uma linha que seja
+// exatamente "/Pilares/*". A versão comentada ("# /Pilares/*") também conta — é
+// de quem decidiu versionar os próprios dados e não deve ser avisado a cada update.
+// A regra citada no meio de outra linha não conta: ali ela não protege nada.
+const USER_GITIGNORE_RULE = /^[ \t]*(#[ \t]*)?\/Pilares\/\*[ \t]*\r?$/m;
+const USER_GITIGNORE_DATA_RULES = ['/Pilares/*', '/Memoria/*', '/Ativos/*'];
+const USER_GITIGNORE = `# ============================================================
+# Córtex — .gitignore
+#
+# Criado por "npx @aksp/cortex init". Protege por padrão os DADOS
+# DO SEU NEGÓCIO (Pilares, Memória, Ativos) de irem parar em um
+# repositório Git — inclusive um público.
+#
+# Se você quiser versionar os seus dados de propósito (ex.: em um
+# repositório PRIVADO seu, como backup), remova ou ajuste as linhas
+# abaixo.
+# ============================================================
+
+# Dados do negócio (criados na conversa de montagem)
+/Pilares/*
+/Memoria/*
+/Ativos/*
+
+# Mantém a estrutura de pastas versionada mesmo vazia
+!/Pilares/.gitkeep
+!/Memoria/.gitkeep
+!/Ativos/.gitkeep
+
+# Backups automáticos do Córtex (update/init) e restos de versões antigas
+/.cortex/backups/
+/.agents.backup-*/
+/Frameworks/CEREBRO.md.backup-*
+
+# Arquivos de sistema operacional
+.DS_Store
+Thumbs.db
+`;
+
+// Código de saída quando o comando precisaria de uma confirmação e não há
+// terminal interativo para responder. Diferente de 1 (erro) para que quem
+// chamou — em geral uma IA — saiba que basta repetir com --force.
+const EXIT_NEEDS_CONFIRMATION = 2;
 
 // Manifesto de framework: lista, versionada, dos arquivos que pertencem à
 // camada de framework nesta release. Gerado por scripts/build-manifest.js e
@@ -333,7 +383,7 @@ async function handleRetiredTargets(targetDir, isForce) {
   const retired = findRetiredTargets(targetDir);
   for (const name of retired) {
     console.log(`  ${yellow}Aviso:${reset} ${name} não é mais gerado — ${RETIRED_TARGETS[name]}.`);
-    if (isForce) {
+    if (isForce || !isInteractive()) {
       console.log(`  ${dim}Pode apagar ${name} quando quiser; ele não é mais atualizado.${reset}`);
       continue;
     }
@@ -620,6 +670,7 @@ ${bold}USO:${reset}
 ${bold}COMANDOS:${reset}
   ${green}init [pasta]${reset}   Instala o Córtex na pasta indicada (ou na pasta atual).
                   Cria AGENTS.md (Codex, OpenCode e compatíveis) e CLAUDE.md (Claude Code).
+                  Em pasta já instalada e ainda não montada, só acrescenta o que faltar.
                   ${dim}--targets=GEMINI.md,.cursorrules${reset}   inclui Gemini CLI e Cursor
                   ${dim}--targets=all${reset}                      inclui todas as ferramentas conhecidas
   ${green}update [pasta]${reset} Atualiza APENAS a camada de framework (.agents/) para a versão instalada do CLI.
@@ -638,6 +689,8 @@ ${bold}COMANDOS:${reset}
                   ${dim}--offline${reset}     não consulta o npm
                   ${dim}Aliases: checkup, diagnostico${reset}
   ${green}--force, -f${reset}    Em init, update e sync: não pede confirmação.
+                  ${dim}Sem terminal interativo (uma IA rodando o comando, um script), nada é
+                  alterado sem --force: o comando mostra o plano e sai com código 2.${reset}
   ${green}--help, -h${reset}     Exibe esta mensagem de ajuda.
   ${green}--version, -v${reset}  Exibe a versão atual do CLI.
 
@@ -655,17 +708,73 @@ function printVersion() {
   console.log(`v${VERSION}`);
 }
 
+function isInteractive() {
+  return Boolean(process.stdin.isTTY);
+}
+
+// Pergunta "s/N" no terminal. Sem terminal interativo (uma IA rodando o comando,
+// um script, um pipe) não há quem responda: em vez de terminar calado com
+// "sucesso" sem ter feito nada, diz que nada mudou e sai com um código próprio.
 function askConfirmation(query) {
+  if (!isInteractive()) {
+    console.log(`${query}${dim}(sem terminal interativo para responder)${reset}`);
+    console.log(`\n${yellow}Nada foi alterado.${reset} Para aplicar sem perguntar, rode o mesmo comando com ${cyan}--force${reset}.\n`);
+    process.exit(EXIT_NEEDS_CONFIRMATION);
+  }
+
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
   });
   return new Promise((resolve) => {
+    let answered = false;
     rl.question(query, (ans) => {
+      answered = true;
       rl.close();
       resolve(ans.trim().toLowerCase().startsWith('s') || ans.trim().toLowerCase().startsWith('y'));
     });
+    // Entrada encerrada sem resposta (Ctrl+D, janela fechada) conta como "não".
+    rl.on('close', () => {
+      if (!answered) resolve(false);
+    });
   });
+}
+
+// Garante as regras do Córtex no .gitignore da pasta, sem nunca apagar as do
+// usuário. Com `appendToExisting: false`, um .gitignore que já existe não é tocado.
+// Retorna 'created', 'appended', 'present' ou 'missing-rules'.
+function ensureGitignore(targetDir, options) {
+  const appendToExisting = Boolean(options && options.appendToExisting);
+  const dest = path.join(targetDir, '.gitignore');
+  if (!fs.existsSync(dest)) {
+    fs.writeFileSync(dest, USER_GITIGNORE);
+    return 'created';
+  }
+  const existing = fs.readFileSync(dest, 'utf8');
+  if (USER_GITIGNORE_RULE.test(existing)) return 'present';
+  if (!appendToExisting) return 'missing-rules';
+  fs.writeFileSync(dest, existing.replace(/\s*$/, '\n\n') + USER_GITIGNORE);
+  return 'appended';
+}
+
+// Traduz um erro inesperado em algo que o dono do negócio consiga ler e agir.
+// O detalhe técnico vai junto, por último, para quem for ajudar.
+function describeError(err) {
+  const code = err && err.code;
+  const lines = [];
+  if (code === 'EPERM' || code === 'EBUSY' || code === 'EACCES') {
+    lines.push('Um arquivo desta pasta estava em uso ou bloqueado (OneDrive, antivírus ou outro programa aberto).');
+    lines.push('Feche o que estiver usando a pasta e rode o mesmo comando de novo.');
+  } else if (code === 'ENOSPC') {
+    lines.push('O disco está sem espaço. Libere espaço e rode o mesmo comando de novo.');
+  } else {
+    lines.push('Rode o mesmo comando de novo. Se o erro continuar, copie o detalhe técnico abaixo e envie em:');
+    lines.push('https://github.com/alberthpalhares/cortex/issues');
+  }
+  return {
+    lines,
+    detail: err && err.stack ? String(err.stack) : String(err)
+  };
 }
 
 function copyRecursiveSync(src, dest) {
@@ -995,12 +1104,79 @@ function pruneBackups(targetDir, keep) {
   return old.length;
 }
 
-// Já existe um Córtex montado nesta pasta? (versão instalada ou cérebro gerado)
+// "Montado" = a conversa de montagem já aconteceu: existe o cérebro (ou, num
+// Córtex antigo, o índice da Memória). Só ter instalado não conta: o init grava
+// .cortex/version.json, mas até a conversa não há nada do negócio para proteger.
 function isCortexMounted(targetDir) {
   return (
-    fs.existsSync(path.join(targetDir, CORTEX_META_DIR, CORTEX_VERSION_FILE)) ||
-    fs.existsSync(path.join(targetDir, CEREBRO_PATH))
+    fs.existsSync(path.join(targetDir, CEREBRO_PATH)) ||
+    fs.existsSync(path.join(targetDir, 'Memoria', 'META.md'))
   );
+}
+
+// "Instalado" = o init já rodou nesta pasta (montado ou não).
+function isCortexInstalled(targetDir) {
+  return fs.existsSync(path.join(targetDir, CORTEX_META_DIR, CORTEX_VERSION_FILE));
+}
+
+// O que o init copia do pacote para a pasta do usuário. As quatro pastas de
+// dados chegam vazias (só um .gitkeep); quem as preenche é a conversa de montagem.
+const INSTALL_ITEMS = ['.agents', 'Frameworks', 'Memoria', 'Pilares', 'Ativos'];
+
+// Cria os arquivos de inicialização que ainda não existem para as ferramentas
+// pedidas. Nunca sobrescreve um arquivo existente. Retorna `created` (os que
+// criou) e `kept` (os que já existiam, foram escritos pelo usuário e por isso
+// continuam sem as instruções do Córtex).
+function addMissingBootstrapTargets(targetDir, templateDir, targets) {
+  const bootstrap = fs.readFileSync(path.join(templateDir, 'AGENTS.md'), 'utf8');
+  const created = [];
+  const kept = [];
+  for (const target of targets) {
+    const dest = path.join(targetDir, target);
+    if (fs.existsSync(dest)) {
+      let content = '';
+      try {
+        content = fs.readFileSync(dest, 'utf8');
+      } catch (e) {}
+      const ready = isCortexOwnedFile(content) || (target === 'CLAUDE.md' && content.includes(CLAUDE_IMPORT_LINE));
+      if (!ready) kept.push(target);
+      continue;
+    }
+    fs.writeFileSync(dest, target === 'CLAUDE.md' ? `${CLAUDE_IMPORT_LINE}\n` : bootstrap);
+    created.push(target);
+  }
+  return { created, kept };
+}
+
+// Trecho " <pasta>" para as dicas de comando. Quem instalou com
+// `init "Minha Empresa"` continua no diretório de cima: sem a pasta, seguir a
+// dica instalaria um segundo Córtex ali.
+function folderHint(targetArg) {
+  if (!targetArg || targetArg === '.') return '';
+  return /\s/.test(targetArg) ? ` "${targetArg}"` : ` ${targetArg}`;
+}
+
+// Arquivos de instrução na raiz que estão diferentes do que o cérebro geraria
+// hoje (ou que não existem). Sem cérebro não há o que comparar.
+function findStaleTargets(targetDir, version) {
+  const cerebroPath = path.join(targetDir, CEREBRO_PATH);
+  if (!fs.existsSync(cerebroPath)) return [];
+  const cerebro = fs.readFileSync(cerebroPath, 'utf8');
+  const targets = readTargets(targetDir);
+  const full = compileBrain(cerebro, version);
+  const claudeImports = targets.includes('AGENTS.md');
+  return targets.filter((target) => {
+    const filePath = path.join(targetDir, target);
+    if (!fs.existsSync(filePath)) return true;
+    const expected = target === 'CLAUDE.md' && claudeImports
+      ? buildClaudeImport(version, detectEol(cerebro))
+      : full;
+    try {
+      return fs.readFileSync(filePath, 'utf8') !== expected;
+    } catch (e) {
+      return true;
+    }
+  });
 }
 
 // O arquivo é do Córtex (gerado ou texto de inicialização) ou foi escrito pelo usuário?
@@ -1033,8 +1209,64 @@ async function runInit() {
     console.log(`${yellow}Já existe um Córtex montado nesta pasta.${reset}`);
     console.log(`  O \`init\` só serve para a primeira instalação — rodar de novo apagaria o seu cérebro compilado.`);
     console.log(`  Para trazer as novidades sem mexer nos seus dados, use:`);
-    console.log(`    ${cyan}npx @aksp/cortex@latest update${reset}\n`);
+    console.log(`    ${cyan}npx @aksp/cortex@latest update${folderHint(targetArg)}${reset}`);
+    if (toolsFlag) {
+      // No sync, --targets é a lista COMPLETA de ferramentas (ele substitui a
+      // anterior): a dica leva as que já estão em uso mais as pedidas.
+      const all = Array.from(new Set(readTargets(targetDir).concat(toolsFlag)));
+      console.log(`  Para preparar outra ferramenta de IA nesta pasta, use (a lista inclui as que você já usa):`);
+      console.log(`    ${cyan}npx @aksp/cortex sync${folderHint(targetArg)} --targets=${all.join(',')}${reset}`);
+    }
+    console.log('');
     process.exit(1);
+  }
+
+  // init cria os alvos padrão (AGENTS.md + CLAUDE.md). Os demais são gerados
+  // sob demanda: pelo onboarding (Step 7), por --targets= no init, ou por
+  // `cortex sync --targets=...`.
+  const bootstrapTargets = DEFAULT_TARGETS.concat(
+    (toolsFlag || []).filter((t) => !DEFAULT_TARGETS.includes(t))
+  );
+
+  // Já instalado, mas a conversa de montagem ainda não aconteceu: não há o que
+  // refazer. Só acrescenta os arquivos de ferramenta pedidos que estejam
+  // faltando — é o que faz "init --targets=GEMINI.md" funcionar depois do init.
+  if (isCortexInstalled(targetDir)) {
+    const installed = readVersionFile(targetDir);
+
+    // Repõe, sem sobrescrever nada, o que tiver sumido da instalação (a pasta
+    // .agents/ apagada por engano ou perdida ao copiar a pasta para outro computador).
+    const restored = INSTALL_ITEMS.filter((item) => {
+      const src = path.join(templateDir, item);
+      if (fs.existsSync(path.join(targetDir, item)) || !fs.existsSync(src)) return false;
+      copyRecursiveSync(src, path.join(targetDir, item));
+      return true;
+    });
+    // O framework reposto é o desta versão do CLI.
+    if (restored.includes('.agents')) writeVersionFile(targetDir, VERSION);
+
+    const { created, kept } = addMissingBootstrapTargets(targetDir, templateDir, bootstrapTargets);
+    const gitignore = ensureGitignore(targetDir, { appendToExisting: false });
+
+    console.log(`${green}✓${reset} O Córtex já está instalado nesta pasta.`);
+    restored.forEach((item) => console.log(`   ${green}+${reset} ${item} ${dim}— estava faltando e foi reposta${reset}`));
+    created.forEach((t) => console.log(`   ${green}+${reset} ${t} ${dim}— ${KNOWN_TARGETS[t]}${reset}`));
+    if (gitignore === 'created') console.log(`   ${green}+${reset} .gitignore`);
+    for (const t of kept) {
+      console.log(`   ${yellow}!${reset} ${t} já existia e foi mantido como está — ele não tem as instruções do Córtex.`);
+      console.log(`     ${dim}Para o Córtex prepará-lo, renomeie o seu arquivo e rode este comando de novo.${reset}`);
+    }
+    if (restored.length === 0 && created.length === 0 && kept.length === 0 && gitignore !== 'created') {
+      console.log(`  ${dim}Nenhum arquivo novo era necessário.${reset}`);
+    }
+    console.log(`
+${bold}Falta só a conversa que monta o cérebro do seu negócio:${reset}
+  abra esta pasta na sua ferramenta de IA e escreva ${bold}${yellow}"Quero montar meu Córtex"${reset}.
+`);
+    if (installed && !restored.includes('.agents') && compareVersions(VERSION, installed.version) > 0) {
+      console.log(`${dim}Esta pasta foi instalada com a v${installed.version}. Para trazer a v${VERSION}: npx @aksp/cortex@latest update${folderHint(targetArg)}${reset}\n`);
+    }
+    return;
   }
 
   const existingFiles = fs.readdirSync(targetDir);
@@ -1048,14 +1280,6 @@ async function runInit() {
       }
     }
   }
-
-  // init cria os alvos padrão (AGENTS.md + CLAUDE.md). Os demais são gerados
-  // sob demanda: pelo onboarding (Step 7), por --targets= no init, ou por
-  // `cortex sync --targets=...`.
-  const bootstrapTargets = DEFAULT_TARGETS.concat(
-    (toolsFlag || []).filter((t) => !DEFAULT_TARGETS.includes(t))
-  );
-  const itemsToCopy = ['.agents', 'Frameworks', 'Memoria', 'Pilares', 'Ativos'];
 
   // Antes de escrever, guarda uma cópia de qualquer arquivo do usuário que vá
   // ser substituído ou alterado — o init nunca pode apagar nada em silêncio.
@@ -1075,22 +1299,16 @@ async function runInit() {
   console.log(`  ${dim}Copiando arquivos do framework...${reset}`);
 
   // .gitignore: se o usuário já tem um, mantém o dele e acrescenta o do Córtex.
-  const gitignoreSrc = fs.readFileSync(path.join(templateDir, '.gitignore'), 'utf8');
-  const gitignoreDest = path.join(targetDir, '.gitignore');
-  if (fs.existsSync(gitignoreDest)) {
-    const existing = fs.readFileSync(gitignoreDest, 'utf8');
-    if (!existing.includes('/Pilares/*')) {
-      fs.writeFileSync(gitignoreDest, existing.replace(/\s*$/, '\n\n') + gitignoreSrc);
-      console.log(`   ${green}✓${reset} .gitignore ${dim}— o seu foi mantido e as regras do Córtex foram acrescentadas${reset}`);
-    } else {
-      console.log(`   ${green}✓${reset} .gitignore ${dim}— já continha as regras do Córtex${reset}`);
-    }
+  const gitignore = ensureGitignore(targetDir, { appendToExisting: true });
+  if (gitignore === 'appended') {
+    console.log(`   ${green}✓${reset} .gitignore ${dim}— o seu foi mantido e as regras do Córtex foram acrescentadas${reset}`);
+  } else if (gitignore === 'present') {
+    console.log(`   ${green}✓${reset} .gitignore ${dim}— já continha as regras do Córtex${reset}`);
   } else {
-    fs.writeFileSync(gitignoreDest, gitignoreSrc);
     console.log(`   ${green}✓${reset} .gitignore`);
   }
 
-  for (const item of itemsToCopy) {
+  for (const item of INSTALL_ITEMS) {
     const srcPath = path.join(templateDir, item);
     if (fs.existsSync(srcPath)) {
       copyRecursiveSync(srcPath, path.join(targetDir, item));
@@ -1131,7 +1349,7 @@ ${bold}Próximos passos:${reset}
 
   3. São 4 perguntas rápidas (uns 5 minutos). Depois é só dizer ${bold}radar${reset} ou ${bold}ajuda${reset}.
 ${outrasFerramentas.length > 0 ? `
-${dim}Usa ${outrasFerramentas.map((t) => KNOWN_TARGETS[t].split(',')[0]).join(' ou ')}? Rode: npx @aksp/cortex init --targets=${outrasFerramentas.join(',')}${reset}
+${dim}Usa ${outrasFerramentas.map((t) => KNOWN_TARGETS[t].split(',')[0]).join(' ou ')}? Rode: npx @aksp/cortex init${folderHint(targetArg)} --targets=${outrasFerramentas.join(',')}${reset}
 ` : ''}
 ${dim}Dúvidas e exemplos: https://github.com/alberthpalhares/cortex${reset}
 `);
@@ -1192,6 +1410,31 @@ async function runUpdate() {
   console.log(`  ${dim}Versão instalada no projeto:${reset} ${installed ? 'v' + installed.version : 'desconhecida'}`);
   console.log(`  ${dim}Versão do CLI:${reset} v${VERSION}\n`);
 
+  // Quem instalou pelo npm até a 1.3.0 nunca recebeu o .gitignore (o pacote não
+  // o trazia). Cria quando não existe; um .gitignore do usuário nunca é tocado.
+  const reportGitignore = () => {
+    const isGitRepo = fs.existsSync(path.join(targetDir, '.git'));
+    const hasFile = fs.existsSync(path.join(targetDir, '.gitignore'));
+    let status;
+    try {
+      // Repositório Git sem .gitignore: o usuário pode estar versionando os dados
+      // de propósito (backup). Criar o arquivo faria os arquivos novos sumirem do
+      // repositório dele em silêncio — então só avisa.
+      status = isGitRepo && !hasFile ? 'missing-rules' : ensureGitignore(targetDir, { appendToExisting: false });
+    } catch (e) {
+      // Um .gitignore que não pôde ser lido não pode derrubar a atualização no fim.
+      console.log(`  ${yellow}!${reset} Não consegui conferir o .gitignore agora ${dim}(${e.code || e.message})${reset} — a atualização seguiu normalmente.`);
+      return;
+    }
+    if (status === 'created') {
+      console.log(`  ${green}✓${reset} .gitignore criado ${dim}— mantém Pilares/, Memoria/ e Ativos/ fora de um repositório Git${reset}`);
+    } else if (status === 'missing-rules' && isGitRepo) {
+      console.log(`  ${yellow}!${reset} Esta pasta é um repositório Git e o .gitignore ${hasFile ? 'não tem as regras do Córtex' : 'não existe'}.`);
+      console.log(`    Se você NÃO quer os dados do negócio no repositório, acrescente estas linhas ao .gitignore (uma por linha):`);
+      USER_GITIGNORE_DATA_RULES.forEach((rule) => console.log(`      ${rule}`));
+    }
+  };
+
   const { novos, alterados, semMudanca, preservados } = diffFrameworkLayer(templateDir, targetDir);
   const { removidosPeloFramework, personalizados } = classifyPreserved(preservados, targetDir, templateDir);
 
@@ -1231,8 +1474,24 @@ async function runUpdate() {
     console.log(`  ${yellow}~${reset} as regras de operação do cérebro estão desatualizadas e serão regeneradas`);
   }
 
-  if (!hasFrameworkChanges && !hasPruneWork && !hasBrainWork) {
+  // Arquivos de instrução na raiz diferentes do que o cérebro geraria hoje também
+  // são trabalho pendente. É o que torna o update repetível: se uma rodada parou
+  // no meio (um arquivo preso pelo OneDrive, por exemplo), rodar o mesmo comando
+  // de novo termina o serviço em vez de responder "nada para atualizar".
+  const staleTargets = hasBrainWork ? [] : findStaleTargets(targetDir, VERSION);
+  const hasStaleTargets = staleTargets.length > 0;
+  if (hasStaleTargets) {
+    console.log(`  ${yellow}~${reset} arquivo(s) de instrução desatualizado(s), que serão recompilados: ${staleTargets.join(', ')}`);
+  }
+
+  if (!hasFrameworkChanges && !hasPruneWork && !hasBrainWork && !hasStaleTargets) {
     console.log(`${green}Nada para atualizar em .agents/.${reset}`);
+    reportGitignore();
+    // Uma rodada anterior pode ter parado depois de atualizar tudo e antes de
+    // registrar as novidades: num Córtex montado elas ainda precisam ser contadas.
+    if (fs.existsSync(path.join(targetDir, CEREBRO_PATH))) {
+      writeNovidades(targetDir, templateDir, installed && installed.version, VERSION);
+    }
     writeVersionFile(targetDir, VERSION);
     return;
   }
@@ -1292,6 +1551,7 @@ async function runUpdate() {
     await handleRetiredTargets(targetDir, isForce);
   }
 
+  reportGitignore();
   writeVersionFile(targetDir, VERSION);
   const novidades = writeNovidades(targetDir, templateDir, installed && installed.version, VERSION);
 
@@ -1347,7 +1607,17 @@ async function runSync() {
 
   const naoGerados = Object.keys(KNOWN_TARGETS).filter((t) => !targets.includes(t));
   if (naoGerados.length > 0) {
-    console.log(`  ${dim}Não gerados: ${naoGerados.join(', ')} — use --targets=${naoGerados[0]} (ou --targets=all) se precisar.${reset}`);
+    console.log(`  ${dim}Não gerados: ${naoGerados.join(', ')} — para incluir algum, liste todos em --targets= (ou use --targets=all).${reset}`);
+  }
+
+  // --targets= é a lista COMPLETA: uma ferramenta que estava em uso e ficou de
+  // fora deixa de ser atualizada daqui em diante. Isso precisa ser dito às claras.
+  if (flagTargets) {
+    const dropped = readTargets(targetDir).filter((t) => !targets.includes(t) && fs.existsSync(path.join(targetDir, t)));
+    if (dropped.length > 0) {
+      console.log(`  ${yellow}Atenção:${reset} ${dropped.join(', ')} ${dropped.length > 1 ? 'saem' : 'sai'} da lista e não ${dropped.length > 1 ? 'serão mais atualizados' : 'será mais atualizado'}.`);
+      console.log(`  Para manter todos, rode: ${cyan}npx @aksp/cortex sync${folderHint(targetArg)} --targets=${Array.from(new Set(readTargets(targetDir).concat(targets))).join(',')}${reset}`);
+    }
   }
   console.log('');
 
@@ -1387,10 +1657,30 @@ async function runDoctor() {
     process.exit(1);
   }
 
+  // Três estados: nada instalado aqui; instalado, mas a conversa de montagem
+  // ainda não aconteceu; montado (segue para o diagnóstico).
   const metaPath = path.join(targetDir, 'Memoria', 'META.md');
   if (!fs.existsSync(metaPath)) {
-    console.log(`${red}Não encontrei Memoria/META.md.${reset} Este Córtex ainda não foi montado.`);
-    console.log(`Rode ${cyan}npx @aksp/cortex init${reset} e depois peça para a IA ${cyan}"montar meu córtex"${reset}.\n`);
+    const hasBrain = fs.existsSync(path.join(targetDir, CEREBRO_PATH));
+    // A skill de montagem é o sinal de que o framework do Córtex está na pasta
+    // (uma pasta .agents/ qualquer pode ser de outra ferramenta).
+    const hasFramework = fs.existsSync(path.join(targetDir, '.agents', 'skills', 'cortex-onboarding', 'SKILL.md'));
+    if (hasBrain) {
+      // Já foi montado: mandar "fazer a conversa" refaria a montagem por cima de um cérebro que existe.
+      console.log(`${red}Este Córtex tem um cérebro (${toPosix(CEREBRO_PATH)}), mas falta o índice Memoria/META.md.${reset}`);
+      console.log(`Sem o índice, a IA não sabe onde está cada informação. Traga a pasta Memoria/ de volta de uma cópia sua`);
+      console.log(`ou peça à IA: ${cyan}"recrie o Memoria/META.md a partir dos arquivos que existem em Pilares/ e Memoria/"${reset}.\n`);
+    } else if (hasFramework) {
+      console.log(`${yellow}O Córtex está instalado nesta pasta, mas ainda não foi montado.${reset}`);
+      console.log(`Falta só a conversa: abra esta pasta na sua ferramenta de IA e escreva ${cyan}"Quero montar meu Córtex"${reset}.`);
+      console.log(`${dim}Depois dela, rode este diagnóstico de novo.${reset}\n`);
+    } else if (isCortexInstalled(targetDir)) {
+      console.log(`${red}A instalação do Córtex nesta pasta está incompleta: falta a pasta .agents/.${reset}`);
+      console.log(`Rode ${cyan}npx @aksp/cortex init${reset} nesta pasta: ele repõe o que falta e não sobrescreve nada seu.\n`);
+    } else {
+      console.log(`${red}Não encontrei um Córtex nesta pasta.${reset} Confira se você está na pasta do seu negócio.`);
+      console.log(`Para instalar aqui, rode ${cyan}npx @aksp/cortex init${reset} e depois peça para a IA ${cyan}"montar meu córtex"${reset}.\n`);
+    }
     process.exit(1);
   }
 
@@ -1597,7 +1887,11 @@ async function main() {
 // para exercitar as funções puras abaixo — nada roda sozinho.
 if (require.main === module) {
   main().catch((err) => {
-    console.error(`${red}Erro ao executar CLI:${reset}`, err);
+    const { lines, detail } = describeError(err);
+    console.error(`\n${red}O Córtex encontrou um erro e parou.${reset}`);
+    console.error(`  Os dados do seu negócio (Pilares/, Memoria/, Ativos/) não foram alterados.`);
+    lines.forEach((l) => console.error(`  ${l}`));
+    console.error(`\n${dim}Detalhe técnico:\n${detail}${reset}\n`);
     process.exit(1);
   });
 }
@@ -1613,6 +1907,15 @@ module.exports = {
   pruneBackups,
   makeBackupDir,
   isCortexMounted,
+  isCortexInstalled,
+  addMissingBootstrapTargets,
+  ensureGitignore,
+  describeError,
+  folderHint,
+  findStaleTargets,
+  INSTALL_ITEMS,
+  USER_GITIGNORE,
+  EXIT_NEEDS_CONFIRMATION,
   isCortexOwnedFile,
   BACKUPS_REL,
   RETIRED_TARGETS,

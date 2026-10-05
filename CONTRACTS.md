@@ -65,12 +65,15 @@
 ```json
 {
   "version": "1.0.0",
-  "updatedAt": "2026-08-02T00:00:00.000Z"
+  "updatedAt": "2026-08-02T00:00:00.000Z",
+  "checkedAt": "2026-08-02T00:00:00.000Z"
 }
 ```
 
 - Escrito por `cortex init` e `cortex update`
 - `version` é a versão do framework instalada no projeto
+- `checkedAt` (opcional, v1.4.1+) é a última vez em que o usuário conferiu se havia versão nova; o radar usa esse campo, e cai para `updatedAt` quando ele não existe
+- A existência deste arquivo significa **instalado**, não **montado**. Montado é quando existe `Frameworks/CEREBRO.md` (ou, em instalações antigas, `Memoria/META.md`): só então o `init` se recusa a rodar de novo (v1.4.2+)
 
 ### 3.2 `.cortex/targets.json`
 

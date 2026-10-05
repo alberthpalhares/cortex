@@ -99,7 +99,7 @@ If a Córtex already exists, do NOT restart the interview from scratch. Instead:
 
 5. **After completing each block, regenerate the affected files** just like a normal onboarding would. Update `META.md` if new files were created. Do NOT regenerate `CEREBRO.md` from scratch — only update sections that changed.
 
-6. **At the end, run `npx @aksp/cortex sync`** (or recompile manually) to propagate any changes to the compiled instruction files.
+6. **At the end, run `npx @aksp/cortex sync --force`** (or recompile manually) to propagate any changes to the compiled instruction files.
 
 **File generation in Continuation mode:** Same rules as the full onboarding — create missing files from templates, fill in only what's covered, preserve existing content.
 
