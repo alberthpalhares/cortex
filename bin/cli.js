@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const readline = require('readline');
 
@@ -123,8 +124,11 @@ const RETIRED_TARGETS = {
 // `AGENTS.md` é a convenção cross-tool e leva o cérebro completo. `CLAUDE.md`
 // entra por padrão porque o Claude Code não lê AGENTS.md sozinho — mas ele é
 // gerado como um import nativo (`@AGENTS.md`), então a fonte continua única.
-// Os demais são gerados sob demanda (`cortex sync --targets=...`).
-const DEFAULT_TARGETS = ['AGENTS.md', 'CLAUDE.md'];
+// `GEMINI.md` entra por padrão desde a v1.6.0 (o Gemini CLI só lê esse arquivo)
+// e leva o cérebro completo. Os demais são gerados sob demanda
+// (`cortex sync --targets=...`). O padrão só vale para pastas que ainda não
+// escolheram: quem tem targets.json ou arquivos na raiz segue com os seus.
+const DEFAULT_TARGETS = ['AGENTS.md', 'CLAUDE.md', 'GEMINI.md'];
 
 // Sintaxe de import do Claude Code: uma linha `@caminho` dentro do CLAUDE.md é
 // resolvida pela própria ferramenta ao carregar a memória do projeto. Não é um
@@ -336,24 +340,153 @@ function buildClaudeImport(version, eol) {
   return applyEol(buildGeneratedHeader(version) + CLAUDE_IMPORT_LINE + '\n', eol || '\n');
 }
 
-// Compila o cérebro para cada alvo. Retorna a lista de arquivos escritos.
-// Todos recebem o cérebro completo, exceto o CLAUDE.md quando o AGENTS.md está
-// entre os alvos: nesse caso ele apenas importa o AGENTS.md.
+// O arquivo é do Córtex (gerado, texto de inicialização ou o ponteiro das
+// versões antigas) ou foi escrito pelo usuário?
+// Reconhece pela FORMA, não por uma palavra solta: um arquivo do usuário que
+// apenas cita "ARQUIVO GERADO PELO CÓRTEX" ou "cortex-onboarding" continua dele.
+function isCortexOwnedFile(content) {
+  return (
+    generatedHeaderEnd(content) > 0 ||
+    (plainStart(content).startsWith('# Córtex — Inicialização') && content.includes('cortex-onboarding')) ||
+    content.trim() === CLAUDE_IMPORT_LINE ||
+    (content.includes('Este arquivo é um **ponteiro**') && content.includes('CEREBRO.md'))
+  );
+}
+
+function plainStart(content) {
+  return normalizeEol(content).replace(/^﻿/, '').trimStart();
+}
+
+// Onde termina o cabeçalho de arquivo gerado (o primeiro comentário do arquivo,
+// com a frase do Córtex dentro); 0 quando o arquivo não começa por ele.
+function generatedHeaderEnd(content) {
+  const text = plainStart(content);
+  if (!text.startsWith('<!--')) return 0;
+  const end = text.indexOf('-->');
+  const header = end === -1 ? text : text.slice(0, end);
+  if (!header.includes('ARQUIVO GERADO PELO CÓRTEX')) return 0;
+  return end === -1 ? text.length : end + 3;
+}
+
+// O que o usuário (ou a ferramenta dele) escreveu num CLAUDE.md gerado, além do
+// cabeçalho e da linha do import. Vazio quando o arquivo é só o que o Córtex gravou.
+function extraTextInGeneratedClaude(content) {
+  const end = generatedHeaderEnd(content);
+  if (end === 0) return '';
+  return plainStart(content).slice(end).split('\n')
+    .filter((line) => line.trim() !== '' && line.trim() !== CLAUDE_IMPORT_LINE)
+    .join('\n');
+}
+
+// Texto em UTF-8 de verdade? Um arquivo salvo em ANSI ou UTF-16 (Bloco de Notas
+// antigo, `>` do PowerShell) perderia os acentos se fosse lido e regravado.
+function isUtf8Text(raw) {
+  return !raw.includes(0) && Buffer.from(raw.toString('utf8'), 'utf8').equals(raw);
+}
+
+function isSymlink(filePath) {
+  try {
+    return fs.lstatSync(filePath).isSymbolicLink();
+  } catch (e) {
+    return false;
+  }
+}
+
+// Grava um arquivo de instrução da raiz sem nunca escrever ATRAVÉS de um
+// atalho (link simbólico): um CLAUDE.md que aponta para o AGENTS.md faria o
+// import ser gravado por cima do cérebro. O atalho vira um arquivo próprio.
+function writeRootFile(dest, body) {
+  if (isSymlink(dest)) fs.unlinkSync(dest);
+  fs.writeFileSync(dest, body);
+}
+
+// Acrescenta a linha do import ao CLAUDE.md do usuário sem regravar o texto
+// dele: os bytes que ele escreveu (acentos, BOM, fim de linha) ficam como estão.
+function appendClaudeImport(dest, raw) {
+  const text = raw.toString('utf8');
+  const eol = detectEol(text);
+  const gap = /\n[ \t]*\r?\n[ \t]*$/.test(text) ? '' : (/\n[ \t]*$/.test(text) ? eol : eol + eol);
+  if (isSymlink(dest)) {
+    fs.unlinkSync(dest);
+    fs.writeFileSync(dest, raw);
+  }
+  fs.appendFileSync(dest, gap + CLAUDE_IMPORT_LINE + eol);
+}
+
+// CLAUDE.md que o usuário escreveu, num projeto em que o AGENTS.md leva o
+// cérebro: o texto dele fica e só precisa da linha que importa o AGENTS.md.
+function isUserClaudeFile(target, targets, content) {
+  return target === 'CLAUDE.md' && targets.includes('AGENTS.md') && !isCortexOwnedFile(content);
+}
+
+function hasClaudeImport(content) {
+  return normalizeEol(content).split('\n').some((line) => line.trim() === CLAUDE_IMPORT_LINE);
+}
+
+// Compila o cérebro para cada alvo. Todos recebem o cérebro completo, exceto o
+// CLAUDE.md quando o AGENTS.md está entre os alvos: nesse caso ele apenas
+// importa o AGENTS.md.
+// Um arquivo que o USUÁRIO escreveu nunca some em silêncio: o CLAUDE.md dele é
+// mantido (ganha só a linha do import); qualquer outro é copiado para
+// .cortex/backups/originais-<data>/ antes de ser substituído.
+// Também ganha cópia antes de ser trocado: o CLAUDE.md dele que não está em
+// UTF-8 (acrescentar a linha estragaria os acentos) e o CLAUDE.md gerado em
+// que alguém escreveu depois do import.
+// Retorna { written, kept, backedUp, backupDir, notUtf8, unlinked }.
 function compileTargets(targetDir, targets, version) {
   const cerebroPath = path.join(targetDir, CEREBRO_PATH);
   const cerebro = fs.readFileSync(cerebroPath, 'utf8');
   const content = compileBrain(cerebro, version);
   const claudeImports = targets.includes('AGENTS.md');
 
-  const written = [];
+  const result = { written: [], kept: [], backedUp: [], backupDir: null, notUtf8: [], unlinked: [] };
   for (const target of targets) {
+    const dest = path.join(targetDir, target);
+    const raw = fs.existsSync(dest) ? fs.readFileSync(dest) : null;
+    const mine = raw === null ? null : raw.toString('utf8');
+    if (isSymlink(dest)) result.unlinked.push(target);
+    let userText = mine !== null && !isCortexOwnedFile(mine);
+    if (userText && isUserClaudeFile(target, targets, mine)) {
+      if (hasClaudeImport(mine) || isUtf8Text(raw)) {
+        if (!hasClaudeImport(mine)) appendClaudeImport(dest, raw);
+        else result.unlinked.pop();
+        result.kept.push(target);
+        continue;
+      }
+      result.notUtf8.push(target);
+    }
+    if (!userText && mine !== null && target === 'CLAUDE.md' && claudeImports) {
+      userText = extraTextInGeneratedClaude(mine) !== '';
+    }
+    if (userText) {
+      if (!result.backupDir) result.backupDir = makeBackupDir(targetDir, 'originais');
+      fs.copyFileSync(dest, path.join(result.backupDir, target.replace(/^\./, '_')));
+      result.backedUp.push(target);
+    }
     const body = target === 'CLAUDE.md' && claudeImports
       ? buildClaudeImport(version, detectEol(cerebro))
       : content;
-    fs.writeFileSync(path.join(targetDir, target), body);
-    written.push(target);
+    writeRootFile(dest, body);
+    result.written.push(target);
   }
-  return written;
+  return result;
+}
+
+// Conta ao usuário o que a compilação fez com os arquivos que eram dele.
+function reportUserTargets(targetDir, compiled) {
+  for (const t of compiled.kept) {
+    console.log(`   ${green}✓${reset} ${t} ${dim}— é um arquivo seu: mantive o seu texto, só com a linha ${CLAUDE_IMPORT_LINE} que carrega o cérebro${reset}`);
+  }
+  if (compiled.backedUp.length > 0) {
+    console.log(`  ${yellow}!${reset} ${compiled.backedUp.join(', ')} ${compiled.backedUp.length > 1 ? 'tinham' : 'tinha'} um texto seu, que foi substituído pelo cérebro.`);
+    console.log(`    Guardei uma cópia do que você escreveu em ${toPosix(path.relative(targetDir, compiled.backupDir))} ${dim}(essa cópia não é apagada sozinha)${reset}`);
+  }
+  for (const t of compiled.notUtf8 || []) {
+    console.log(`    ${dim}O seu ${t} estava salvo num formato de texto antigo (não era UTF-8): acrescentar a linha estragaria os acentos, por isso ele foi para a cópia acima.${reset}`);
+  }
+  for (const t of compiled.unlinked || []) {
+    console.log(`  ${yellow}!${reset} ${t} era um atalho para outro arquivo: virou um arquivo próprio, para eu não gravar por cima do arquivo de destino.`);
+  }
 }
 
 // Arquivos de alvos aposentados que ainda estão na raiz do projeto. Só conta
@@ -515,13 +648,23 @@ function listRealFiles(targetDir) {
 // Retorna um objeto chave→valor ou {} se não houver frontmatter.
 // Entende: números, null, `{}`, objeto em linha (`{"a": 1}`), objeto em bloco
 // (chave sem valor seguida de linhas indentadas), BOM e comentários `# ...`
-// (só quando precedidos de espaço, para não cortar um `#` dentro de um valor).
+// (só quando precedidos de espaço e fora de aspas, para não cortar um `#`
+// dentro de um valor nem de um nome como "Pacote #2"). `~`, `Null` e aspas
+// vazias contam como null: campo por preencher.
+function stripComment(v) {
+  let inQuotes = false;
+  for (let i = 0; i < v.length; i++) {
+    if (v[i] === '"') inQuotes = !inQuotes;
+    else if (v[i] === '#' && !inQuotes && i > 0 && /\s/.test(v[i - 1])) return v.slice(0, i).trim();
+  }
+  return v.trim();
+}
+
 function parseSimpleFrontmatter(content) {
   const normalized = normalizeEol(content).replace(/^\uFEFF/, '');
   const match = normalized.match(/^---\n([\s\S]*?)\n---[ \t]*(\n|$)/);
   if (!match) return {};
   const lines = match[1].split('\n');
-  const stripComment = (v) => v.replace(/\s+#.*$/, '').trim();
   const result = {};
 
   for (let i = 0; i < lines.length; i++) {
@@ -539,7 +682,7 @@ function parseSimpleFrontmatter(content) {
       while (j < lines.length && (/^\s+\S/.test(lines[j]) || lines[j].trim() === '')) {
         const sub = lines[j].trim();
         const c = sub.indexOf(':');
-        if (sub && c > 0) {
+        if (sub && c > 0 && !sub.startsWith('#')) {
           const k = sub.slice(0, c).trim().replace(/^["']|["']$/g, '');
           const v = stripComment(sub.slice(c + 1));
           block[k] = /^-?\d+(\.\d+)?$/.test(v) ? parseFloat(v) : v;
@@ -547,7 +690,7 @@ function parseSimpleFrontmatter(content) {
         j++;
       }
       result[key] = Object.keys(block).length > 0 ? block : null;
-    } else if (valueStr === 'null') {
+    } else if (/^(null|~|""|'')$/i.test(valueStr)) {
       result[key] = null;
     } else if (valueStr === '{}') {
       result[key] = {};
@@ -560,6 +703,91 @@ function parseSimpleFrontmatter(content) {
     }
   }
   return result;
+}
+
+// Campos numéricos que o Guardião de Margem lê no cabeçalho de 03_Financeiro e
+// 04_Comercial (ver .agents/cortex/PROTOCOLO_AUTONOMIA.md), além dos itens de
+// `custos_variaveis`.
+const MARGIN_NUMBER_FIELDS = ['margem_alvo', 'margem_minima', 'custo_variavel_padrao',
+  'imposto_pct', 'taxas_pct', 'preco_piso', 'desconto_max'];
+
+// Diz o que há de errado num valor que deveria ser número puro, ou null se
+// está certo (ou vazio: campo por preencher é outra pendência). Pega o jeito
+// brasileiro de escrever: "1.500" (lido como 1,5), "1.500,00", "30%", "R$ 700".
+// O ponto como separador de milhar só é suspeito em valores em R$: num
+// percentual, "6.125" é uma alíquota com três casas, e está certa.
+function describeBadNumber(raw, isPercent) {
+  const v = raw.trim().replace(/^["']|["']$/g, '').trim();
+  if (v === '' || /^(null|~)$/i.test(v) || v === '{}') return null;
+  if (!isPercent && /^-?[1-9]\d{0,2}\.\d{3}$/.test(v)) {
+    const whole = v.replace('.', '');
+    return `está escrito "${v}", que é lido como ${String(parseFloat(v)).replace('.', ',')}. Se o valor é ${whole}, escreva ${whole} (sem o ponto).`;
+  }
+  if (/^-?\d+(\.\d+)?$/.test(v)) return null;
+  const bare = v.replace(/R\$|%|\s/gi, '');
+  if (/^-?(\d{1,3}(\.\d{3})+|\d+)(,\d+)?$/.test(bare)) {
+    const fixed = String(parseFloat(bare.replace(/\./g, '').replace(',', '.')));
+    return `está escrito "${v}". Deixe só o número: ${fixed}${fixed.includes('.') ? ' (com ponto no lugar da vírgula)' : ''}`;
+  }
+  if (/^-?\d+\.\d+$/.test(bare)) return `está escrito "${v}". Deixe só o número: ${bare}`;
+  return `está escrito "${v}". Deixe só o número, sem letras nem símbolos (por exemplo: 30).`;
+}
+
+// Confere, no texto cru do cabeçalho (o parser acima já teria transformado
+// "1.500" em 1.5), os números que o Guardião de Margem usa. Devolve frases
+// prontas para o doctor mostrar; nunca altera o arquivo.
+function findNumberIssues(content) {
+  const normalized = normalizeEol(content).replace(/^﻿/, '');
+  const match = normalized.match(/^---\n([\s\S]*?)\n---[ \t]*(\n|$)/);
+  if (!match) {
+    return normalized.startsWith('---\n')
+      ? ['o cabeçalho do topo não está fechado: falta a linha --- logo depois dos números. Sem ela, a IA não encontra suas margens e preços.']
+      : [];
+  }
+  const lines = match[1].split('\n');
+  const unquote = (k) => k.trim().replace(/^["']|["']$/g, '');
+  const issues = [];
+  const check = (label, raw, isPercent) => {
+    const problem = describeBadNumber(raw, isPercent);
+    if (problem) issues.push(`${label} ${problem}`);
+  };
+  // Margem é porcentagem inteira (35, não 0.35): abaixo de 1% é quase sempre
+  // fração de planilha. Só nas margens — imposto e taxa de 0,5% existem.
+  const marginAsFraction = (key, raw) => {
+    if (key !== 'margem_alvo' && key !== 'margem_minima') return false;
+    const written = unquote(raw);
+    const v = written.replace(/%|\s/g, '').replace(',', '.');
+    if (!/^0?\.\d+$/.test(v) || !(parseFloat(v) > 0)) return false;
+    const pct = Math.round(parseFloat(v) * 10000) / 100;
+    issues.push(`${key} está escrito "${written}", que é lido como ${v.replace(/^\./, '0.').replace('.', ',')}% (menos de 1%). Este campo é a porcentagem inteira: se a sua margem é ${String(pct).replace('.', ',')}%, escreva ${pct}.`);
+    return true;
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const colonIdx = line.indexOf(':');
+    if (/^\s/.test(line) || colonIdx === -1) continue;
+    const key = line.slice(0, colonIdx).trim();
+    const valueStr = stripComment(line.slice(colonIdx + 1));
+    if (MARGIN_NUMBER_FIELDS.includes(key)) {
+      if (!marginAsFraction(key, valueStr)) check(key, valueStr, key !== 'preco_piso');
+    } else if (key === 'custos_variaveis' && valueStr.startsWith('{')) {
+      // O valor sem aspas leva junto a vírgula decimal ("12,50"), desde que
+      // depois dela venha o fim do item — senão é o separador do próximo par.
+      for (const pair of valueStr.matchAll(/("[^"]*"|[^\s,{:"]+)\s*:\s*("[^"]*"|[^,}]+(?:,\d+(?=\s*[,}]))?)/g)) {
+        check(`"${unquote(pair[1])}" (em custos_variaveis)`, pair[2]);
+      }
+    } else if (key === 'custos_variaveis' && valueStr === '') {
+      for (let j = i + 1; j < lines.length && (/^\s+\S/.test(lines[j]) || lines[j].trim() === ''); j++) {
+        const sub = lines[j].trim();
+        if (sub.startsWith('#')) continue; // linha só de comentário
+        // O nome pode ter ":" ou "#" entre aspas; o comentário sai só do valor.
+        const m = sub.match(/^("[^"]*"|'[^']*'|[^:]+?)\s*:(.*)$/);
+        if (m) check(`"${unquote(m[1])}" (em custos_variaveis)`, stripComment(m[2]));
+      }
+    }
+  }
+  return issues;
 }
 
 // Conta marcadores <!-- REVISAR --> e seções em branco num pilar.
@@ -690,34 +918,48 @@ ${bold}USO:${reset}
   $ npx @aksp/cortex init [nome-da-pasta]
   $ npx @aksp/cortex update [pasta]
   $ npx @aksp/cortex sync [pasta]
+  $ npx @aksp/cortex backup [pasta]
   $ npx @aksp/cortex doctor [pasta]
 
   ${dim}Sempre com o prefixo @aksp/ — "cortex" sozinho é outro pacote no npm.${reset}
 
 ${bold}COMANDOS:${reset}
   ${green}init [pasta]${reset}   Instala o Córtex na pasta indicada (ou na pasta atual).
-                  Cria AGENTS.md (Codex, OpenCode e compatíveis) e CLAUDE.md (Claude Code).
+                  Cria AGENTS.md (Codex, OpenCode e compatíveis), CLAUDE.md (Claude Code)
+                  e GEMINI.md (Gemini CLI), e deixa na pasta o COMECE-AQUI.txt (os próximos
+                  passos e as frases do dia a dia).
                   Em pasta já instalada e ainda não montada, só acrescenta o que faltar.
-                  ${dim}--targets=GEMINI.md,.cursorrules${reset}   inclui Gemini CLI e Cursor
-                  ${dim}--targets=all${reset}                      inclui todas as ferramentas conhecidas
+                  ${dim}--targets=.cursorrules${reset}   inclui também o arquivo .cursorrules (Cursor)
+                  ${dim}--targets=all${reset}            inclui todas as ferramentas conhecidas
   ${green}update [pasta]${reset} Atualiza APENAS a camada de framework (.agents/) para a versão instalada do CLI.
                   Nunca toca em Pilares/, Memoria/, Ativos/ nem na área CORTEX:BUSINESS do cérebro.
                   Regenera a área CORTEX:FRAMEWORK do cérebro e recompila os arquivos de instrução.
+                  No fim, diz onde ficou o backup e como voltar à versão anterior.
                   ${dim}--prune${reset}       Remove arquivos que o framework descontinuou (deixaram de existir no
                                 manifesto da versão atual). Nunca remove customizações suas — só o que
                                 o próprio framework já possuiu e abandonou. Um backup já é feito antes.
   ${green}sync [pasta]${reset}   Compila Frameworks/CEREBRO.md nos arquivos de instrução que a sua ferramenta de IA lê.
-                  AGENTS.md leva o cérebro completo; CLAUDE.md o importa (@AGENTS.md).
-                  ${dim}--targets=GEMINI.md,.cursorrules${reset}   escolhe os alvos (grava em .cortex/targets.json)
-                  ${dim}--targets=all${reset}                      gera todos os alvos conhecidos
+                  AGENTS.md e GEMINI.md levam o cérebro completo; CLAUDE.md o importa (@AGENTS.md).
+                  Numa pasta que já tem os seus arquivos escolhidos, gera só esses.
+                  ${dim}--targets=AGENTS.md,CLAUDE.md${reset}   escolhe os alvos (grava em .cortex/targets.json)
+                  ${dim}--targets=all${reset}                   gera todos os alvos conhecidos
+                  Um CLAUDE.md que você escreveu é mantido; outro arquivo seu com o mesmo nome
+                  ganha uma cópia em .cortex/backups/ antes de ser substituído.
+  ${green}backup [pasta]${reset} Guarda uma cópia dos dados do negócio (Pilares/, Memoria/, Ativos/ e o
+                  Frameworks/CEREBRO.md) em .cortex/backups/dados-<data>/. Não altera nada e
+                  essas cópias nunca são apagadas sozinhas. Atalhos para outras pastas não são
+                  seguidos: a cópia avisa quais ficaram de fora.
   ${green}doctor [pasta]${reset} Audita a estrutura do Córtex sem depender de IA: pilares faltando,
-                  marcadores REVISAR pendentes, frontmatter incompleto, saúde do cérebro.
+                  marcadores REVISAR pendentes, frontmatter incompleto, número de margem ou
+                  preço escrito de um jeito que muda o valor (ex.: 1.500, 30%), saúde do cérebro.
                   Avisa se existe versão nova (consulta só o número da versão no npm).
                   ${dim}--offline${reset}     não consulta o npm
                   ${dim}Aliases: checkup, diagnostico${reset}
   ${green}--force, -f${reset}    Em init, update e sync: não pede confirmação.
-                  ${dim}Sem terminal interativo (uma IA rodando o comando, um script), nada é
-                  alterado sem --force: o comando mostra o plano e sai com código 2.${reset}
+                  ${dim}Sem terminal interativo (uma IA rodando o comando, um script), o que
+                  precisaria de confirmação não é feito sem --force: o comando mostra o
+                  plano e sai com código 2. O init numa pasta sem nenhum nome igual ao do
+                  que o Córtex cria não tem o que confirmar: instala direto, só acrescentando.${reset}
   ${green}--help, -h${reset}     Exibe esta mensagem de ajuda.
   ${green}--version, -v${reset}  Exibe a versão atual do CLI.
 
@@ -727,6 +969,7 @@ ${bold}EXEMPLOS:${reset}
   $ npx @aksp/cortex@latest update
   $ npx @aksp/cortex update --prune
   $ npx @aksp/cortex sync --targets=all
+  $ npx @aksp/cortex@latest backup
   $ npx @aksp/cortex doctor
 `);
 }
@@ -804,7 +1047,14 @@ function describeError(err) {
   };
 }
 
-function copyRecursiveSync(src, dest) {
+// Com `skipped` (uma lista), a cópia não atravessa atalhos (links simbólicos e
+// junções de pasta): anota o caminho e segue. É o que o `backup` usa, para um
+// atalho que aponta para a própria pasta não fazer a cópia nunca terminar.
+function copyRecursiveSync(src, dest, skipped) {
+  if (skipped && isSymlink(src)) {
+    skipped.push(src);
+    return;
+  }
   const exists = fs.existsSync(src);
   const stats = exists && fs.statSync(src);
   const isDirectory = exists && stats.isDirectory();
@@ -816,7 +1066,8 @@ function copyRecursiveSync(src, dest) {
     fs.readdirSync(src).forEach((childItemName) => {
       copyRecursiveSync(
         path.join(src, childItemName),
-        path.join(dest, childItemName)
+        path.join(dest, childItemName),
+        skipped
       );
     });
   } else if (exists) {
@@ -1115,20 +1366,52 @@ function makeBackupDir(targetDir, label) {
   return dir;
 }
 
-// Mantém só os últimos N backups (por nome, que começa com data ordenável dentro do rótulo).
+// Mantém só os últimos N backups de atualização (`update-<data>`, nome ordenável).
+// Só esses giram: são cópias do framework, que dá para baixar de novo. As pastas
+// `init-`, `originais-` (arquivos que o usuário escreveu) e `dados-` (cópia dos
+// dados do negócio) não têm como ser refeitas e nunca são apagadas aqui.
 function pruneBackups(targetDir, keep) {
   const base = path.join(targetDir, BACKUPS_REL);
   if (!fs.existsSync(base)) return 0;
   const entries = fs.readdirSync(base)
-    .filter((n) => fs.statSync(path.join(base, n)).isDirectory())
-    .sort((x, y) => {
-      const tx = x.slice(x.indexOf('-') + 1);
-      const ty = y.slice(y.indexOf('-') + 1);
-      return tx < ty ? 1 : tx > ty ? -1 : 0;
-    });
+    .filter((n) => n.startsWith('update-') && fs.statSync(path.join(base, n)).isDirectory())
+    .sort()
+    .reverse();
   const old = entries.slice(keep === undefined ? BACKUPS_TO_KEEP : keep);
   for (const n of old) fs.rmSync(path.join(base, n), { recursive: true, force: true });
   return old.length;
+}
+
+// Marca, dentro de um backup `update-…`, de que a atualização que o criou ainda
+// não terminou. Guarda a versão de onde ela partiu.
+const UPDATE_PENDING_FILE = '.atualizacao-em-andamento';
+
+// O backup de uma atualização interrompida que partiu desta mesma versão.
+function findPendingUpdateBackup(targetDir, fromVersion) {
+  const base = path.join(targetDir, BACKUPS_REL);
+  if (!fs.existsSync(base)) return null;
+  const names = fs.readdirSync(base).filter((n) => n.startsWith('update-')).sort().reverse();
+  for (const n of names) {
+    try {
+      if (fs.readFileSync(path.join(base, n, UPDATE_PENDING_FILE), 'utf8').trim() === fromVersion) return path.join(base, n);
+    } catch (e) {
+      // sem a marca: é o backup de uma atualização que terminou
+    }
+  }
+  return null;
+}
+
+// A partir desta versão o comando antigo sabe preservar o CLAUDE.md do usuário
+// e as cópias init-/originais-/dados-. Antes dela, `npx @aksp/cortex@<antiga>
+// update --force` regravaria o CLAUDE.md e apagaria essas cópias: para essas
+// versões o caminho de volta é manual, a partir do backup da atualização.
+const ROLLBACK_BY_COMMAND_SINCE = '1.6.0';
+
+// Como voltar da versão `current` para a `previous`: 'comando', 'manual' ou
+// null (não há versão anterior para oferecer).
+function rollbackAdvice(previous, current) {
+  if (!/^\d+\.\d+\.\d+$/.test(String(previous)) || compareVersions(previous, current) >= 0) return null;
+  return compareVersions(previous, ROLLBACK_BY_COMMAND_SINCE) >= 0 ? 'comando' : 'manual';
 }
 
 // "Montado" = a conversa de montagem já aconteceu: existe o cérebro (ou, num
@@ -1150,29 +1433,81 @@ function isCortexInstalled(targetDir) {
 // dados chegam vazias (só um .gitkeep); quem as preenche é a conversa de montagem.
 const INSTALL_ITEMS = ['.agents', 'Frameworks', 'Memoria', 'Pilares', 'Ativos'];
 
+// O bilhete em texto simples para quem abre a pasta: como começar e as frases
+// do dia a dia. A fonte vem com o framework (.agents/cortex/); a cópia da raiz
+// é a que o dono lê, imprime e pode editar.
+const START_HERE_FILE = 'COMECE-AQUI.txt';
+const START_HERE_REL_PATH = path.join('.agents', 'cortex', START_HERE_FILE);
+
+// Grava (ou renova) a cópia da raiz a partir da fonte já instalada em .agents/.
+// `previous` é o texto da fonte ANTES de uma atualização (null no init ou quando
+// a versão anterior não trazia o arquivo). Só troca a cópia que continua igual
+// à fonte anterior: um arquivo que o dono editou, ou um arquivo dele com o
+// mesmo nome, fica como está; e o que ele apagou não volta.
+// A cópia leva a marca UTF-8 (BOM) para os acentos abrirem certo em qualquer
+// Bloco de Notas.
+// O `update` passa `sourceDir` (o pacote) e chama isto ANTES de trocar os
+// arquivos de .agents/: se a rodada parar no meio, a fonte instalada ainda é a
+// anterior (ou a cópia já é a nova) e repetir o comando termina o serviço.
+function refreshStartHere(targetDir, previous, sourceDir) {
+  const srcPath = path.join(sourceDir || targetDir, START_HERE_REL_PATH);
+  if (!fs.existsSync(srcPath)) return 'absent';
+  const plain = (text) => normalizeEol(String(text).replace(/^﻿/, ''));
+  const fresh = plain(fs.readFileSync(srcPath, 'utf8'));
+  const dest = path.join(targetDir, START_HERE_FILE);
+  if (fs.existsSync(dest)) {
+    const mine = plain(fs.readFileSync(dest, 'utf8'));
+    if (mine === fresh) return 'current';
+    if (previous === null || mine !== plain(previous)) return 'kept';
+  } else if (previous !== null) {
+    return 'removed';
+  }
+  fs.writeFileSync(dest, '﻿' + fresh);
+  return 'written';
+}
+
+function readStartHereSource(targetDir) {
+  try {
+    return fs.readFileSync(path.join(targetDir, START_HERE_REL_PATH), 'utf8');
+  } catch (e) {
+    return null;
+  }
+}
+
 // Cria os arquivos de inicialização que ainda não existem para as ferramentas
 // pedidas. Nunca sobrescreve um arquivo existente. Retorna `created` (os que
-// criou) e `kept` (os que já existiam, foram escritos pelo usuário e por isso
-// continuam sem as instruções do Córtex).
+// criou), `imported` (o CLAUDE.md do usuário que ganhou a linha do import, como
+// no init novo e no sync) e `kept` (os que já existiam, foram escritos pelo
+// usuário e por isso continuam sem as instruções do Córtex).
 function addMissingBootstrapTargets(targetDir, templateDir, targets) {
   const bootstrap = fs.readFileSync(path.join(templateDir, 'AGENTS.md'), 'utf8');
   const created = [];
   const kept = [];
+  const imported = [];
   for (const target of targets) {
     const dest = path.join(targetDir, target);
     if (fs.existsSync(dest)) {
-      let content = '';
+      let raw = null;
       try {
-        content = fs.readFileSync(dest, 'utf8');
+        raw = fs.readFileSync(dest);
       } catch (e) {}
-      const ready = isCortexOwnedFile(content) || (target === 'CLAUDE.md' && content.includes(CLAUDE_IMPORT_LINE));
-      if (!ready) kept.push(target);
+      const content = raw === null ? '' : raw.toString('utf8');
+      const ready = isCortexOwnedFile(content) || (target === 'CLAUDE.md' && hasClaudeImport(content));
+      if (ready) continue;
+      // Um atalho ou um texto que não está em UTF-8 fica como está (com aviso):
+      // aqui não há cópia de segurança feita antes.
+      if (raw !== null && isUserClaudeFile(target, targets, content) && isUtf8Text(raw) && !isSymlink(dest)) {
+        appendClaudeImport(dest, raw);
+        imported.push(target);
+      } else {
+        kept.push(target);
+      }
       continue;
     }
-    fs.writeFileSync(dest, target === 'CLAUDE.md' ? `${CLAUDE_IMPORT_LINE}\n` : bootstrap);
+    writeRootFile(dest, target === 'CLAUDE.md' ? `${CLAUDE_IMPORT_LINE}\n` : bootstrap);
     created.push(target);
   }
-  return { created, kept };
+  return { created, kept, imported };
 }
 
 // Trecho " <pasta>" para as dicas de comando. Quem instalou com
@@ -1199,20 +1534,48 @@ function findStaleTargets(targetDir, version) {
       ? buildClaudeImport(version, detectEol(cerebro))
       : full;
     try {
-      return fs.readFileSync(filePath, 'utf8') !== expected;
+      const current = fs.readFileSync(filePath, 'utf8');
+      // O CLAUDE.md do usuário é mantido pela compilação: está em dia se já importa o AGENTS.md.
+      if (isUserClaudeFile(target, targets, current)) return !hasClaudeImport(current);
+      return current !== expected;
     } catch (e) {
       return true;
     }
   });
 }
 
-// O arquivo é do Córtex (gerado ou texto de inicialização) ou foi escrito pelo usuário?
-function isCortexOwnedFile(content) {
-  return (
-    content.includes('ARQUIVO GERADO PELO CÓRTEX') ||
-    content.includes('cortex-onboarding') ||
-    content.trim() === CLAUDE_IMPORT_LINE
-  );
+// Pastas onde o Córtex ficaria misturado com as coisas pessoais de quem
+// instala: a pasta do usuário, a Área de Trabalho, Documentos e Downloads
+// (também dentro do OneDrive) e a raiz do disco. Um terminal aberto pelo menu
+// Iniciar começa justamente na pasta do usuário.
+// Também as pastas do sistema: um terminal aberto "como administrador" começa
+// em C:\Windows\System32.
+const PERSONAL_FOLDER_NAMES = ['desktop', 'documents', 'downloads', 'área de trabalho', 'area de trabalho', 'documentos'];
+
+// Só no Windows essas variáveis existem; nos outros sistemas a lista fica vazia
+// (lá, gravar numa pasta do sistema já exige permissão especial).
+function systemFolders() {
+  return ['SystemRoot', 'ProgramFiles', 'ProgramFiles(x86)', 'ProgramData'].map((k) => process.env[k]).filter(Boolean);
+}
+
+function isPersonalRootFolder(dir, home) {
+  const norm = (p) => {
+    try {
+      return fs.realpathSync(p).toLowerCase();
+    } catch (e) {
+      return path.resolve(p).toLowerCase();
+    }
+  };
+  const d = norm(dir);
+  const h = norm(home || os.homedir());
+  if (d === h || d === path.parse(d).root) return true;
+  // Em ou abaixo de uma pasta do sistema (a pasta temporária, que em alguns
+  // ambientes fica dentro de uma delas, não conta).
+  const within = (base) => d === base || d.startsWith(base.replace(/[\\/]+$/, '') + path.sep);
+  if (systemFolders().map(norm).some(within) && !within(norm(os.tmpdir()))) return true;
+  if (!PERSONAL_FOLDER_NAMES.includes(path.basename(d))) return false;
+  const parent = path.dirname(d);
+  return parent === h || (path.dirname(parent) === h && path.basename(parent).startsWith('onedrive'));
 }
 
 async function runInit() {
@@ -1248,7 +1611,7 @@ async function runInit() {
     process.exit(1);
   }
 
-  // init cria os alvos padrão (AGENTS.md + CLAUDE.md). Os demais são gerados
+  // init cria os alvos padrão (AGENTS.md, CLAUDE.md e GEMINI.md). Os demais são gerados
   // sob demanda: pelo onboarding (Step 7), por --targets= no init, ou por
   // `cortex sync --targets=...`.
   const bootstrapTargets = DEFAULT_TARGETS.concat(
@@ -1272,18 +1635,21 @@ async function runInit() {
     // O framework reposto é o desta versão do CLI.
     if (restored.includes('.agents')) writeVersionFile(targetDir, VERSION);
 
-    const { created, kept } = addMissingBootstrapTargets(targetDir, templateDir, bootstrapTargets);
+    const { created, kept, imported } = addMissingBootstrapTargets(targetDir, templateDir, bootstrapTargets);
     const gitignore = ensureGitignore(targetDir, { appendToExisting: false });
 
     console.log(`${green}✓${reset} O Córtex já está instalado nesta pasta.`);
     restored.forEach((item) => console.log(`   ${green}+${reset} ${item} ${dim}— estava faltando e foi reposta${reset}`));
     created.forEach((t) => console.log(`   ${green}+${reset} ${t} ${dim}— ${KNOWN_TARGETS[t]}${reset}`));
     if (gitignore === 'created') console.log(`   ${green}+${reset} .gitignore`);
+    for (const t of imported) {
+      console.log(`   ${green}✓${reset} ${t} ${dim}— é um arquivo seu: mantive o seu texto e só acrescentei a linha ${CLAUDE_IMPORT_LINE}${reset}`);
+    }
     for (const t of kept) {
       console.log(`   ${yellow}!${reset} ${t} já existia e foi mantido como está — ele não tem as instruções do Córtex.`);
       console.log(`     ${dim}Para o Córtex prepará-lo, renomeie o seu arquivo e rode este comando de novo.${reset}`);
     }
-    if (restored.length === 0 && created.length === 0 && kept.length === 0 && gitignore !== 'created') {
+    if (restored.length === 0 && created.length === 0 && kept.length === 0 && imported.length === 0 && gitignore !== 'created') {
       console.log(`  ${dim}Nenhum arquivo novo era necessário.${reset}`);
     }
     console.log(`
@@ -1296,15 +1662,15 @@ ${bold}Falta só a conversa que monta o cérebro do seu negócio:${reset}
     return;
   }
 
-  const existingFiles = fs.readdirSync(targetDir);
-  if (existingFiles.length > 0) {
-    if (!isForce) {
-      console.log(`  ${yellow}⚠️ A pasta de destino não está vazia:${reset} ${targetDir}`);
-      const confirmed = await askConfirmation(`  Deseja copiar a estrutura do Córtex mesmo assim? (s/N): `);
-      if (!confirmed) {
-        console.log(`\n${red}Operação cancelada.${reset}\n`);
-        process.exit(0);
-      }
+  if (!isForce && isPersonalRootFolder(targetDir)) {
+    console.log(`  Esta é uma pasta de uso geral do seu computador: ${targetDir}`);
+    console.log(`  O Córtex cria aqui as pastas dele (Pilares, Memoria, Frameworks, Ativos), e elas ficariam misturadas com as suas coisas.`);
+    console.log(`  O melhor é uma pasta só para o negócio. Para criar a pasta e instalar nela, rode (troque pelo nome que quiser):`);
+    console.log(`    ${cyan}npx @aksp/cortex init "Meu Negocio"${reset}\n`);
+    const here = await askConfirmation(`  Prefere instalar aqui mesmo assim? (s/N): `);
+    if (!here) {
+      console.log(`\nNada foi alterado.\n`);
+      process.exit(0);
     }
   }
 
@@ -1315,6 +1681,46 @@ ${bold}Falta só a conversa que monta o cérebro do seu negócio:${reset}
     if (!fs.existsSync(fp)) return false;
     return f === '.gitignore' || !isCortexOwnedFile(fs.readFileSync(fp, 'utf8'));
   });
+
+  // Pasta com arquivos é o caso normal (o README manda instalar na pasta do
+  // negócio). Só há o que confirmar quando algo do usuário tem o mesmo nome de
+  // algo que o init grava: uma das pastas do Córtex, ou um arquivo de instrução
+  // que será substituído (o .gitignore e o CLAUDE.md dele são mantidos).
+  const existingFiles = fs.readdirSync(targetDir);
+  const itemNames = INSTALL_ITEMS.map((i) => i.toLowerCase());
+  const sameFolders = existingFiles.filter((f) => itemNames.includes(f.toLowerCase()));
+  const replacedFiles = userFiles.filter((f) => f !== '.gitignore' && f !== 'CLAUDE.md');
+
+  // Um ARQUIVO do usuário no lugar de uma pasta que o Córtex precisa criar: a
+  // cópia quebraria no meio. Para antes de gravar qualquer coisa, dizendo o que fazer.
+  const blockers = INSTALL_ITEMS.filter((item) => {
+    const p = path.join(targetDir, item);
+    return fs.existsSync(p) && !fs.statSync(p).isDirectory();
+  });
+  if (blockers.length > 0) {
+    const um = blockers.length === 1;
+    console.log(`  ${yellow}Nesta pasta existe ${um ? 'um arquivo chamado' : 'arquivos chamados'} ${blockers.join(', ')}, e o Córtex precisa criar ${um ? 'uma pasta com esse nome' : 'pastas com esses nomes'}.${reset}`);
+    console.log(`  Renomeie ${um ? 'o seu arquivo' : 'os seus arquivos'} (por exemplo, para "${blockers[0]}-antigo") e rode o mesmo comando de novo.`);
+    console.log(`\nNada foi alterado.\n`);
+    process.exit(1);
+  }
+
+  if (existingFiles.length > 0 && sameFolders.length + replacedFiles.length === 0) {
+    console.log(`  Esta pasta já tem arquivos seus. O Córtex só acrescenta as pastas e os arquivos dele ao lado dos seus: nada seu é apagado.\n`);
+  } else if (existingFiles.length > 0 && !isForce) {
+    console.log(`  Esta pasta já tem itens com o mesmo nome dos que o Córtex cria: ${sameFolders.concat(replacedFiles).join(', ')}`);
+    if (sameFolders.length > 0) {
+      console.log(`  Dentro de ${sameFolders.join(', ')}, um arquivo seu que tenha o mesmo nome de um arquivo do Córtex seria substituído; os demais ficam como estão.`);
+    }
+    if (replacedFiles.length > 0) {
+      console.log(`  ${replacedFiles.join(', ')}: guardo uma cópia em ${toPosix(BACKUPS_REL)} antes de substituir.`);
+    }
+    const confirmed = await askConfirmation(`  Continuar? (s/N): `);
+    if (!confirmed) {
+      console.log(`\nNada foi alterado. Se preferir uma pasta nova só para o Córtex: ${cyan}npx @aksp/cortex init "Meu Negocio"${reset}\n`);
+      process.exit(0);
+    }
+  }
   let initBackupDir = null;
   if (userFiles.length > 0) {
     initBackupDir = makeBackupDir(targetDir, 'init');
@@ -1347,34 +1753,51 @@ ${bold}Falta só a conversa que monta o cérebro do seu negócio:${reset}
   // AGENTS.md do pacote). O CLAUDE.md apenas importa o AGENTS.md.
   const bootstrap = fs.readFileSync(path.join(templateDir, 'AGENTS.md'), 'utf8');
   for (const target of bootstrapTargets) {
-    let body = target === 'CLAUDE.md' ? `${CLAUDE_IMPORT_LINE}\n` : bootstrap;
-    // CLAUDE.md escrito pelo usuário: preserva o conteúdo e só acrescenta o import.
+    const body = target === 'CLAUDE.md' ? `${CLAUDE_IMPORT_LINE}\n` : bootstrap;
     const existingPath = path.join(targetDir, target);
-    if (target === 'CLAUDE.md' && userFiles.includes('CLAUDE.md')) {
-      const mine = fs.readFileSync(existingPath, 'utf8');
-      body = mine.includes(CLAUDE_IMPORT_LINE) ? mine : mine.replace(/\s*$/, '\n\n') + CLAUDE_IMPORT_LINE + '\n';
+    // CLAUDE.md escrito pelo usuário: o texto dele fica e só ganha a linha do
+    // import. Um atalho para outro arquivo, ou um texto que não está em UTF-8
+    // (a linha estragaria os acentos), é trocado: a cópia já está em init-….
+    if (target === 'CLAUDE.md' && userFiles.includes('CLAUDE.md') && !isSymlink(existingPath)) {
+      const raw = fs.readFileSync(existingPath);
+      const mine = raw.toString('utf8');
+      if (hasClaudeImport(mine) || isUtf8Text(raw)) {
+        if (!hasClaudeImport(mine)) appendClaudeImport(existingPath, raw);
+        console.log(`   ${green}✓${reset} ${target} ${dim}— ${KNOWN_TARGETS[target]}${reset}`);
+        continue;
+      }
+      console.log(`   ${yellow}!${reset} O seu ${target} estava salvo num formato de texto antigo (não era UTF-8): ficou na cópia acima e foi trocado por um novo.`);
     }
-    fs.writeFileSync(path.join(targetDir, target), body);
+    writeRootFile(existingPath, body);
     console.log(`   ${green}✓${reset} ${target} ${dim}— ${KNOWN_TARGETS[target]}${reset}`);
+  }
+
+  const startHere = refreshStartHere(targetDir, null);
+  if (startHere === 'written') {
+    console.log(`   ${green}✓${reset} ${START_HERE_FILE} ${dim}— os próximos passos e as frases do dia a dia, para ler ou imprimir${reset}`);
+  } else if (startHere === 'kept') {
+    console.log(`   ${yellow}!${reset} ${START_HERE_FILE} já existia e foi mantido como está ${dim}— o do Córtex está em ${toPosix(START_HERE_REL_PATH)}${reset}`);
   }
 
   writeVersionFile(targetDir, VERSION);
 
-  const outrasFerramentas = Object.keys(KNOWN_TARGETS).filter((t) => !bootstrapTargets.includes(t));
+  const outrasFerramentas =Object.keys(KNOWN_TARGETS).filter((t) => !bootstrapTargets.includes(t));
 
   console.log(`
 ${bold}${green}🎉 Córtex instalado!${reset} Agora falta só a conversa que monta o cérebro do seu negócio.
 
 ${bold}Próximos passos:${reset}
-  1. Abra ${bold}esta pasta${reset} na sua ferramenta de IA:
+  1. Abra o seu aplicativo de IA (Claude Code, Cursor…), escolha ${bold}Abrir pasta${reset} e aponte para esta pasta:
      ${dim}${targetDir}${reset}
-     • Claude Code: abra o terminal dentro desta pasta e digite ${cyan}claude${reset}
-     • Cursor ou outro editor: menu Arquivo → Abrir Pasta
 
   2. Escreva no chat:
      ${bold}${yellow}"Quero montar meu Córtex"${reset}
 
   3. São 4 perguntas rápidas (uns 5 minutos). Depois é só dizer ${bold}radar${reset} ou ${bold}ajuda${reset}.
+${startHere === 'written' ? `
+  Estes passos e as frases do dia a dia ficaram guardados no arquivo ${bold}${START_HERE_FILE}${reset}, dentro da pasta.
+` : ''}
+${dim}Prefere o terminal? É opcional: dentro desta pasta, digite claude ou gemini e escreva a mesma frase.${reset}
 ${outrasFerramentas.length > 0 ? `
 ${dim}Usa ${outrasFerramentas.map((t) => KNOWN_TARGETS[t].split(',')[0]).join(' ou ')}? Rode: npx @aksp/cortex init${folderHint(targetArg)} --targets=${outrasFerramentas.join(',')}${reset}
 ` : ''}
@@ -1397,6 +1820,7 @@ async function runUpdate() {
   }
 
   const installed = readVersionFile(targetDir);
+  const fromVersion = installed && installed.version ? String(installed.version) : '';
   const hasFramework = fs.existsSync(path.join(targetDir, '.agents'));
 
   if (!hasFramework) {
@@ -1522,6 +1946,9 @@ async function runUpdate() {
       writeNovidades(targetDir, templateDir, installed && installed.version, VERSION);
     }
     writeVersionFile(targetDir, VERSION);
+    // A atualização que tinha parado no meio terminou aqui: o backup dela está completo.
+    let pending;
+    while ((pending = findPendingUpdateBackup(targetDir, fromVersion))) fs.rmSync(path.join(pending, UPDATE_PENDING_FILE));
     return;
   }
 
@@ -1533,25 +1960,46 @@ async function runUpdate() {
     }
   }
 
-  const backupDir = makeBackupDir(targetDir, 'update');
-  copyRecursiveSync(path.join(targetDir, '.agents'), path.join(backupDir, 'agents'));
-  console.log(`  ${dim}Backup salvo em:${reset} ${toPosix(path.relative(targetDir, backupDir))}`);
+  // Uma rodada anterior desta mesma atualização parou no meio? O backup dela é
+  // o que guarda "como estava antes" (.agents/ já foi trocada em parte): ele é
+  // reaproveitado, em vez de se criar outro com os arquivos já novos. Assim a
+  // mensagem final aponta para a cópia certa e repetir o comando várias vezes
+  // não a empurra para fora dos 3 backups guardados.
+  const cerebroPath = path.join(targetDir, CEREBRO_PATH);
+  let backupDir = findPendingUpdateBackup(targetDir, fromVersion);
+  if (backupDir) {
+    console.log(`  ${dim}Backup da tentativa anterior reaproveitado:${reset} ${toPosix(path.relative(targetDir, backupDir))}`);
+  } else {
+    backupDir = makeBackupDir(targetDir, 'update');
+    copyRecursiveSync(path.join(targetDir, '.agents'), path.join(backupDir, 'agents'));
+    if (fs.existsSync(cerebroPath)) {
+      fs.copyFileSync(cerebroPath, path.join(backupDir, 'CEREBRO.md'));
+    }
+    // A marca só entra com a cópia completa, e só sai quando a atualização termina.
+    fs.writeFileSync(path.join(backupDir, UPDATE_PENDING_FILE), fromVersion + '\n');
+    console.log(`  ${dim}Backup salvo em:${reset} ${toPosix(path.relative(targetDir, backupDir))}`);
+  }
 
   if (hasPruneWork) {
     pruneDeprecatedFiles(targetDir, removidosPeloFramework);
     console.log(`  ${yellow}${removidosPeloFramework.length} arquivo(s) descontinuado(s) removido(s).${reset} ${dim}(preservados no backup acima)${reset}`);
   }
 
+  // A folha da raiz é renovada a partir do pacote ANTES de .agents/ ser trocada
+  // (ver refreshStartHere): uma rodada interrompida não a deixa velha para sempre.
+  const startHere = refreshStartHere(targetDir, readStartHereSource(targetDir), templateDir);
+  if (startHere === 'written') {
+    console.log(`  ${green}✓${reset} ${START_HERE_FILE} ${dim}— a folha com os primeiros passos e as frases do dia a dia, na raiz da pasta${reset}`);
+  } else if (startHere === 'kept') {
+    console.log(`  ${dim}${START_HERE_FILE}: o seu foi mantido como está (o do Córtex fica em ${toPosix(START_HERE_REL_PATH)}).${reset}`);
+  }
+
   applyFrameworkUpdate(templateDir, targetDir, novos, alterados);
 
   // Propaga o cérebro: sem este passo, as skills novas chegam ao disco mas
   // continuam invisíveis para a IA, porque nada as ensina a acioná-las.
-  const cerebroPath = path.join(targetDir, CEREBRO_PATH);
-  if (fs.existsSync(cerebroPath)) {
-    fs.copyFileSync(cerebroPath, path.join(backupDir, 'CEREBRO.md'));
-  }
   const removidos = pruneBackups(targetDir, BACKUPS_TO_KEEP);
-  if (removidos > 0) console.log(`  ${dim}Backups antigos removidos (guardo os ${BACKUPS_TO_KEEP} mais recentes): ${removidos}${reset}`);
+  if (removidos > 0) console.log(`  ${dim}Backups antigos de atualização removidos (guardo os ${BACKUPS_TO_KEEP} mais recentes): ${removidos}${reset}`);
 
   const brain = refreshBrainFramework(targetDir, templateDir);
 
@@ -1574,9 +2022,10 @@ async function runUpdate() {
       targets.push('CLAUDE.md');
       console.log(`  ${green}✓${reset} CLAUDE.md criado ${dim}— o Claude Code passa a carregar o cérebro (importa o AGENTS.md)${reset}`);
     }
-    compileTargets(targetDir, targets, VERSION);
+    const compiled = compileTargets(targetDir, targets, VERSION);
     writeTargets(targetDir, targets);
     console.log(`  ${green}✓${reset} Cérebro recompilado para: ${targets.join(', ')}`);
+    reportUserTargets(targetDir, compiled);
     await handleRetiredTargets(targetDir, isForce);
   }
 
@@ -1596,15 +2045,39 @@ async function runUpdate() {
   }
 
   reportGitignore();
-  writeVersionFile(targetDir, VERSION);
+  // A versão é a última coisa gravada: se algo falhar antes, o projeto continua
+  // marcado com a versão antiga e rodar o mesmo comando de novo termina o serviço.
   const novidades = writeNovidades(targetDir, templateDir, installed && installed.version, VERSION);
+  writeVersionFile(targetDir, VERSION);
+  fs.rmSync(path.join(backupDir, UPDATE_PENDING_FILE), { force: true });
 
+  const backupRel = toPosix(path.relative(targetDir, backupDir));
   console.log(`
 ${bold}${green}🎉 Framework atualizado para v${VERSION}!${reset}
 
-${dim}Se você tinha personalizado algum arquivo dentro de .agents/skills, confira o backup acima para recuperar suas mudanças.${reset}
 ${dim}Pilares/, Memoria/, Ativos/ e a área CORTEX:BUSINESS do seu cérebro não foram tocados.${reset}
+${dim}Como estava antes (a pasta .agents/ e o cérebro) ficou guardado em ${backupRel} — se você tinha personalizado alguma habilidade, a sua versão está lá.${reset}
 `);
+
+  // Caminho de volta. Uma versão que já protege os arquivos do usuário volta
+  // pelo próprio comando dela; para as anteriores, a volta é à mão, a partir do
+  // backup acima (ver ROLLBACK_BY_COMMAND_SINCE).
+  const rollback = rollbackAdvice(fromVersion, VERSION);
+  if (rollback === 'comando') {
+    console.log(`${bold}Algo ficou estranho depois de atualizar?${reset} Para voltar à v${fromVersion}, rode:`);
+    console.log(`  ${cyan}npx @aksp/cortex@${fromVersion} update${folderHint(targetArg)} --force${reset}\n`);
+  } else if (rollback === 'manual') {
+    const temCerebro = fs.existsSync(path.join(backupDir, 'CEREBRO.md'));
+    console.log(`${bold}Algo ficou estranho depois de atualizar?${reset} Dá para voltar à v${fromVersion} copiando de volta o que ficou guardado:`);
+    console.log(`  1. Abra a pasta ${backupRel} ${dim}(fica dentro da pasta do negócio)${reset}.`);
+    console.log(`  2. Copie tudo o que há dentro da pasta ${bold}agents${reset} para dentro da pasta ${bold}.agents${reset} do negócio, substituindo os arquivos.`);
+    if (temCerebro) {
+      console.log(`  3. Copie o arquivo ${bold}CEREBRO.md${reset} para dentro da pasta ${bold}Frameworks${reset}, substituindo o que está lá.`);
+    }
+    console.log(`  ${temCerebro ? 4 : 3}. Rode: ${cyan}npx @aksp/cortex@latest sync${folderHint(targetArg)}${reset}`);
+    console.log(`  ${dim}Não use o comando da versão antiga (npx @aksp/cortex@${fromVersion}): ela não conhece as cópias guardadas em ${toPosix(BACKUPS_REL)}${reset}`);
+    console.log(`  ${dim}nem o seu CLAUDE.md, e poderia apagá-los. Para atualizar de novo mais tarde: npx @aksp/cortex@latest update${folderHint(targetArg)} --force${reset}\n`);
+  }
 
   if (novidades.length > 0) {
     console.log(`${bold}✨ O que há de novo para você:${reset}`);
@@ -1673,12 +2146,13 @@ async function runSync() {
     }
   }
 
-  compileTargets(targetDir, targets, VERSION);
+  const compiled = compileTargets(targetDir, targets, VERSION);
   writeTargets(targetDir, targets);
 
-  for (const file of targets) {
+  for (const file of compiled.written) {
     console.log(`   ${green}✓${reset} ${file}`);
   }
+  reportUserTargets(targetDir, compiled);
 
   await handleRetiredTargets(targetDir, isForce);
 
@@ -1687,6 +2161,84 @@ ${bold}${green}🎉 Cérebro compilado!${reset}
 
 ${dim}A sua ferramenta de IA carrega o cérebro completo ao abrir a pasta${targets.includes('AGENTS.md') && targets.includes('CLAUDE.md') ? ' (o CLAUDE.md importa o AGENTS.md)' : ''}.${reset}
 ${dim}Esses arquivos são gerados: edite sempre ${toPosix(CEREBRO_PATH)} e rode "npx @aksp/cortex sync" de novo.${reset}
+`);
+}
+
+// Os dados do negócio: o que o `backup` copia (e o que o `update` nunca toca).
+const DATA_BACKUP_ITEMS = ['Pilares', 'Memoria', 'Ativos', CEREBRO_PATH];
+
+// Faz a cópia em si. Não atravessa atalhos (devolve-os em `skipped`). Se a
+// cópia falhar no meio (arquivo preso, disco cheio), a pasta desta tentativa é
+// removida: uma pasta dados-… pela metade seria tomada por uma cópia boa.
+function copyBusinessData(targetDir) {
+  const items = DATA_BACKUP_ITEMS.filter((item) => fs.existsSync(path.join(targetDir, item)));
+  const backupDir = makeBackupDir(targetDir, 'dados');
+  const skipped = [];
+  try {
+    for (const item of items) {
+      copyRecursiveSync(path.join(targetDir, item), path.join(backupDir, item), skipped);
+      console.log(`   ${green}✓${reset} ${toPosix(item)}`);
+    }
+  } catch (err) {
+    let sobrou = null;
+    try {
+      fs.rmSync(backupDir, { recursive: true, force: true });
+    } catch (e) {
+      try {
+        fs.renameSync(backupDir, backupDir + '-incompleta');
+        sobrou = backupDir + '-incompleta';
+      } catch (e2) {
+        sobrou = backupDir;
+      }
+    }
+    console.log(`\n  ${red}A cópia não terminou: nenhuma cópia foi guardada desta vez.${reset}`);
+    if (sobrou) {
+      console.log(`  Sobrou uma pasta pela metade, que não serve como cópia e pode ser apagada: ${toPosix(path.relative(targetDir, sobrou))}`);
+    }
+    throw err;
+  }
+  return { backupDir, skipped };
+}
+
+// Copia os dados do negócio para .cortex/backups/dados-<data>/. Só lê os
+// originais; não altera nem apaga nada, por isso não pede confirmação.
+function runBackup() {
+  const targetArg = args[1] && !args[1].startsWith('-') ? args[1] : '.';
+  const targetDir = path.resolve(process.cwd(), targetArg);
+
+  console.log(`\n${bold}${cyan}🧠 Guardando uma cópia dos dados do seu negócio...${reset}\n`);
+
+  if (!fs.existsSync(targetDir)) {
+    console.log(`${red}Pasta não encontrada:${reset} ${targetDir}`);
+    process.exit(1);
+  }
+
+  if (!isCortexMounted(targetDir)) {
+    console.log(`${red}Ainda não há dados do negócio para copiar nesta pasta.${reset}`);
+    console.log(`  Confira se você está na pasta do seu negócio. Se o Córtex acabou de ser instalado, a cópia só faz`);
+    console.log(`  sentido depois da conversa de montagem (${bold}"Quero montar meu Córtex"${reset}). Nenhuma cópia foi feita.\n`);
+    process.exit(1);
+  }
+
+  const { backupDir, skipped } = copyBusinessData(targetDir);
+
+  if (skipped.length > 0) {
+    console.log(`\n  ${yellow}!${reset} Atalho(s) para outra pasta que NÃO entraram na cópia ${dim}(a cópia não segue atalhos; se precisar do conteúdo, copie à mão)${reset}:`);
+    skipped.forEach((p) => console.log(`     ${yellow}•${reset} ${toPosix(path.relative(targetDir, p))}`));
+  }
+
+  const backupRel = toPosix(path.relative(targetDir, backupDir));
+  const total = listFilesRecursive(backupDir).length;
+  console.log(`
+${bold}${green}Cópia guardada:${reset} ${total} arquivo(s) em
+  ${backupDir}
+
+${bold}Para restaurar:${reset} abra essa pasta e copie de volta, por cima, o arquivo ou a pasta que você quer
+  recuperar (ex.: ${backupRel}/Memoria → Memoria). Os nomes e os lugares são os mesmos da pasta do negócio.
+  ${dim}Se restaurar o ${toPosix(CEREBRO_PATH)}, rode depois: npx @aksp/cortex sync${folderHint(targetArg)}${reset}
+
+${dim}Estas cópias (pastas "dados-...") nunca são apagadas sozinhas: quando juntar muitas, apague as mais antigas à mão.${reset}
+${dim}Elas ficam dentro da própria pasta do negócio. Para se proteger de perder o computador, copie a pasta inteira para fora dele.${reset}
 `);
 }
 
@@ -1749,8 +2301,22 @@ async function runDoctor() {
   const unindexed = []; // no disco mas não no mapa
   const ok = [];        // nos dois
 
+  // O arquivo morto (Memoria/_Arquivo/, criado pela skill consolidar) fica numa
+  // subpasta que listRealFiles não percorre. A linha dele no mapa pode apontar
+  // para a pasta ou para um ou mais arquivos dela: a pasta precisa existir, e
+  // cada .md citado na linha também (menos os marcadores AAAA.md e *.md).
+  const archiveExists = (f) => {
+    if (f !== 'Memoria/_Arquivo' && !f.startsWith('Memoria/_Arquivo/')) return false;
+    const archiveDir = path.join(targetDir, 'Memoria', '_Arquivo');
+    if (!fs.existsSync(archiveDir)) return false;
+    return [...f.matchAll(/Memoria\/_Arquivo\/([^\s,;()#]+\.md)/g)]
+      .map((m) => m[1])
+      .filter((name) => name !== 'AAAA.md' && name !== '*.md')
+      .every((name) => fs.existsSync(path.join(archiveDir, name)));
+  };
+
   for (const f of mapFiles) {
-    if (diskFiles.has(f)) {
+    if (diskFiles.has(f) || archiveExists(f)) {
       ok.push(f);
     } else {
       broken.push(f);
@@ -1779,12 +2345,16 @@ async function runDoctor() {
       'custos_variaveis', 'custo_variavel_padrao'];
     const nullFields = knownFields.filter((k) => fm[k] === null || (fm[k] && typeof fm[k] === 'object' && Object.keys(fm[k]).length === 0));
 
+    // Números do Guardião de Margem escritos de um jeito que muda o valor.
+    const numberIssues = /^Pilares\/0[34]_/.test(f) ? findNumberIssues(content) : [];
+
     pillarResults.push({
       file: f,
       exists: true,
       revisarCount,
       blankSections,
       nullFields,
+      numberIssues,
     });
   }
 
@@ -1797,6 +2367,7 @@ async function runDoctor() {
       revisarCount: 0,
       blankSections: 0,
       nullFields: [],
+      numberIssues: [],
     });
   }
 
@@ -1849,7 +2420,7 @@ async function runDoctor() {
     console.log('');
   }
 
-  const withPendencies = pillarResults.filter((p) => p.exists && (p.revisarCount > 0 || p.blankSections > 0 || p.nullFields.length > 0));
+  const withPendencies = pillarResults.filter((p) => p.exists && (p.revisarCount > 0 || p.blankSections > 0 || p.nullFields.length > 0 || p.numberIssues.length > 0));
   if (withPendencies.length > 0) {
     console.log(`${yellow}📝 Pilares com pendências:${reset}`);
     for (const p of withPendencies) {
@@ -1857,11 +2428,21 @@ async function runDoctor() {
       if (p.revisarCount > 0) parts.push(`${p.revisarCount} REVISAR`);
       if (p.blankSections > 0) parts.push(`${p.blankSections} seção(ões) em branco`);
       if (p.nullFields.length > 0) parts.push(`campos null: ${p.nullFields.join(', ')}`);
+      if (p.numberIssues.length > 0) parts.push(`${p.numberIssues.length} número(s) para corrigir (veja abaixo)`);
       console.log(`   • ${p.file} — ${parts.join(' | ')}`);
     }
     console.log('');
   } else {
     console.log(`${green}📝 Pilares com pendências: Nenhum ✅${reset}\n`);
+  }
+
+  const withNumberIssues = pillarResults.filter((p) => p.numberIssues.length > 0);
+  if (withNumberIssues.length > 0) {
+    console.log(`${red}🔢 Números para corrigir${reset} (a IA usa estes valores nas contas de preço, desconto e margem):`);
+    for (const p of withNumberIssues) {
+      for (const issue of p.numberIssues) console.log(`   • ${p.file} — ${issue}`);
+    }
+    console.log(`   ${dim}Eles ficam no topo do arquivo, entre as duas linhas ---. Corrija ali, ou peça à IA: "corrija os números do cabeçalho dos pilares". Nada foi alterado por este diagnóstico.${reset}\n`);
   }
 
   if (broken.length > 0 || unindexed.length > 0) {
@@ -1920,6 +2501,11 @@ async function runDoctor() {
   // --- 8. Sugestão ---
   console.log(`\n${bold}💡 Sugestão:${reset}`, (() => {
     if (mandatoryMissing.length > 0) return `Crie os pilares obrigatórios faltantes — diga "revisar córtex" no chat.`;
+    if (withNumberIssues.length > 0) {
+      return withPendencies.some((p) => p.revisarCount > 0 || p.blankSections > 0 || p.nullFields.length > 0)
+        ? `Primeiro corrija os números apontados acima; depois diga "continuar onboarding" no chat para completar o resto, um bloco por vez.`
+        : `Corrija os números apontados acima — ou diga "corrija os números do cabeçalho dos pilares" no chat.`;
+    }
     if (withPendencies.length > 0) return `Ainda há itens a completar — diga "continuar onboarding" no chat e fazemos um bloco por vez.`;
     if (!brain.hasLayers) return `Migre o cérebro para o formato com camadas — diga "revisar córtex" no chat.`;
     if (brain.isPointer) return `Recompile os arquivos de raiz — rode "npx @aksp/cortex sync".`;
@@ -1937,6 +2523,8 @@ async function main() {
     await runUpdate();
   } else if (command === 'sync') {
     await runSync();
+  } else if (command === 'backup') {
+    runBackup();
   } else if (command === 'doctor' || command === 'checkup' || command === 'diagnostico') {
     await runDoctor();
   } else if (command === '--help' || command === '-h' || command === 'help') {
@@ -1972,6 +2560,8 @@ module.exports = {
   MANDATORY_PILLAR_NAMES,
   KNOWN_TARGETS,
   compareVersions,
+  rollbackAdvice,
+  copyBusinessData,
   pruneBackups,
   makeBackupDir,
   isCortexMounted,
@@ -1984,6 +2574,7 @@ module.exports = {
   findLegacyProtocols,
   LEGACY_PROTOCOL_FILES,
   INSTALL_ITEMS,
+  isPersonalRootFolder,
   USER_GITIGNORE,
   EXIT_NEEDS_CONFIRMATION,
   isCortexOwnedFile,
@@ -2021,10 +2612,12 @@ module.exports = {
   parseFileMapFromMeta,
   listRealFiles,
   parseSimpleFrontmatter,
+  findNumberIssues,
   countRevisarAndBlanks,
   checkBrainHealth,
   calculateCompleteness,
   copyRecursiveSync,
+  refreshStartHere,
   writeVersionFile,
   readVersionFile,
   touchVersionCheck,

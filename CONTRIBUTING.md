@@ -137,7 +137,7 @@ Cada ferramenta de IA lê um arquivo de instrução diferente. O Córtex gera es
 |---|---|---|
 | `AGENTS.md` | OpenAI Codex, OpenCode e demais ferramentas do padrão AGENTS.md | cérebro completo |
 | `CLAUDE.md` | Claude Code | uma linha `@AGENTS.md` (import nativo) |
-| `GEMINI.md` | Gemini CLI, Google Antigravity | cérebro completo, sob demanda |
+| `GEMINI.md` | Gemini CLI, Google Antigravity | cérebro completo (padrão desde a v1.6.0) |
 | `.cursorrules` | Cursor, Windsurf | cérebro completo, sob demanda |
 
 - **As regras do cérebro vivem em dois arquivos, sempre idênticos:** `.agents/cortex/brain.framework.md` e a região `CORTEX:FRAMEWORK` de `.agents/skills/cortex-onboarding/resources/CORTEX_TEMPLATE.md`. Um teste falha se divergirem — nunca edite os arquivos de raiz para mudar o comportamento da IA.
@@ -190,10 +190,13 @@ Ao publicar uma nova versão (adicionar/remover/renomear skill, ou qualquer muda
 
 - ⚙️ `npm test` passa (toda a suíte). Ela inclui `test/integration/package.test.js`, que empacota o projeto, instala o pacote e roda o CLI instalado — é o que pega diferenças entre o repositório e o que chega pelo `npx` (ex.: o npm não publica arquivos chamados `.gitignore`).
 - ⚙️ `npm run verify:manifest` passa (manifesto em dia)
-- [ ] **O CI está verde** no commit que vai ser publicado (Ubuntu, Windows e macOS)
+- [ ] **O CI está verde** no commit que vai ser publicado (Ubuntu, Windows e macOS). Como o `master` só é enviado depois da tag, rode o CI por um Pull Request; a tag roda a mesma matriz de novo antes de publicar
 - [ ] **Roteiro de conversa** rodado numa ferramenta de IA de verdade (veja abaixo) — obrigatório quando a versão mexe no cérebro, numa skill ou num protocolo
 - [ ] **O cérebro continua dentro do orçamento** (`brain.framework.md` com no máximo 900 palavras; `test/unit/dia-a-dia.test.js` confere). Ele é carregado em toda conversa: para acrescentar uma regra, corte outra
-- [ ] **Depois de publicar:** `npx @aksp/cortex@latest init` numa pasta nova e vazia termina sem erro
+- [ ] **Publicar é criar a tag** (veja "Publicar pela tag" abaixo) — não rode `npm publish` à mão
+- [ ] **O `README.md` novo e a tag saem juntos:** não dê `git push` no `master` antes da tag. O README aponta para `releases/latest/download/cortex.zip` e `cortex-exemplo-estudio-lumen.zip`, e esses links só entregam a versão nova (na primeira versão com ZIPs, só passam a existir) quando a Release sai. A ordem está em "Publicar pela tag"
+- [ ] **Depois de publicar:** `npx @aksp/cortex@latest init` numa pasta nova e vazia termina sem erro, e os dois links de download do README (`cortex.zip` e `cortex-exemplo-estudio-lumen.zip`) baixam a versão nova
+- [ ] **`COMECE-AQUI.txt`** (`.agents/cortex/`) continua valendo: se uma frase do dia a dia mudou de nome, mude lá também (um teste confere contra a skill `ajuda`)
 - [ ] `npm run build:manifest` foi rodado e commitado (se arquivos em `.agents/` mudaram)
 - [ ] **Tabela de gatilhos** no `CONTRIBUTING.md` está atualizada (skill nova = nova linha na tabela)
 - [ ] **Skill `ajuda`** lista o novo comando (se for skill acionável pelo usuário)
@@ -201,13 +204,50 @@ Ao publicar uma nova versão (adicionar/remover/renomear skill, ou qualquer muda
 - [ ] **CHANGELOG.md** está atualizado com as mudanças desta versão
 - [ ] **`examples/estudio-lumen/`** reflete as mudanças (se o exemplo for afetado — ex: novo pilar opcional, nova skill que o cérebro do exemplo deveria conhecer)
 - [ ] **`package.json`** — versão incrementada conforme SemVer
-- [ ] **`README.md`** — tabela de comandos do CLI atualizada, se houve mudança em `init`/`update`/`sync`/`doctor`
+- [ ] **`README.md`** — tabela de comandos do CLI atualizada, se houve mudança em `init`/`update`/`sync`/`backup`/`doctor`
+
+### Publicar pela tag
+
+Com tudo acima conferido e commitado no `master` **local**, ainda sem `git push` do `master`:
+
+```bash
+git tag v1.6.0            # exatamente "v" + a versão do package.json
+git push origin v1.6.0    # envia a tag (e os commits dela) e dispara a publicação
+# espere o job "Release no GitHub (com os ZIPs)" ficar verde e confira que
+# https://github.com/alberthpalhares/cortex/releases/latest/download/cortex.zip baixa. Só então:
+git push origin master
+```
+
+O `master` vai por último para o README novo nunca aparecer no GitHub apontando para um ZIP que ainda não existe. Se a publicação falhar, o `master` do GitHub continua com o README antigo, que segue valendo. Falha passageira ou cadastro do npm que faltava: resolva e use **Re-run failed jobs**. Erro no conteúdo (CHANGELOG sem a seção, teste quebrado): corrija num commit novo, apague a tag (`git tag -d v1.6.0` e `git push origin :refs/tags/v1.6.0`) e crie de novo.
+
+O push da tag dispara o `.github/workflows/release.yml`, que:
+
+1. roda a matriz de testes inteira (a mesma do CI: Ubuntu, Windows e macOS);
+2. confere que a tag é a versão do `package.json` e que o `CHANGELOG.md` tem a seção `## [x.y.z]` — se não, para antes de publicar qualquer coisa;
+3. publica no npm, sem token guardado e com atestado de procedência (npm *Trusted Publishing*). Se a versão já estiver no npm, avisa e termina sem erro;
+4. só com o npm no ar, gera os ZIPs (`npm run build:zip`) e publica a Release do GitHub com o texto dessa seção do CHANGELOG, já com `cortex.zip` (a pasta pronta: o que o `init` instala) e `cortex-exemplo-estudio-lumen.zip` (o exemplo com as habilidades) anexados — a Release não aparece sem os ZIPs. Se a Release da tag já existir (ou tiver ficado como rascunho numa execução que falhou), troca os anexos e publica.
+
+A Release espera o npm de propósito: a pasta pronta traz o comando `npx @aksp/cortex@latest update`, e ele precisa encontrar no npm a mesma versão do ZIP (com o npm atrasado, o `update` recusaria a pasta ou, com `--force`, voltaria o framework para a versão anterior). Se um passo falhar, resolva e use **Re-run failed jobs**: o que já saiu não é publicado de novo.
+
+Os anexos têm nome fixo de propósito: o README aponta para `releases/latest/download/cortex.zip`, que sempre entrega a última versão.
+
+**Cadastro único no npm (antes da primeira publicação pela tag).** Enquanto ele não for feito, o job "Publicar no npm" falha com um aviso apontando para cá, e a Release com os ZIPs fica esperando (nada sai pela metade):
+
+1. Entre em [npmjs.com](https://www.npmjs.com) com a conta dona do pacote e abra `https://www.npmjs.com/package/@aksp/cortex/access` (aba **Settings** do pacote).
+2. Em **Trusted Publisher**, escolha **GitHub Actions**.
+3. Preencha: *Organization or user* = `alberthpalhares`; *Repository* = `cortex`; *Workflow filename* = `release.yml` (só o nome do arquivo, com a extensão); *Environment name* = deixe em branco.
+4. Salve. Não é preciso criar token nem segredo no GitHub.
+5. Opcional, depois que a primeira publicação pela tag der certo: na mesma página, em **Publishing access**, marque a opção que exige 2FA e não aceita tokens — a partir daí só o workflow publica.
+
+Requisitos que o workflow já cumpre: repositório público, runner do próprio GitHub, permissão `id-token: write` e npm 11.5.1 ou mais novo.
+
+Para testar os ZIPs antes de criar a tag: `npm run build:zip` grava os dois em `dist/` (pasta ignorada pelo git e fora do pacote do npm), com a versão no nome.
 
 ### Roteiro de conversa (12 frases)
 
 Os testes automáticos conferem o texto das skills, não o que a IA faz com ele. Antes de publicar uma versão que mexe no cérebro, numa skill ou num protocolo, rode este roteiro numa ferramenta de IA de verdade.
 
-**Preparação:** copie `examples/estudio-lumen/` para uma pasta fora do repositório, copie a pasta `.agents/` da raiz para dentro da cópia e abra a cópia na ferramenta. Guarde uma segunda cópia intocada para comparar os arquivos depois. O exemplo vem compilado para `AGENTS.md` e `CLAUDE.md`; para testar no Gemini CLI ou no Cursor, rode antes `node <repositório>/bin/cli.js sync <cópia> --targets=all --force`. As datas do exemplo são fixas (o único prazo é 20/10/2026), então em que bloco do radar cada item aparece depende do dia em que você roda.
+**Preparação:** rode `npm run build:zip` e descompacte `dist/cortex-exemplo-estudio-lumen-<versão>.zip` numa pasta fora do repositório (é o exemplo já com a pasta `.agents/` desta versão); abra essa pasta na ferramenta. Guarde uma segunda cópia intocada para comparar os arquivos depois. O ZIP vem compilado para `AGENTS.md`, `CLAUDE.md` e `GEMINI.md`; para testar no Cursor, rode antes `node <repositório>/bin/cli.js sync <cópia> --targets=all --force`. As datas do exemplo são fixas (o único prazo é 20/10/2026), então em que bloco do radar cada item aparece depende do dia em que você roda.
 
 | # | Você diz | O que tem de acontecer |
 |---|---|---|

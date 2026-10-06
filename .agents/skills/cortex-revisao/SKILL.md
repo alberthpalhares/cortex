@@ -30,6 +30,7 @@ The review does NOT redo onboarding from scratch. It:
 1. Read `Memoria/META.md` to learn the business name and the date of the last onboarding/review
 2. List every `.md` file inside `Pilares/` to know which pillars exist (including custom pillars beyond the 9 standard ones)
 3. Read each pillar file found
+4. **Before the first change of this review** (a pillar, the Memory or the brain — not before reading), make a safety copy: run `npx @aksp/cortex@latest backup` (it only copies `Pilares/`, `Memoria/`, `Ativos/` and the brain into `.cortex/backups/dados-<timestamp>/`, changes nothing and asks nothing). If the command cannot run or does not end by naming the folder it saved (no terminal, no Node.js, no network, an answer such as "Comando não reconhecido", any other error), copy each file you are about to change, as it is, into `.cortex/backups/dados-[YYYY-MM-DD]/` (same relative path) with your file tools, before saving it. Use a folder that does not exist yet: if `dados-[YYYY-MM-DD]` is already there (an earlier copy from today), name this one `dados-[YYYY-MM-DD]-2` (then `-3`…). Never save over a file that is already inside a copy folder: the older copy is the one that holds how things were. Say it once, in one line, naming the real folder: *"Antes de mexer, guardei uma cópia de como está hoje em `.cortex/backups/dados-…`."* One copy covers the whole review, the consolidation step included; a review that changes nothing needs none.
 
 ### For Each Pillar
 

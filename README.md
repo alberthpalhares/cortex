@@ -10,7 +10,23 @@ O **Córtex** transforma a sua IA em um **sócio que conhece o seu negócio**. E
 
 ## Comece em 5 minutos
 
-**Você precisa de duas coisas:** o [Node.js](https://nodejs.org) instalado (versão LTS) e uma ferramenta de IA que trabalhe com as pastas do seu computador — [veja qual escolher](#qual-ferramenta-de-ia-escolher).
+Você precisa de uma ferramenta de IA que trabalhe com as pastas do seu computador — [veja qual escolher](#qual-ferramenta-de-ia-escolher). Há dois jeitos de começar; o resultado é o mesmo.
+
+### Sem terminal (baixar e abrir)
+
+**1. Baixe a [pasta pronta do Córtex (ZIP)](https://github.com/alberthpalhares/cortex/releases/latest/download/cortex.zip)** e descompacte (no Windows: botão direito no arquivo → *Extrair tudo*; no Mac: dois cliques). Dê à pasta o nome do seu negócio e guarde onde preferir.
+
+**2. Abra essa pasta na sua ferramenta de IA** e escreva no chat:
+
+> Quero montar meu Córtex
+
+**3. Responda 4 perguntas rápidas.** Pronto: a partir daí, é só conversar. Dentro da pasta há um arquivo `COMECE-AQUI.txt` com estes passos e as frases do dia a dia.
+
+Para **começar** não é preciso instalar mais nada. Para **atualizar** o Córtex quando sair versão nova, aí sim é preciso o [Node.js](https://nodejs.org) — veja [Mantendo o Córtex atualizado](#mantendo-o-córtex-atualizado). Seus dados continuam funcionando mesmo sem atualizar.
+
+### Com o Node.js (pelo terminal)
+
+Você precisa do [Node.js](https://nodejs.org) instalado (versão LTS).
 
 **1. Instale** — abra o terminal dentro da pasta do seu negócio e rode:
 
@@ -18,11 +34,15 @@ O **Córtex** transforma a sua IA em um **sócio que conhece o seu negócio**. E
 npx @aksp/cortex init
 ```
 
+Na primeira vez, o próprio `npx` pergunta em inglês `Ok to proceed? (y)` — ele só quer saber se pode baixar o Córtex. Digite `y` e aperte Enter.
+
+A pasta pode já ter os seus arquivos: o Córtex cria as pastas dele ao lado e não apaga nada seu. Só evite instalar direto na Área de Trabalho, em Documentos ou na sua pasta pessoal — para criar uma pasta só para o negócio, rode `npx @aksp/cortex init "Meu Negocio"`.
+
 **2. Abra essa mesma pasta na sua ferramenta de IA** e escreva no chat:
 
 > Quero montar meu Córtex
 
-**3. Responda 4 perguntas rápidas.** Pronto: a partir daí, é só conversar.
+**3. Responda 4 perguntas rápidas.** Pronto: a partir daí, é só conversar. O `init` deixa na pasta um `COMECE-AQUI.txt` com estes passos e as frases do dia a dia, para ler ou imprimir.
 
 > 💡 Não sabe abrir o terminal numa pasta? No Windows, abra a pasta no Explorador de Arquivos, clique na barra de endereço, digite `cmd` e aperte Enter. No Mac, abra o aplicativo Terminal, digite `cd ` (com espaço), arraste a pasta para a janela e aperte Enter.
 
@@ -111,11 +131,11 @@ Se você ainda não sabe a sua margem, ela não trava nem chuta: conduz você a 
 | | `pesquisar concorrência` | Quem são, quanto cobram, onde você se diferencia |
 | **Para cuidar do Córtex** | `continuar onboarding` | Completa o que ficou faltando, um bloco de 2–5 minutos por vez |
 | | `saúde do córtex` | Mostra o que ainda está em branco |
-| | `revisar córtex` | A cada 6 meses, confere o que mudou |
-| | `consolidar memória` | Arquiva o que ficou antigo, sem apagar nada |
+| | `revisar córtex` | A cada 6 meses, confere o que mudou (guarda uma cópia antes de alterar) |
+| | `consolidar memória` | Arquiva o que ficou antigo, sem apagar nada (guarda uma cópia antes de mexer) |
 | | `ajuda` | Mostra esta lista dentro do chat |
 
-Quer ver um Córtex já preenchido? Veja [`examples/estudio-lumen/`](https://github.com/alberthpalhares/cortex/tree/master/examples/estudio-lumen), um estúdio de fotografia fictício.
+Quer ver um Córtex já preenchido, sem responder nenhuma pergunta? Baixe o [exemplo pronto (ZIP)](https://github.com/alberthpalhares/cortex/releases/latest/download/cortex-exemplo-estudio-lumen.zip), de um estúdio de fotografia fictício, descompacte, abra a pasta na sua ferramenta de IA e diga `radar`. Para só ler os arquivos, veja [`examples/estudio-lumen/`](https://github.com/alberthpalhares/cortex/tree/master/examples/estudio-lumen).
 
 ---
 
@@ -134,10 +154,10 @@ O Córtex precisa de uma IA que **leia e escreva arquivos na pasta do seu negóc
 
 **Quanto custa:** o Córtex é gratuito e de código aberto. A ferramenta de IA é à parte — algumas têm uso gratuito com limite, outras exigem assinatura. Os planos mudam com frequência; confira no site de cada uma antes de decidir.
 
-**O `init` já prepara** o Claude Code e as ferramentas que leem `AGENTS.md`. Para Cursor ou Gemini CLI, rode também (pode ser depois do `init`, antes da conversa de montagem):
+**O `init` e a pasta pronta (ZIP) já vêm preparados** para o Claude Code, o Gemini CLI e as ferramentas que leem `AGENTS.md`. Para o Cursor, rode também (pede o Node.js; pode ser depois do `init` ou de descompactar a pasta, antes da conversa de montagem):
 
 ```bash
-npx @aksp/cortex init --targets=.cursorrules,GEMINI.md
+npx @aksp/cortex init --targets=.cursorrules
 ```
 
 ---
@@ -167,11 +187,11 @@ npx @aksp/cortex init --targets=.cursorrules,GEMINI.md
 
 **No Windows, o PowerShell reclama de "execução de scripts desabilitada"** — use o *Prompt de Comando* (`cmd`) em vez do PowerShell; lá o mesmo comando funciona.
 
-**"A pasta de destino não está vazia"** — o Córtex cria as pastas dele (`Pilares`, `Memoria`, `Frameworks`, `Ativos`, `.agents`) ao lado dos seus arquivos. Se a pasta já tiver um `.gitignore`, `AGENTS.md` ou `CLAUDE.md` seus, o Córtex guarda uma cópia em `.cortex/backups` antes de mexer, mantém as suas regras do `.gitignore` e não sobrescreve o seu `CLAUDE.md`. E não rode o `init` de novo numa pasta onde o Córtex já foi montado: para atualizar, use `update`.
+**Posso instalar numa pasta que já tem arquivos?** — pode, é o caso normal. O Córtex cria as pastas dele (`Pilares`, `Memoria`, `Frameworks`, `Ativos`, `.agents`) ao lado dos seus arquivos. Ele só pergunta antes de continuar se você já tiver uma pasta com um desses nomes, um `AGENTS.md` ou `GEMINI.md` seu (que seria substituído pelo do Córtex), ou se estiver instalando direto na Área de Trabalho, em Documentos, em Downloads, na sua pasta pessoal ou numa pasta do sistema, como a do Windows (aí ele sugere criar uma pasta só para o negócio). Em qualquer caso, se a pasta já tiver um `.gitignore`, `AGENTS.md`, `CLAUDE.md` ou `GEMINI.md` seus, o Córtex guarda uma cópia em `.cortex/backups` antes de mexer; ele mantém as suas regras do `.gitignore` e o texto do seu `CLAUDE.md`, que só ganha uma linha no fim. Se existir um arquivo seu chamado `Pilares`, `Memoria`, `Frameworks` ou `Ativos`, ele para antes de gravar e pede para você renomear o arquivo. E não rode o `init` de novo numa pasta onde o Córtex já foi montado: para atualizar, use `update`.
 
-**A IA não começou a conversa de montagem** — confirme que você abriu *a pasta onde rodou o `init`* (e não uma pasta acima). Se usa Cursor ou Gemini CLI, rode o comando com `--targets=` mostrado acima. Em último caso, diga: *"Leia o arquivo `.agents/skills/cortex-onboarding/SKILL.md` e siga as instruções."*
+**A IA não começou a conversa de montagem** — confirme que você abriu *a pasta onde rodou o `init`* (e não uma pasta acima). Se usa o Cursor, rode o comando com `--targets=` mostrado acima. Em último caso, diga: *"Leia o arquivo `.agents/skills/cortex-onboarding/SKILL.md` e siga as instruções."*
 
-**Como faço backup?** — copie a pasta inteira do negócio para onde você já guarda seus backups (HD externo, nuvem pessoal). Não há nada escondido em outro lugar.
+**Como faço backup?** — rode `npx @aksp/cortex@latest backup` (ou peça para a sua IA rodar): ele guarda uma cópia de `Pilares`, `Memoria`, `Ativos` e do `CEREBRO.md` em `.cortex/backups/dados-<data>`, sem alterar nada. Vale fazer antes de uma arrumação grande na memória. Para restaurar, copie de volta o arquivo ou a pasta que quiser; essas cópias nunca são apagadas sozinhas. Como elas ficam dentro da própria pasta, para se proteger de perder o computador copie também a pasta inteira do negócio para onde você já guarda seus backups (HD externo, nuvem pessoal). Não há nada escondido em outro lugar.
 
 **Quero conferir se está tudo certo, sem gastar com IA** — rode `npx @aksp/cortex doctor` no terminal.
 
@@ -204,14 +224,15 @@ SeuNegocio/
 ├── Ativos/                     ← Seus logos e os documentos que a IA gera (propostas, textos)
 ├── Frameworks/
 │   └── CEREBRO.md              ← As instruções da IA para o SEU negócio (fonte única)
-├── AGENTS.md / CLAUDE.md       ← Gerados a partir do CEREBRO.md — não edite à mão
+├── AGENTS.md / CLAUDE.md / GEMINI.md ← O que a IA lê primeiro; depois da montagem, gerados a partir do CEREBRO.md — não edite à mão
+├── COMECE-AQUI.txt             ← Como começar e as frases do dia a dia (para ler ou imprimir)
 ├── .agents/                    ← O framework (habilidades da IA e protocolos) — atualizado pelo `update`
-└── .cortex/                    ← Versão instalada, ferramentas escolhidas e dados básicos do negócio
+└── .cortex/                    ← Versão instalada, ferramentas escolhidas, dados básicos do negócio e as cópias de segurança (backups/)
 ```
 
 ✅ = criado já na montagem rápida. Os demais entram quando fizerem sentido para você.
 
-Os arquivos `META.md`, `CEREBRO.md`, `AGENTS.md`/`CLAUDE.md` e parte do `.cortex/` só aparecem **depois** da conversa de montagem.
+Os arquivos `META.md`, `CEREBRO.md` e parte do `.cortex/` só aparecem **depois** da conversa de montagem. `AGENTS.md`, `CLAUDE.md` e `GEMINI.md` já vêm na instalação com um texto de inicialização (é ele que faz a IA começar a conversa) e passam a levar o cérebro do seu negócio ao final da montagem.
 
 ---
 
@@ -221,11 +242,14 @@ O framework (`.agents/`) e os dados do seu negócio são camadas separadas — a
 
 | Comando | Para quê |
 |---|---|
-| `npx @aksp/cortex@latest update` | Traz habilidades novas e correções. Mostra o que vai mudar, pede confirmação e faz backup antes. **Nunca toca** em `Pilares/`, `Memoria/`, `Ativos/` nem nos dados do negócio dentro do `CEREBRO.md`. |
-| `npx @aksp/cortex sync` | Regera `AGENTS.md`/`CLAUDE.md` depois que você editar o `Frameworks/CEREBRO.md` à mão. Com `--targets=` você escolhe para quais ferramentas gerar: liste **todas** as que usa (ex.: `--targets=AGENTS.md,CLAUDE.md,GEMINI.md`), porque a lista substitui a anterior. |
-| `npx @aksp/cortex doctor` | Confere a estrutura no terminal, sem usar IA: o que falta preencher, se o cérebro está em ordem e se existe versão nova. |
+| `npx @aksp/cortex@latest update` | Traz habilidades novas e correções. Mostra o que vai mudar, pede confirmação e faz backup antes. **Nunca toca** em `Pilares/`, `Memoria/`, `Ativos/` nem nos dados do negócio dentro do `CEREBRO.md`. No fim, diz onde ficou o backup e mostra como voltar à versão anterior, caso algo fique estranho. |
+| `npx @aksp/cortex sync` | Regera os arquivos que a IA lê (`AGENTS.md`, `CLAUDE.md`, `GEMINI.md`) depois que você editar o `Frameworks/CEREBRO.md` à mão. Com `--targets=` você escolhe para quais ferramentas gerar: liste **todas** as que usa (ex.: `--targets=AGENTS.md,CLAUDE.md,GEMINI.md`), porque a lista substitui a anterior. |
+| `npx @aksp/cortex@latest backup` | Guarda uma cópia dos dados do negócio (`Pilares/`, `Memoria/`, `Ativos/` e o `CEREBRO.md`) em `.cortex/backups/dados-<data>`. Não altera nada, e essas cópias nunca são apagadas sozinhas. Atalhos para outras pastas não são seguidos: a cópia avisa quais ficaram de fora. |
+| `npx @aksp/cortex doctor` | Confere a estrutura no terminal, sem usar IA: o que falta preencher, número de margem ou preço escrito de um jeito que muda o valor (como `1.500` ou `30%`), se o cérebro está em ordem e se existe versão nova. |
 
 **Se quem roda o comando é a sua IA:** peça para ela acrescentar `--force` (por exemplo, `npx @aksp/cortex@latest update --force`). Sem terminal para confirmar, o comando só mostra o que faria e não altera nada.
+
+**Baixou a pasta pronta (ZIP)?** Ela é uma instalação igual à do `init`: os comandos acima funcionam nela do mesmo jeito, depois que o Node.js estiver instalado. Não baixe um ZIP novo por cima da sua pasta para atualizar — use o `update`, que preserva os seus dados.
 
 **Como eu fico sabendo que saiu versão nova?** O `doctor` avisa na hora (ele consulta só o número da versão no npm; nada da sua pasta é enviado, e `--offline` desliga a consulta). O `radar` lembra quando faz mais de 3 meses que você não atualiza. E depois de cada `update`, é só dizer **`novidades`** no chat: a IA conta o que mudou e oferece testar o que for mais útil para você.
 
@@ -243,7 +267,7 @@ O framework (`.agents/`) e os dados do seu negócio são camadas separadas — a
 ### Outras formas de instalar
 
 - **Em uma pasta nova:** `npx @aksp/cortex init "Minha Empresa"`
-- **Sem Node.js:** baixe o [ZIP do repositório](https://github.com/alberthpalhares/cortex/archive/refs/heads/master.zip) ou use `git clone https://github.com/alberthpalhares/cortex.git "NomeDaPasta"`. Esses caminhos trazem também arquivos de desenvolvimento do framework (`bin/`, `test/`, `examples/`), que você pode apagar; prefira o `npx`.
+- **Sem Node.js e sem terminal:** a [pasta pronta (ZIP)](https://github.com/alberthpalhares/cortex/releases/latest/download/cortex.zip), como no começo desta página. Ela traz exatamente o que o `init` instala.
 
 ---
 

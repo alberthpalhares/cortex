@@ -26,6 +26,8 @@
 /Frameworks/CEREBRO.md.backup-*
 
 # Artefatos de build / cache locais
+# (dist/ = os ZIPs de `npm run build:zip`, que vão anexados à Release)
+/dist/
 /graphify-out/
 node_modules/
 *.log

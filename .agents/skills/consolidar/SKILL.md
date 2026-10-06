@@ -41,14 +41,15 @@ This skill executes `.agents/cortex/PROTOCOLO_MEMORIA.md`. It keeps `Memoria/` l
    ```
 
 6. **Only after the user confirms**, apply it in this order:
-   1. Create (or update) `Memoria/_Arquivo/AAAA.md` for each year needed, following the format described in `.agents/cortex/PROTOCOLO_MEMORIA.md`, and copy there every line that is going to be archived.
-   2. For each merge, copy the original lines **word for word** into that same archive file, under a `## Fundidas em [YYYY-MM-DD]` heading.
-   3. Only then remove the archived lines from the source files and replace each group of duplicates with its single merged line — most recent date first, the oldest date cited in parentheses.
-   4. If `Memoria/_Arquivo/` was just created for the first time, add a line for it in `Memoria/META.md`'s File Map.
+   1. **Make a safety copy first.** Run `npx @aksp/cortex@latest backup` (it only copies `Pilares/`, `Memoria/`, `Ativos/` and the brain into `.cortex/backups/dados-<timestamp>/`, changes nothing and asks nothing). If the command cannot run or does not end by naming the folder it saved (no terminal, no Node.js, no network, an answer such as "Comando não reconhecido", any other error), copy each `Memoria/` file you are about to change, as it is, into `.cortex/backups/dados-[YYYY-MM-DD]/Memoria/` with your file tools. Use a folder that does not exist yet: if `dados-[YYYY-MM-DD]` is already there (an earlier copy from today), name this one `dados-[YYYY-MM-DD]-2` (then `-3`…). Never save over a file that is already inside a copy folder: the older copy is the one that holds how things were. Do not touch any file before one of the two copies exists; one copy per conversation is enough.
+   2. Create (or update) `Memoria/_Arquivo/AAAA.md` for each year needed, following the format described in `.agents/cortex/PROTOCOLO_MEMORIA.md`, and copy there every line that is going to be archived.
+   3. For each merge, copy the original lines **word for word** into that same archive file, under a `## Fundidas em [YYYY-MM-DD]` heading.
+   4. Only then remove the archived lines from the source files and replace each group of duplicates with its single merged line — most recent date first, the oldest date cited in parentheses.
+   5. If `Memoria/_Arquivo/` was just created for the first time, add a line for it in `Memoria/META.md`'s File Map.
 
 7. **Check your own work before saying it is done.** Take the lines that existed before and account for every one of them: it is still in its file, or it is in the archive. Report it in one line — *"Das 96 linhas de antes, 62 continuam onde estavam e 34 estão no arquivo; 2 linhas novas de fusão."* If any line cannot be found in either place, name it and say the consolidation is NOT complete.
 
-8. **Show a final summary** of what was moved/merged and where to find it (`Memoria/_Arquivo/AAAA.md`).
+8. **Show a final summary** of what was moved/merged and where to find it (`Memoria/_Arquivo/AAAA.md`), ending with one line naming the real folder of the safety copy: *"Antes de mexer, guardei uma cópia de como estava em `.cortex/backups/dados-…`."*
 
 ## Rules
 

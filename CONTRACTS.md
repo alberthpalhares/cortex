@@ -71,6 +71,7 @@
 ```
 
 - Escrito por `cortex init` e `cortex update`
+- Nas pastas prontas para baixar (§4.1) o arquivo traz só `version`, sem as datas: elas entram no primeiro `update`. Sem nenhuma das duas datas, o radar não mostra o lembrete de atualizar
 - `version` é a versão do framework instalada no projeto
 - `checkedAt` (opcional, v1.4.1+) é a última vez em que o usuário conferiu se havia versão nova; o radar usa esse campo, e cai para `updatedAt` quando ele não existe
 - A existência deste arquivo significa **instalado**, não **montado**. Montado é quando existe `Frameworks/CEREBRO.md` (ou, em instalações antigas, `Memoria/META.md`): só então o `init` se recusa a rodar de novo (v1.4.2+)
@@ -86,7 +87,7 @@
 
 - `targets` é um subconjunto de `["AGENTS.md", "CLAUDE.md", "GEMINI.md", ".cursorrules"]`
 - Escrito pelo onboarding (Step 7), por `cortex sync` e por `cortex update`
-- Se o arquivo não existe, o CLI detecta quais targets já existem na raiz ou usa `["AGENTS.md", "CLAUDE.md"]` como padrão
+- Se o arquivo não existe, o CLI detecta quais targets já existem na raiz ou usa o padrão: `["AGENTS.md", "CLAUDE.md", "GEMINI.md"]` (até a v1.5.0, sem o `GEMINI.md`)
 - Alvos aposentados (ver emenda da v1.3.0 abaixo) presentes em um `targets.json` antigo são ignorados na leitura
 
 ### 3.3 `.cortex/meta.json`
@@ -105,7 +106,26 @@
 - Escrito pelo onboarding (Step 7); campos adicionais podem ser mergeados via `writeCortexMeta`
 - Lido por `readCortexMeta` → `readBusinessName` (fallback: regex no `META.md`)
 
-**Garantia de breaking change:** renomear o diretório `.cortex/` (`CORTEX_META_DIR`), ou mudar o nome/estrutura de qualquer um dos 3 arquivos acima.
+### 3.4 `.cortex/backups/` (v1.6.0+)
+
+Cada cópia é uma pasta `<rótulo>-<data ISO com "-" no lugar de ":" e ".">`. O rótulo diz o que há dentro e se a pasta entra na limpeza automática:
+
+| Pasta | Quem cria | O que guarda | Limpeza automática |
+|---|---|---|---|
+| `update-…` | `cortex update` | `.agents/` (em `agents/`) e o `CEREBRO.md` de antes da atualização | sim: ficam as 3 mais recentes |
+| `init-…` | `cortex init` | `.gitignore` e arquivos de raiz que o usuário já tinha na pasta | nunca |
+| `originais-…` | `cortex sync` / `update` | arquivo de raiz escrito pelo usuário, antes de ser substituído pelo cérebro compilado | nunca |
+| `dados-…` | `cortex backup` (também chamado pelas skills `consolidar` e `cortex-revisao` antes de alterarem arquivos) | `Pilares/`, `Memoria/`, `Ativos/` e `Frameworks/CEREBRO.md`, nos mesmos caminhos da raiz | nunca |
+
+- Só as pastas `update-…` giram, porque o framework pode ser baixado de novo; as demais guardam coisas que não têm como ser refeitas e só saem pela mão do usuário
+- Nas pastas `init-…` e `originais-…`, um arquivo cujo nome começa com ponto é gravado com `_` no lugar (`.gitignore` → `_gitignore`)
+- `cortex backup` só lê os dados: não altera `Pilares/`, `Memoria/`, `Ativos/` nem o cérebro, e por isso não pede confirmação. Recusa-se (código 1) numa pasta sem Córtex montado. Restaurar é copiar de volta à mão; não existe comando de restauração
+- `cortex backup` não segue atalhos (links simbólicos e junções de pasta) dentro das pastas de dados: lista no terminal os que ficaram de fora. Se a cópia falhar no meio, a pasta `dados-…` daquela tentativa é removida (ou, se não der para remover, renomeada com o sufixo `-incompleta`): uma pasta `dados-…` sem sufixo é sempre uma cópia que terminou
+- Uma pasta `update-…` com o arquivo `.atualizacao-em-andamento` pertence a uma atualização que parou no meio. Repetir o `cortex update` reaproveita essa pasta (ela é a que guarda o estado de antes) em vez de criar outra, e apaga o arquivo ao terminar
+- Caminho de volta depois de um `update`: para uma versão anterior à v1.6.0, o CLI mostra os passos manuais a partir da pasta `update-…` (copiar `agents/` por cima de `.agents/`, o `CEREBRO.md` por cima de `Frameworks/CEREBRO.md` e rodar `cortex sync`) e **não** sugere o comando da versão antiga, que não conhece as regras desta seção nem a emenda v1.6.0 do item 4. Da v1.6.0 em diante, sugere `npx @aksp/cortex@<versão anterior> update --force`
+- As skills `consolidar` e `cortex-revisao` tiram essa cópia antes da primeira alteração. Elas chamam `npx @aksp/cortex@latest backup`, para que uma versão antiga guardada pelo `npx` não responda no lugar. Sem terminal, sem Node.js ou se o comando falhar, a própria IA copia os arquivos que vai alterar para `.cortex/backups/dados-AAAA-MM-DD/`, nos mesmos caminhos: essa pasta feita à mão guarda só esses arquivos, não os dados todos. Uma cópia feita à mão nunca é gravada por cima de outra: se a pasta do dia já existe, a nova se chama `dados-AAAA-MM-DD-2` (depois `-3`…)
+
+**Garantia de breaking change:** renomear o diretório `.cortex/` (`CORTEX_META_DIR`), mudar o nome/estrutura de qualquer um dos 3 arquivos acima, ou passar a apagar sozinho pastas de backup que não sejam `update-…`.
 
 ---
 
@@ -139,7 +159,29 @@
 
 > **Emenda — v1.3.0 (2026-10-04).** `CODEX.md` foi retirado da lista de targets. Pela regra acima isso seria uma quebra de contrato; registramos como emenda, e não como major version, porque **nenhuma instalação perde funcionalidade**: o Codex lê `AGENTS.md` nativamente, então o `CODEX.md` era uma cópia redundante. Córtex existentes continuam funcionando sem ação: `cortex sync`/`update` avisam sobre um `CODEX.md` antigo e só o removem com confirmação explícita. Na mesma versão, o padrão de targets passou de `["AGENTS.md"]` para `["AGENTS.md", "CLAUDE.md"]` (o Claude Code não lê `AGENTS.md` sozinho) — instalações que já têm `targets.json` não são alteradas.
 
+> **Emenda — v1.6.0.** Um arquivo de raiz que o **usuário** escreveu (sem o cabeçalho de arquivo gerado, sem o texto de inicialização e que não seja o ponteiro das versões antigas) nunca é substituído em silêncio. O `CLAUDE.md` dele, quando o `AGENTS.md` está entre os targets, é mantido e só recebe a linha `@AGENTS.md` (sem cabeçalho); qualquer outro é copiado para `.cortex/backups/originais-…/` antes de receber o cérebro compilado, com aviso no terminal. A posse é reconhecida pela forma (o arquivo **começa** pelo cabeçalho gerado ou pelo título do texto de inicialização), não por uma expressão citada no meio do texto. A linha `@AGENTS.md` é acrescentada ao fim do `CLAUDE.md` do usuário sem regravar o texto dele (acentos, BOM e fim de linha ficam como estavam). Três casos em que o `CLAUDE.md` também é copiado para `originais-…` (no `init`, para `init-…`) e trocado, com aviso: o do usuário que não está em UTF-8 e ainda não tem a linha (acrescentá-la estragaria os acentos); o gerado em que alguém escreveu além do cabeçalho e do import; e, só no `init`, o que é um atalho para outro arquivo. Um arquivo de instrução que é um atalho (link simbólico) nunca é gravado através do atalho: ele vira um arquivo próprio, com aviso. O `cortex update` grava `.cortex/version.json` por último: uma rodada interrompida deixa a versão antiga marcada, e repetir o comando termina o serviço.
+
+> **Emenda — v1.6.0 (`COMECE-AQUI.txt`).** O `init` grava na raiz um `COMECE-AQUI.txt`: texto simples para o dono da pasta (como começar, as frases do dia a dia, como atualizar e o aviso de privacidade). A **fonte** pertence à camada de framework (`.agents/cortex/COMECE-AQUI.txt`, listada no manifesto e trocada pelo `update` como qualquer arquivo de `.agents/`). A **cópia da raiz** é do usuário a partir do momento em que ele a altera: o `update` só a substitui enquanto ela for igual à fonte da versão instalada (ignorando fim de linha e a marca BOM); se foi editada, fica como está e a versão nova continua disponível em `.agents/cortex/`; se foi apagada, não é recriada. Numa instalação anterior à v1.6.0 (sem a fonte), o `update` cria a cópia uma vez. Um `COMECE-AQUI.txt` que já existia na pasta antes do `init` nunca é substituído. A cópia da raiz é gravada em UTF-8 com BOM (para os acentos abrirem certo em qualquer Bloco de Notas) e não é lida por nenhuma skill.
+
+> **Emenda — v1.6.0 (padrão de targets e `init`).** O padrão de targets passou a incluir o `GEMINI.md` (o Gemini CLI só lê esse arquivo), com o cérebro completo. Vale para instalações novas: uma pasta que já tem `targets.json`, ou que já tem arquivos de instrução na raiz, continua com os seus — `sync` e `update` não criam `GEMINI.md` nela. O `.cursorrules` segue como target opcional. No `init`: uma pasta com arquivos do usuário, sem nenhum nome igual ao do que o Córtex cria, é instalada sem pergunta (nada é substituído); havendo nome igual (uma das pastas do Córtex, ou um arquivo de instrução do usuário que seria substituído), o `init` pede confirmação. Na pasta pessoal do usuário, na Área de Trabalho, em Documentos, em Downloads (também dentro do OneDrive), na raiz do disco ou, no Windows, numa pasta do sistema (a do Windows, as de Arquivos de Programas e a `ProgramData`, com o que há dentro delas), o `init` sugere uma subpasta e só instala com confirmação ou `--force`. Sem terminal interativo e sem `--force`, as duas confirmações saem com código 2 e nada é gravado. Um **arquivo** do usuário com o nome de uma das pastas que o Córtex cria (`Pilares`, `Memoria`, `Frameworks`, `Ativos`, `.agents`) faz o `init` parar antes de gravar qualquer coisa, com ou sem `--force`, pedindo para renomear o arquivo (código 1). Numa pasta já instalada e ainda não montada, o `init` trata o `CLAUDE.md` do usuário como o `sync`: mantém o texto e só acrescenta a linha `@AGENTS.md` (se ele não estiver em UTF-8 ou for um atalho, fica como está, com aviso).
+
 ---
+
+## 4.1 Pastas prontas para baixar (v1.6.0+)
+
+**Propósito:** começar sem Node.js e sem terminal. A cada versão, `scripts/build-zip.js` (`npm run build:zip`) gera dois arquivos em `dist/`, e o workflow `release.yml` os anexa à Release do GitHub, que só sai depois de a versão estar no npm (a pasta pronta nunca fica à frente do `npx @aksp/cortex@latest update`):
+
+| Em `dist/` | Anexo da Release (nome fixo) | Conteúdo |
+|---|---|---|
+| `cortex-<versão>.zip` | `cortex.zip` | Exatamente o que `cortex init` grava numa pasta vazia — o script roda o `init` de verdade e compacta o resultado. Única diferença: o `.cortex/version.json` leva só `version`, sem as datas do dia em que o ZIP foi gerado |
+| `cortex-exemplo-estudio-lumen-<versão>.zip` | `cortex-exemplo-estudio-lumen.zip` | `examples/estudio-lumen/` + a pasta `.agents/` da versão + `.cortex/version.json` (só `version`), recompilado para `AGENTS.md`, `CLAUDE.md` e `GEMINI.md`. O `README.md` é um texto próprio do ZIP, para quem já baixou (o do repositório manda baixar o ZIP) |
+
+- Os arquivos ficam soltos na raiz do ZIP (sem uma pasta por cima); nomes em UTF-8, com `/`, em ordem alfabética; a data dos arquivos vai no horário de Brasília
+- As pastas prontas vêm preparadas para o Claude Code, o Gemini CLI e as ferramentas que leem `AGENTS.md`. Não trazem `.cursorrules`: ele nasce na conversa de montagem ou com `init --targets=.cursorrules`
+- Uma pasta descompactada do `cortex.zip` é uma instalação como qualquer outra: `update`, `sync`, `backup` e `doctor` funcionam nela (esses comandos continuam pedindo Node.js)
+- `dist/` não é versionado nem entra no pacote do npm
+
+**Garantia de breaking change:** renomear os anexos de nome fixo (o README e páginas externas apontam para `releases/latest/download/cortex.zip`) ou colocar uma pasta por cima do conteúdo do ZIP.
 
 ## 5. Pilares Obrigatórios e Opcionais
 

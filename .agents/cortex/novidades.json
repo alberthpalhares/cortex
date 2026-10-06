@@ -43,5 +43,20 @@
     "version": "1.5.0",
     "texto": "O radar agora mostra também o que está sem prazo e os prazos mais adiante e, para o que você anotar daqui em diante, há quantos dias cada item em espera está parado",
     "diga": "radar"
+  },
+  {
+    "version": "1.6.0",
+    "texto": "Antes de consolidar a memória ou revisar os pilares eu guardo uma cópia dos seus dados e digo onde ficou",
+    "diga": "consolidar memória"
+  },
+  {
+    "version": "1.6.0",
+    "texto": "A pasta ganhou um arquivo COMECE-AQUI.txt com as frases do dia a dia, para ler ou imprimir",
+    "diga": "ajuda"
+  },
+  {
+    "version": "1.6.0",
+    "texto": "Antes de ler uma ata, um PDF ou uma planilha eu aviso que o conteúdo é enviado ao fornecedor da ferramenta de IA que você usa: deixe de fora senhas e números de cartão",
+    "diga": "anota a reunião"
   }
 ]

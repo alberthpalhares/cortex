@@ -1,6 +1,7 @@
 {
-  "version": "1.5.0",
+  "version": "1.6.0",
   "files": [
+    ".agents/cortex/COMECE-AQUI.txt",
     ".agents/cortex/PROTOCOLO_AUTONOMIA.md",
     ".agents/cortex/PROTOCOLO_MEMORIA.md",
     ".agents/cortex/brain.framework.md",

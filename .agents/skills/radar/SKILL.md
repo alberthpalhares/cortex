@@ -30,7 +30,7 @@ You've just been triggered to run the business's **Radar**. The goal of this ski
      3. The most recent date written in `Memoria/` — a `**[YYYY-MM-DD]**` stamp, `(desde …)`, `(atualizado em …)` or a trailing `(YYYY-MM-DD)` — is more than 7 days old → the inactivity line. Ignore future dates (deadlines, the next review) and `META.md`. Exactly 7 days is not "more than 7".
      4. `Pilares/03_Financeiro.md` exists but `margem_alvo` or `margem_minima` is empty → offer `descobrir minha margem`.
      5. One of the 4 mandatory pillars (`Pilares/01_Estrategia.md`, `02_Cultura.md`, `05_Comunicacao.md`, `06_Operacao.md`) still has `<!-- REVISAR -->` markers, or no quarterly goal is recorded at all → offer **one** small next step, naming how long it takes. (A goal whose quarter ended is already handled by the 🎯 line — do not repeat it here.)
-     6. `checkedAt` (or, if absent, `updatedAt`) in `.cortex/version.json` is more than 90 days old → the "atualizar" line. Skip quietly if the file is missing.
+     6. `checkedAt` (or, if absent, `updatedAt`) in `.cortex/version.json` is more than 90 days old → the "atualizar" line. Skip quietly if the file is missing or has neither date (a folder downloaded as a ZIP: the count starts at its first `update`).
 8. Generate a **Mini Radar Report** strictly in this format (use emojis and be concise):
 
 ```

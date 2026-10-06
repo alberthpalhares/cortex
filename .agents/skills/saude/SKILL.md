@@ -21,7 +21,7 @@ This skill doesn't judge the business's content — it audits the Córtex's **st
    - The 4 mandatory pillars (`01`, `02`, `05`, `06`) that don't exist → `🔴 Faltando (obrigatório)`
    - Optional pillars (`03_Financeiro`, `04_Comercial`, `07_Juridico`, `08_Inventario`, `09_Identidade_Visual`) that don't exist → `ℹ️ Opcional não configurado` (informational, not an error — the user may have chosen to skip these)
 
-5. **Read each file in `Pilares/`** and count how many `<!-- REVISAR -->` markers or blank sections (a heading followed only by an HTML comment) each one has. The "Panorama Competitivo" section of `01_Estrategia.md` stays blank on purpose until the `pesquisa-mercado` skill runs — never count it as pending. In `Pilares/03_Financeiro.md` and `Pilares/04_Comercial.md`, also check the YAML frontmatter at the top: every field (`margem_alvo`, `margem_minima`, `custos_variaveis`, `custo_variavel_padrao`, `preco_piso`, `desconto_max`) still set to `null` (or `{}` for `custos_variaveis`) counts as a pending item — it's data the "Margin Guardian" Mode needs and doesn't have yet. The `custos_variaveis` field is what lets the Margin Guardian compute `Custo Real → Margem Resultante → Veredito` per item instead of guessing the cost from prose.
+5. **Read each file in `Pilares/`** and count how many `<!-- REVISAR -->` markers or blank sections (a heading followed only by an HTML comment) each one has. The "Panorama Competitivo" section of `01_Estrategia.md` stays blank on purpose until the `pesquisa-mercado` skill runs — never count it as pending. In `Pilares/03_Financeiro.md` and `Pilares/04_Comercial.md`, also check the YAML frontmatter at the top: every field (`margem_alvo`, `margem_minima`, `custos_variaveis`, `custo_variavel_padrao`, `preco_piso`, `desconto_max`) still set to `null` (or `{}` for `custos_variaveis`) counts as a pending item — it's data the "Margin Guardian" Mode needs and doesn't have yet. The `custos_variaveis` field is what lets the Margin Guardian compute `Custo Real → Margem Resultante → Veredito` per item instead of guessing the cost from prose. Still in those two files, a value in those fields, in `imposto_pct`, `taxas_pct` or inside `custos_variaveis` that is not a plain number counts as a "número para corrigir": `1.500,00`, `12,50`, `30%`, `R$ 700`; `1.500` in a value in R$ (`preco_piso`, `custos_variaveis`) — the dot is read as a decimal point, so it is used as 1,5; `margem_alvo` or `margem_minima` below 1 (`0.35` means 0,35%, not 35%). So does a top block missing its closing `---` line. Show what is written and what it probably should be (`1500`, `12.5`, `30`, `700`, `35`), and change nothing until the user confirms the value.
 
 6. **Check the brain layer:**
    - `Frameworks/CEREBRO.md` exists and contains the `CORTEX:BUSINESS` and `CORTEX:FRAMEWORK` markers → **current format**. Confirm at least one compiled instruction file exists at the root (the default is `AGENTS.md`; chosen targets live in `.cortex/targets.json`).
@@ -49,6 +49,9 @@ This skill doesn't judge the business's content — it audits the Córtex's **st
 📝 Pilares com marcadores REVISAR pendentes:
    • [Nome do Pilar] — [N] pendência(s)
    • [lista, ou "Nenhum ✅"]
+
+🔢 Números para corrigir (só se houver):
+   • [Pilar] — [campo] está escrito "[valor]"; o certo provavelmente é [valor]
 
 ⚠️ Inconsistências no META.md:
    • [arquivos quebrados ou não indexados, ou "Nenhuma ✅"]

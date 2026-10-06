@@ -158,6 +158,51 @@ test('consolidar guarda o texto original antes de fundir e confere o próprio tr
   assert.ok(protocol.includes('A decision that is still in force is never archived by age'), 'o protocolo e o radar concordam sobre o que é arquivável');
 });
 
+// ── Cópia antes de mexer ──────────────────────────────────────────
+
+test('consolidar e revisão guardam uma cópia dos dados antes da primeira alteração', () => {
+  const c = skill('consolidar');
+  const copy = c.indexOf('Make a safety copy first');
+  assert.ok(copy !== -1, 'o consolidar tira a cópia');
+  assert.ok(copy < c.indexOf('Create (or update) `Memoria/_Arquivo/AAAA.md`'), 'a cópia vem antes de qualquer gravação');
+  assert.ok(c.includes('Do not touch any file before one of the two copies exists'));
+  const r = skill('cortex-revisao');
+  assert.ok(r.includes('Before the first change of this review'));
+  assert.ok(r.indexOf('Before the first change of this review') < r.indexOf('### For Each Pillar'), 'a regra vem antes do primeiro pilar');
+  for (const [name, text] of [['consolidar', c], ['cortex-revisao', r]]) {
+    assert.ok(text.includes('`npx @aksp/cortex@latest backup`'), `${name} usa o comando de cópia, com @latest`);
+    assert.ok(!/npx @aksp\/cortex backup/.test(text), `${name}: sem @latest, um npx antigo em cache pode não conhecer o backup`);
+    assert.ok(text.includes('or does not end by naming the folder it saved'), `${name}: comando que falha também cai na cópia manual`);
+    assert.ok(text.includes('Use a folder that does not exist yet') && text.includes('`dados-[YYYY-MM-DD]-2`'), `${name}: a segunda cópia manual do dia ganha pasta própria`);
+    assert.ok(text.includes('Never save over a file that is already inside a copy folder'), `${name}: uma cópia guardada nunca é sobrescrita`);
+    assert.ok(!/cortex backup[^`]*--force/.test(text), `${name}: o backup não pede confirmação, então não leva --force`);
+    assert.ok(text.includes('with your file tools'), `${name}: sem Node, a própria IA copia os arquivos`);
+    assert.ok(text.includes('.cortex/backups/dados-[YYYY-MM-DD]/'), `${name}: a cópia manual fica junto das outras, numa pasta que nunca é apagada sozinha`);
+    assert.ok(/guardei uma cópia de como est(ava|á hoje) em `\.cortex\/backups\/dados-…`/.test(text), `${name} conta ao dono onde a cópia ficou`);
+  }
+  assert.ok(read('bin/cli.js').includes('npx @aksp/cortex backup [pasta]'), 'o comando que as skills chamam existe no CLI');
+  assert.ok(read('bin/cli.js').includes('$ npx @aksp/cortex@latest backup\n'), 'o exemplo da ajuda usa a mesma forma que as skills');
+  assert.ok(!/npx @aksp\/cortex backup`/.test(read('README.md')), 'o README ensina o backup com @latest');
+  assert.ok(read('CONTRACTS.md').includes('`dados-AAAA-MM-DD-2`'), 'o contrato registra que a cópia manual não sobrescreve outra');
+});
+
+// ── Privacidade na conversa ───────────────────────────────────────
+
+test('o aviso de privacidade aparece na conversa, uma vez, nas skills que leem material do dono', () => {
+  const notice = 'O que eu leio é enviado ao fornecedor da ferramenta de IA que você usa: deixe de fora senhas, números de cartão e documentos pessoais.';
+  const o = skill('cortex-onboarding');
+  const opening = o.slice(o.indexOf('### 🟢 Opening'), o.indexOf('Then follow the **Modo Quickstart**'));
+  assert.ok(opening.includes(`eu leio antes — mas não precisa. ${notice}`), 'na abertura da montagem, junto do convite para mostrar arquivos');
+  assert.ok(/has not been said in this conversation yet/.test(o), 'montagem retomada: o aviso vem antes de ler os arquivos');
+  for (const name of ['registrar', 'analisador-dre']) {
+    const text = skill(name);
+    assert.ok(text.includes(`🔒 ${notice}`), `${name} traz o aviso`);
+    assert.ok(text.includes('Privacy line, once per conversation'), `${name}: uma vez por conversa`);
+    assert.ok(text.includes('never wait for an answer to it'), `${name}: o aviso não trava a conversa`);
+  }
+  assert.ok(!BRAIN.includes('fornecedor da ferramenta'), 'o aviso mora nas skills, não no cérebro carregado em toda conversa');
+});
+
 // ── Montagem ──────────────────────────────────────────────────────
 
 test('montagem rápida: a 4ª pergunta colhe a semana, e o primeiro radar nasce com conteúdo', () => {

@@ -4,6 +4,8 @@ on:
   push:
     branches: [main, master]
   pull_request:
+  # Reaproveitado pelo release.yml: a mesma matriz roda antes de publicar uma tag.
+  workflow_call:
 
 jobs:
   test:

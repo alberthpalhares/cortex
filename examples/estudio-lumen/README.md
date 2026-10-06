@@ -17,6 +17,14 @@ estudio-lumen/
 └── AGENTS.md / CLAUDE.md      ← cérebro compilado a partir de Frameworks/CEREBRO.md (artefatos gerados)
 ```
 
-Esta pasta guarda só os **dados** do negócio de exemplo. As habilidades da IA (a pasta `.agents/`, com as skills e os protocolos) não ficam aqui, para não duplicar o framework dentro do repositório.
+## Para conversar com este exemplo
 
-**Para conversar com este exemplo:** copie esta pasta para fora do repositório, copie também a pasta `.agents/` da raiz do repositório para dentro da cópia, abra a cópia na sua ferramenta de IA (Claude Code, Gemini CLI, Cursor etc.) e diga "radar" ou pergunte "quem é o cliente ideal do Estúdio Lumen?". Sem a pasta `.agents/`, a IA não tem as instruções das skills para seguir.
+1. Baixe o [exemplo pronto (ZIP)](https://github.com/alberthpalhares/cortex/releases/latest/download/cortex-exemplo-estudio-lumen.zip) e descompacte.
+2. Abra a pasta descompactada na sua ferramenta de IA (Claude Code, Gemini CLI ou outra que leia o arquivo `AGENTS.md`).
+3. Diga `radar`, ou pergunte "quem é o cliente ideal do Estúdio Lumen?" ou "posso dar 15% de desconto na cobertura de evento?".
+
+O ZIP traz estes mesmos dados e mais as habilidades da IA (a pasta `.agents/`, com as skills e os protocolos), já prontos para o Claude Code, o Gemini CLI e as ferramentas que leem `AGENTS.md`. Não precisa de Node.js nem de terminal. Dentro dele vai um `README.md` próprio, mais curto, para quem já baixou.
+
+**Nesta pasta do repositório ficam só os dados** do negócio de exemplo: a pasta `.agents/` não é copiada para cá, para não duplicar o framework. Por isso, abrir esta pasta direto do repositório não basta: sem as habilidades, a IA não tem as instruções para seguir. O ZIP é montado a cada versão por `npm run build:zip`, que junta as duas partes.
+
+As datas do exemplo são fixas (o único prazo é 20/10/2026): o que o radar mostra como atrasado depende do dia em que você abre.

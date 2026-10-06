@@ -6,6 +6,39 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-10-06
+
+Começar sem terminal e confiar nos dados: dá para baixar a pasta pronta, os seus arquivos deixam de ser sobrescritos, e os seus dados ganham cópia de segurança.
+
+### Migração (quem já usa)
+- Rode `npx @aksp/cortex@latest update`. Nenhum dado seu é tocado. A pasta ganha um `COMECE-AQUI.txt` na raiz.
+- Quem já tem o Córtex montado continua com os mesmos arquivos de instrução: o `GEMINI.md` só passa a ser criado em instalações novas.
+- O `init` sem `--force` numa pasta com arquivos agora instala sem perguntar quando nenhum nome coincide com o que ele cria (ele só acrescenta). Continua perguntando, e saindo com código 2 sem terminal, quando há nome coincidente ou quando a pasta é a Área de Trabalho, Documentos, Downloads, a pasta pessoal ou uma pasta do sistema (como a do Windows).
+
+### Adicionado
+- **Pasta pronta para baixar, sem instalar nada.** Cada versão publica um ZIP do Córtex: baixe, descompacte, abra na sua ferramenta de IA e escreva "Quero montar meu Córtex". Atualizar continua pedindo o Node.js.
+- **Exemplo que roda.** O Estúdio Lumen também sai em ZIP, já com as skills: abra a pasta e diga "radar" para ver o Córtex respondendo sobre um negócio.
+- **`COMECE-AQUI.txt` na pasta:** os primeiros passos, as frases do dia a dia e como atualizar. Dá para ler no Bloco de Notas ou imprimir. Se você escrever nele, as atualizações deixam a sua versão como está.
+- **Comando `npx @aksp/cortex@latest backup`:** guarda uma cópia dos dados do negócio (Pilares, Memória, Ativos e o cérebro) em `.cortex/backups/dados-<data>`, sem alterar nada, e mostra como restaurar copiando os arquivos de volta. Essas cópias nunca são apagadas sozinhas. Atalhos para outras pastas não entram na cópia (ela avisa quais), e uma cópia que falha no meio não deixa uma pasta pela metade.
+- **Cópia antes de mexer.** Antes de consolidar a memória ou de alterar algo na revisão, a IA guarda uma cópia dos dados e diz onde ficou. Funciona também sem o Node.js.
+- **Aviso de privacidade na conversa.** Antes de ler uma ata, um PDF ou uma planilha, a IA avisa em uma linha, uma vez por conversa, que o que ela lê é enviado ao fornecedor da ferramenta de IA, e pede para deixar de fora senhas, números de cartão e documentos pessoais.
+- **`GEMINI.md` criado na instalação**, junto com o `AGENTS.md` e o `CLAUDE.md`: quem usa o Gemini CLI não precisa de um segundo comando.
+- **Publicação pela tag.** Ao criar a tag de uma versão, os testes rodam em Windows, Mac e Linux e só então saem o pacote do npm, com atestado de procedência, e depois dele a Release com as pastas prontas.
+
+### Corrigido
+- **O seu `CLAUDE.md` era substituído no primeiro `sync`.** Agora o seu texto fica e ele só ganha a linha que carrega o cérebro. Outro arquivo seu com o mesmo nome de um que o Córtex gera ganha cópia em `.cortex/backups/originais-…` antes de ser substituído, com aviso. O mesmo vale para um `CLAUDE.md` salvo num formato de texto antigo (fora do UTF-8), em que acrescentar a linha estragaria os acentos.
+- **A cópia dos seus arquivos feita na instalação sumia depois de três atualizações.** Só os backups de atualização (`update-…`) são renovados; os outros nunca são apagados sozinhos.
+- **Uma atualização interrompida ficava marcada como concluída.** A versão passa a ser a última coisa gravada: rodar o mesmo comando de novo termina o serviço, sem perder a lista de novidades.
+- **Atualizar era um caminho sem volta.** No fim, o `update` diz onde ficou guardado o que havia antes e como voltar: copiando de volta essa cópia e rodando o `sync`. Ele não manda usar o comando de uma versão antiga, que apagaria cópias guardadas e o seu `CLAUDE.md`. Se a atualização parar no meio, repetir o comando reaproveita o mesmo backup.
+- **Instalar numa pasta com arquivos parecia um erro.** O `init` avisa que só acrescenta as pastas dele e segue. Se a pasta for a Área de Trabalho, Documentos, Downloads, a pasta pessoal ou uma pasta do sistema (como a do Windows, onde começa o terminal aberto como administrador), ele sugere criar uma pasta só para o negócio. Se um arquivo seu tiver o nome de uma pasta que o Córtex cria (`Pilares`, por exemplo), ele para antes de gravar e pede para renomear, em vez de quebrar no meio. E rodar o `init` de novo numa pasta instalada não manda mais renomear o seu `CLAUDE.md`: ele só ganha a linha que carrega as instruções.
+- **Depois de instalar, o CLI mandava de volta ao terminal.** A primeira instrução agora é abrir a pasta no aplicativo de IA; o terminal virou uma linha opcional no fim.
+- **O `doctor` não percebia número escrito do jeito brasileiro** nos pilares Financeiro e Comercial: `1.500` (lido como 1,5), `1.500,00`, `30%`, `R$ 700`. Ele diz o campo, o arquivo e o que escrever no lugar, sem alterar nada.
+- **O `doctor` marcava como "Quebrado" a pasta de arquivo da Memória** (`Memoria/_Arquivo/`), que estava lá.
+
+### Ainda não
+- Restaurar um backup com um comando (por ora é copiar os arquivos de volta).
+- Córtex no Claude Cowork e a aposentadoria do `.cursorrules`: dependem de teste dentro dessas ferramentas.
+
 ## [1.5.0] - 2026-10-05
 
 O dia a dia funciona de verdade: o Guardião de Margem novo chega a quem já usa o Córtex e aprende a responder "quanto cobrar?", lembretes viram lembretes, e nada do que foi anotado some do radar.

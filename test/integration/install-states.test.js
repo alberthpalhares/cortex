@@ -37,15 +37,20 @@ function setVersion(dir, version) {
 
 // ── Instalado × montado ───────────────────────────────────────────
 
-test('a dica do init funciona: init e depois init --targets=GEMINI.md acrescenta o arquivo', () => {
-  const dir = installed();
+test('a dica do init funciona: init e depois init --targets=.cursorrules acrescenta o arquivo', () => {
+  const dir = mkTmpDir();
+  const first = run(['init', '.', '--force'], dir);
+  assert.equal(first.status, 0);
+  const hint = first.stdout.match(/Rode: npx @aksp\/cortex init (--targets=\S+)/);
+  assert.ok(hint, first.stdout);
+  assert.equal(hint[1], '--targets=.cursorrules', 'a dica só oferece o que o init simples não criou');
   const agentsBefore = read(dir, 'AGENTS.md');
 
   // Sem --force de propósito: em pasta só instalada não há nada a confirmar.
-  const r = run(['init', '.', '--targets=GEMINI.md'], dir);
+  const r = run(['init', '.', hint[1]], dir);
   assert.equal(r.status, 0, r.stdout + r.stderr);
   assert.ok(r.stdout.includes('já está instalado'), r.stdout);
-  assert.ok(read(dir, 'GEMINI.md').includes('cortex-onboarding'), 'GEMINI.md deve receber o texto de inicialização');
+  assert.ok(read(dir, '.cursorrules').includes('cortex-onboarding'), '.cursorrules deve receber o texto de inicialização');
   assert.equal(read(dir, 'AGENTS.md'), agentsBefore, 'arquivos que já existiam não são reescritos');
 });
 
@@ -65,21 +70,21 @@ test('init --targets em Córtex montado é recusado, e seguir a dica mantém as 
   const dir = installed();
   mount(dir);
 
-  const r = run(['init', '.', '--force', '--targets=GEMINI.md'], dir);
+  const r = run(['init', '.', '--force', '--targets=.cursorrules'], dir);
   assert.equal(r.status, 1);
-  assert.equal(fs.existsSync(path.join(dir, 'GEMINI.md')), false);
+  assert.equal(fs.existsSync(path.join(dir, '.cursorrules')), false);
 
   // No sync, --targets substitui a lista: a dica tem de levar as ferramentas atuais junto.
   const hint = r.stdout.match(/npx @aksp\/cortex sync (--targets=\S+)/);
   assert.ok(hint, r.stdout);
-  assert.equal(hint[1], '--targets=AGENTS.md,CLAUDE.md,GEMINI.md');
+  assert.equal(hint[1], '--targets=AGENTS.md,CLAUDE.md,GEMINI.md,.cursorrules');
 
   assert.equal(run(['sync', '.', '--force', hint[1]], dir).status, 0);
   assert.deepEqual(
     JSON.parse(read(dir, path.join('.cortex', 'targets.json'))).targets,
-    ['AGENTS.md', 'CLAUDE.md', 'GEMINI.md']
+    ['AGENTS.md', 'CLAUDE.md', 'GEMINI.md', '.cursorrules']
   );
-  assert.ok(read(dir, 'GEMINI.md').includes('ARQUIVO GERADO PELO CÓRTEX'));
+  assert.ok(read(dir, '.cursorrules').includes('ARQUIVO GERADO PELO CÓRTEX'));
 });
 
 test('sync avisa quando --targets tira da lista uma ferramenta que estava em uso', () => {
@@ -112,6 +117,45 @@ test('CLAUDE.md do usuário que já importa o AGENTS.md não gera aviso', () => 
   assert.equal(r.status, 0, r.stdout + r.stderr);
   assert.ok(!r.stdout.includes('já existia e foi mantido'), r.stdout);
   assert.ok(r.stdout.includes('Nenhum arquivo novo era necessário'));
+});
+
+test('init em pasta instalada: o CLAUDE.md do usuário é mantido e só ganha a linha @AGENTS.md, sem mandar renomear', () => {
+  const dir = installed();
+  fs.writeFileSync(path.join(dir, 'CLAUDE.md'), 'minhas regras do claude\n');
+
+  const r = run(['init', '.', '--targets=.cursorrules'], dir);
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.equal(read(dir, 'CLAUDE.md'), 'minhas regras do claude\n\n@AGENTS.md\n');
+  assert.ok(!/renomeie/i.test(r.stdout), r.stdout);
+  assert.ok(r.stdout.includes('mantive o seu texto'), r.stdout);
+
+  // Rodar de novo não acrescenta a linha outra vez.
+  const again = run(['init', '.'], dir);
+  assert.equal(read(dir, 'CLAUDE.md'), 'minhas regras do claude\n\n@AGENTS.md\n');
+  assert.ok(again.stdout.includes('Nenhum arquivo novo era necessário'), again.stdout);
+});
+
+test('a ajuda não promete que o init sem terminal nunca grava sem --force', () => {
+  const r = run(['--help'], mkTmpDir());
+  assert.equal(r.status, 0);
+  const help = r.stdout.replace(/\s+/g, ' ');
+  assert.ok(!help.includes('nada é alterado sem --force'), r.stdout);
+  assert.ok(help.includes('precisaria de confirmação não é feito sem --force'), r.stdout);
+  assert.ok(help.includes('instala direto'), r.stdout);
+});
+
+test('o README diz quando o init pergunta e que os arquivos de instrução já vêm na instalação', () => {
+  const readme = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8');
+  const pergunta = readme.split('\n').find((l) => l.includes('Ele só pergunta antes de continuar'));
+  assert.ok(pergunta, 'a frase sobre quando o init pergunta deve existir');
+  // O init também pergunta quando um AGENTS.md ou GEMINI.md do usuário seria substituído.
+  assert.ok(/um `AGENTS\.md` ou `GEMINI\.md` seu/.test(pergunta), pergunta);
+  assert.ok(pergunta.includes('pasta do sistema'), pergunta);
+
+  const depois = readme.split('\n').find((l) => l.includes('só aparecem **depois** da conversa de montagem'));
+  assert.ok(depois, 'a frase sobre o que só aparece depois da montagem deve existir');
+  assert.ok(!/AGENTS\.md[^.]*só aparecem \*\*depois\*\*/.test(depois), 'AGENTS/CLAUDE/GEMINI já vêm no init: ' + depois);
+  assert.ok(depois.includes('já vêm na instalação'), depois);
 });
 
 test('pasta instalada que perdeu a .agents/: o doctor explica e o init repõe', () => {
@@ -355,13 +399,32 @@ test('sem terminal e sem --force, sync não grava e sai com código 2', () => {
   assert.equal(read(dir, 'AGENTS.md'), before);
 });
 
-test('sem terminal e sem --force, init numa pasta com arquivos não instala', () => {
+test('sem terminal e sem --force, init não instala quando algo seu tem o mesmo nome do que o Córtex cria', () => {
   const dir = mkTmpDir();
-  fs.writeFileSync(path.join(dir, 'notas.txt'), 'coisas minhas');
+  fs.mkdirSync(path.join(dir, 'Pilares'));
+  fs.writeFileSync(path.join(dir, 'Pilares', 'obra.txt'), 'coisas minhas');
 
   const r = run(['init', '.'], dir);
   assert.equal(r.status, cli.EXIT_NEEDS_CONFIRMATION, r.stdout + r.stderr);
-  assert.deepEqual(fs.readdirSync(dir), ['notas.txt']);
+  assert.ok(r.stdout.includes('mesmo nome') && r.stdout.includes('Pilares'), r.stdout);
+  assert.ok(r.stdout.includes('Nada foi alterado'), r.stdout);
+  assert.deepEqual(fs.readdirSync(dir), ['Pilares']);
+
+  // Outra caixa no nome (no Windows e no macOS é a mesma pasta): também pergunta.
+  const minuscula = mkTmpDir();
+  fs.mkdirSync(path.join(minuscula, 'pilares'));
+  const r3 = run(['init', '.'], minuscula);
+  assert.equal(r3.status, cli.EXIT_NEEDS_CONFIRMATION, r3.stdout + r3.stderr);
+  assert.ok(r3.stdout.includes('mesmo nome') && r3.stdout.includes('pilares'), r3.stdout);
+  assert.deepEqual(fs.readdirSync(minuscula), ['pilares']);
+
+  // Um arquivo de instrução do usuário que seria substituído também pede confirmação.
+  const outra = mkTmpDir();
+  fs.writeFileSync(path.join(outra, 'AGENTS.md'), 'MINHAS REGRAS');
+  const r2 = run(['init', '.'], outra);
+  assert.equal(r2.status, cli.EXIT_NEEDS_CONFIRMATION, r2.stdout + r2.stderr);
+  assert.ok(r2.stdout.includes('guardo uma cópia'), r2.stdout);
+  assert.deepEqual(fs.readdirSync(outra), ['AGENTS.md']);
 });
 
 test('saída sem terminal não leva códigos de cor', () => {
@@ -396,4 +459,156 @@ test('describeError: arquivo bloqueado vira orientação prática', () => {
   assert.ok(generic.lines.join(' ').includes('issues'));
   assert.ok(generic.detail.includes('qualquer'));
   assert.ok(cli.describeError('texto solto').detail.includes('texto solto'));
+});
+
+// ── Primeira instalação (v1.6.0) ──────────────────────────────────
+
+test('init numa pasta com arquivos do usuário, sem nome coincidente, instala sem alarme e sem pergunta', () => {
+  const dir = mkTmpDir();
+  fs.writeFileSync(path.join(dir, 'notas.txt'), 'coisas minhas');
+  fs.mkdirSync(path.join(dir, 'Contratos'));
+  fs.writeFileSync(path.join(dir, 'Contratos', 'cliente.txt'), 'contrato');
+
+  // Sem --force e sem terminal: não há nada a confirmar, então instala.
+  const r = run(['init', '.'], dir);
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.ok(r.stdout.includes('nada seu é apagado'), r.stdout);
+  assert.ok(!/não está vazia|⚠️|cancelad/i.test(r.stdout), 'o caminho normal não pode parecer um erro');
+  assert.equal(read(dir, 'notas.txt'), 'coisas minhas');
+  assert.equal(read(dir, path.join('Contratos', 'cliente.txt')), 'contrato');
+  assert.ok(cli.isCortexInstalled(dir));
+});
+
+test('init na pasta pessoal, na Área de Trabalho ou em Documentos sugere uma subpasta e não instala sem confirmação', () => {
+  const home = mkTmpDir('cortex-home-');
+  const env = Object.assign({}, process.env, { HOME: home, USERPROFILE: home });
+  const runAt = (args, cwd) => spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env });
+  const desktop = path.join(home, 'OneDrive', 'Área de Trabalho');
+  const docs = path.join(home, 'Documents');
+  fs.mkdirSync(desktop, { recursive: true });
+  fs.mkdirSync(docs);
+
+  for (const dir of [home, desktop, docs]) {
+    const before = fs.readdirSync(dir);
+    const r = runAt(['init', '.'], dir);
+    assert.equal(r.status, cli.EXIT_NEEDS_CONFIRMATION, dir + '\n' + r.stdout + r.stderr);
+    assert.ok(r.stdout.includes('npx @aksp/cortex init "Meu Negocio"'), r.stdout);
+    assert.deepEqual(fs.readdirSync(dir), before, 'nada pode ser criado em ' + dir);
+  }
+
+  // A subpasta sugerida instala normalmente, e --force continua valendo para quem quer a pasta pessoal mesmo.
+  assert.equal(runAt(['init', 'Meu Negocio'], docs).status, 0);
+  assert.ok(cli.isCortexInstalled(path.join(docs, 'Meu Negocio')));
+  assert.equal(runAt(['init', '.', '--force'], desktop).status, 0);
+  assert.ok(cli.isCortexInstalled(desktop));
+});
+
+test('isPersonalRootFolder: só a pasta pessoal, as pastas padrão dela e a raiz do disco', () => {
+  const home = mkTmpDir('cortex-home-');
+  for (const p of ['Desktop', 'Downloads', 'Documentos', path.join('OneDrive', 'Documents'), path.join('Documents', 'Padaria'), 'Padaria', path.join('Padaria', 'Documents')]) {
+    fs.mkdirSync(path.join(home, p), { recursive: true });
+  }
+  for (const p of ['', 'Desktop', 'Downloads', 'Documentos', path.join('OneDrive', 'Documents')]) {
+    assert.equal(cli.isPersonalRootFolder(path.join(home, p), home), true, p);
+  }
+  for (const p of [path.join('Documents', 'Padaria'), 'Padaria', path.join('Padaria', 'Documents'), 'OneDrive']) {
+    assert.equal(cli.isPersonalRootFolder(path.join(home, p), home), false, p);
+  }
+  assert.equal(cli.isPersonalRootFolder(path.parse(home).root, home), true, 'raiz do disco');
+
+  // Pastas do sistema (Windows): um terminal aberto como administrador começa em System32.
+  if (process.platform === 'win32' && process.env.SystemRoot) {
+    assert.equal(cli.isPersonalRootFolder(path.join(process.env.SystemRoot, 'System32'), home), true, 'System32');
+    assert.equal(cli.isPersonalRootFolder(process.env.SystemRoot, home), true, 'pasta do Windows');
+  }
+  assert.equal(cli.isPersonalRootFolder(mkTmpDir(), home), false, 'a pasta temporária nunca conta como pasta do sistema');
+});
+
+test('init com CLAUDE.md e .gitignore do usuário, sem --force: instala sem perguntar, guarda cópia e só acrescenta', () => {
+  const dir = mkTmpDir();
+  const claude = '# Minhas regras\nSempre use tabs.\n';
+  fs.writeFileSync(path.join(dir, 'CLAUDE.md'), claude);
+  fs.writeFileSync(path.join(dir, '.gitignore'), 'meu-segredo.txt\n');
+
+  const r = run(['init', '.'], dir);
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.ok(r.stdout.includes('nada seu é apagado'), r.stdout);
+  assert.ok(!r.stdout.includes('mesmo nome'), r.stdout);
+
+  const mine = read(dir, 'CLAUDE.md');
+  assert.ok(mine.startsWith(claude), mine);
+  assert.equal(mine.split('\n').filter((l) => l === '@AGENTS.md').length, 1, mine);
+  assert.ok(read(dir, '.gitignore').startsWith('meu-segredo.txt\n'));
+
+  const backups = fs.readdirSync(path.join(dir, '.cortex', 'backups')).filter((n) => n.startsWith('init-'));
+  assert.equal(backups.length, 1, backups.join(', '));
+  const backup = path.join('.cortex', 'backups', backups[0]);
+  assert.equal(read(dir, path.join(backup, 'CLAUDE.md')), claude);
+  assert.equal(read(dir, path.join(backup, '_gitignore')), 'meu-segredo.txt\n');
+});
+
+test('init com um ARQUIVO no lugar de uma pasta do Córtex para antes de gravar e diz o que renomear', () => {
+  for (const args of [['init', '.'], ['init', '.', '--force']]) {
+    const dir = mkTmpDir();
+    fs.writeFileSync(path.join(dir, 'Pilares'), 'anotações minhas');
+
+    const r = run(args, dir);
+    assert.equal(r.status, 1, r.stdout + r.stderr);
+    assert.ok(r.stdout.includes('arquivo chamado Pilares') && r.stdout.includes('Renomeie'), r.stdout);
+    assert.ok(r.stdout.includes('Nada foi alterado'), r.stdout);
+    assert.ok(!r.stdout.includes('Dentro de Pilares'), 'não pode falar em "dentro" de um arquivo');
+    assert.ok(!(r.stdout + r.stderr).includes('ENOENT'), r.stdout + r.stderr);
+    assert.deepEqual(fs.readdirSync(dir), ['Pilares'], 'nada pode ficar instalado pela metade');
+    assert.equal(read(dir, 'Pilares'), 'anotações minhas');
+
+    // Depois de renomear, o mesmo comando instala.
+    fs.renameSync(path.join(dir, 'Pilares'), path.join(dir, 'Pilares-antigo'));
+    assert.equal(run(args, dir).status, 0);
+    assert.ok(cli.isCortexInstalled(dir));
+  }
+});
+
+test('a mensagem final do init manda abrir a pasta no aplicativo de IA antes de falar em terminal', () => {
+  const dir = mkTmpDir();
+  const r = run(['init', '.', '--force'], dir);
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+
+  const out = r.stdout.slice(r.stdout.indexOf('Córtex instalado'));
+  const app = out.indexOf('Abrir pasta');
+  const frase = out.indexOf('Quero montar meu Córtex');
+  // Âncora na frase fixa: a palavra solta "terminal" pode aparecer no caminho da pasta temporária.
+  const terminal = out.indexOf('Prefere o terminal');
+  assert.ok(app > 0 && frase > app, out);
+  assert.ok(terminal > frase, 'o terminal só aparece depois da frase da conversa: ' + out);
+  assert.ok(/terminal\? É opcional/.test(out), out);
+});
+
+test('GEMINI.md por padrão vale para instalação nova; quem já escolheu as ferramentas não ganha arquivo novo', () => {
+  // Instalação nova, montada sem targets.json: o padrão entra pelos arquivos que o init criou.
+  const nova = installed();
+  mount(nova);
+  assert.equal(run(['sync', '.', '--force'], nova).status, 0);
+  assert.ok(read(nova, 'GEMINI.md').includes('ARQUIVO GERADO PELO CÓRTEX'));
+  assert.deepEqual(JSON.parse(read(nova, path.join('.cortex', 'targets.json'))).targets, ['AGENTS.md', 'CLAUDE.md', 'GEMINI.md']);
+
+  // Córtex anterior à v1.6.0 com a escolha gravada em targets.json.
+  const comEscolha = installed();
+  mount(comEscolha);
+  fs.rmSync(path.join(comEscolha, 'GEMINI.md'));
+  cli.writeTargets(comEscolha, ['AGENTS.md', 'CLAUDE.md']);
+  setVersion(comEscolha, '1.5.0');
+  // Córtex anterior à v1.6.0 sem targets.json: valem os arquivos que já estão na raiz.
+  const semEscolha = installed();
+  mount(semEscolha);
+  fs.rmSync(path.join(semEscolha, 'GEMINI.md'));
+  setVersion(semEscolha, '1.5.0');
+
+  for (const dir of [comEscolha, semEscolha]) {
+    for (const cmd of ['update', 'sync']) {
+      const r = run([cmd, '.', '--force'], dir);
+      assert.equal(r.status, 0, r.stdout + r.stderr);
+      assert.equal(fs.existsSync(path.join(dir, 'GEMINI.md')), false, `${cmd} não pode criar GEMINI.md em quem não pediu`);
+    }
+    assert.deepEqual(JSON.parse(read(dir, path.join('.cortex', 'targets.json'))).targets, ['AGENTS.md', 'CLAUDE.md']);
+  }
 });

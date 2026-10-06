@@ -25,9 +25,10 @@ test('init cria a estrutura completa esperada', () => {
   const result = runCli(['init', '.', '--force'], dir);
   assert.equal(result.status, 0, result.stderr);
 
-  // init cria AGENTS.md (padrão cross-tool) e CLAUDE.md (o Claude Code não lê
-  // AGENTS.md sozinho). Os demais são sob demanda: onboarding ou --targets=.
-  for (const entry of ['.agents', 'Frameworks', 'Memoria', 'Pilares', 'Ativos', 'AGENTS.md', 'CLAUDE.md', '.gitignore']) {
+  // init cria AGENTS.md (padrão cross-tool), CLAUDE.md (o Claude Code não lê
+  // AGENTS.md sozinho) e GEMINI.md (o Gemini CLI só lê esse). Os demais são sob
+  // demanda: onboarding ou --targets=.
+  for (const entry of ['.agents', 'Frameworks', 'Memoria', 'Pilares', 'Ativos', 'AGENTS.md', 'CLAUDE.md', 'GEMINI.md', '.gitignore']) {
     assert.ok(fs.existsSync(path.join(dir, entry)), `esperava "${entry}" depois do init`);
   }
   assert.equal(
@@ -35,7 +36,12 @@ test('init cria a estrutura completa esperada', () => {
     '@AGENTS.md',
     'o CLAUDE.md do init deve apenas importar o AGENTS.md, sem duplicar conteúdo'
   );
-  for (const f of ['GEMINI.md', 'CODEX.md', '.cursorrules']) {
+  assert.equal(
+    fs.readFileSync(path.join(dir, 'GEMINI.md'), 'utf8'),
+    fs.readFileSync(path.join(dir, 'AGENTS.md'), 'utf8'),
+    'o GEMINI.md do init leva o mesmo texto de inicialização do AGENTS.md'
+  );
+  for (const f of ['CODEX.md', '.cursorrules']) {
     assert.equal(fs.existsSync(path.join(dir, f)), false, `${f} não deveria ser criado sem --targets=`);
   }
   assert.ok(fs.existsSync(path.join(dir, '.cortex', 'version.json')), 'esperava .cortex/version.json depois do init');
@@ -57,7 +63,7 @@ test('init --targets=all cria todos os targets', () => {
   );
 });
 
-test('init --targets=CLAUDE.md,.cursorrules cria só os targets pedidos', () => {
+test('init --targets=CLAUDE.md,.cursorrules cria os padrões mais os targets pedidos', () => {
   const dir = mkTmpDir();
   const result = runCli(['init', '.', '--force', '--targets=CLAUDE.md,.cursorrules'], dir);
   assert.equal(result.status, 0, result.stderr);
@@ -65,7 +71,7 @@ test('init --targets=CLAUDE.md,.cursorrules cria só os targets pedidos', () => 
   assert.ok(fs.existsSync(path.join(dir, 'AGENTS.md')), 'AGENTS.md sempre é criado (padrão cross-tool)');
   assert.ok(fs.existsSync(path.join(dir, 'CLAUDE.md')), 'CLAUDE.md deveria existir com --targets=CLAUDE.md,.cursorrules');
   assert.ok(fs.existsSync(path.join(dir, '.cursorrules')), '.cursorrules deveria existir com --targets=CLAUDE.md,.cursorrules');
-  assert.equal(fs.existsSync(path.join(dir, 'GEMINI.md')), false, 'GEMINI.md não deveria existir sem ser pedido');
+  assert.ok(fs.existsSync(path.join(dir, 'GEMINI.md')), 'GEMINI.md é padrão: é criado mesmo sem ser pedido');
   assert.equal(fs.existsSync(path.join(dir, 'CODEX.md')), false, 'CODEX.md não deveria existir sem ser pedido');
 });
 

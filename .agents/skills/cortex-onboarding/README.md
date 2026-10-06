@@ -8,7 +8,7 @@ Este arquivo existe apenas para localizar rapidamente esta skill dentro de `.age
 
 ## O que esta skill faz
 
-Conduz a conversa de montagem do Córtex e gera fisicamente os arquivos de `Pilares/`, `Memoria/` e `Frameworks/`, além dos arquivos de instrução da raiz (`AGENTS.md` e `CLAUDE.md` por padrão; `GEMINI.md` e `.cursorrules` sob demanda). Tem três modos:
+Conduz a conversa de montagem do Córtex e gera fisicamente os arquivos de `Pilares/`, `Memoria/` e `Frameworks/`, além dos arquivos de instrução da raiz (`AGENTS.md`, `CLAUDE.md` e `GEMINI.md` por padrão; `.cursorrules` sob demanda). Tem três modos:
 
 - **Rápido (padrão):** 4 perguntas, cerca de 5 minutos.
 - **Completo:** 9 blocos, cerca de 25 perguntas, 20–30 minutos — só quando o usuário pede.

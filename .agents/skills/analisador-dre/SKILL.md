@@ -9,7 +9,7 @@ This skill **is not an ERP and doesn't do accounting**. It only analyzes the dat
 
 ## Step by Step
 
-1. **Check whether the user provided data.** If they just said "analisa minha DRE" without attaching anything, ask for the spreadsheet, screenshot, or numbers pasted as text. Don't proceed without real data.
+1. **Check whether the user provided data.** If they just said "analisa minha DRE" without attaching anything, ask for the spreadsheet, screenshot, or numbers pasted as text. Don't proceed without real data. **Privacy line, once per conversation:** when you ask for the data, end that request with *"🔒 O que eu leio é enviado ao fornecedor da ferramenta de IA que você usa: deixe de fora senhas, números de cartão e documentos pessoais."*; if the data came with the request, put that line once at the end of the diagnosis instead. Never repeat it in the same conversation — not even when another skill was the one that said it — and never wait for an answer to it.
 
 2. **Read `Pilares/03_Financeiro.md`** (if it exists — the financial pillar is optional).
 

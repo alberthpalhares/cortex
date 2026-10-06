@@ -160,3 +160,86 @@ test('doctor com os 4 pilares preenchidos diz que estão completos, mesmo com o 
   assert.equal(r.status, 0, r.stdout + r.stderr);
   assert.ok(r.stdout.includes('Os 4 pilares essenciais estão completos'), r.stdout);
 });
+
+// ── Doctor: números do cabeçalho e arquivo morto ──────────────────
+
+const FULL_PILLARS = {
+  '01_Estrategia.md': '# Estratégia\n\n## Posicionamento\nPão quente às 6h.\n',
+  '02_Cultura.md': '# Cultura\n\n## Valores\nPontualidade.\n',
+  '05_Comunicacao.md': '# Comunicação\n\n## Tom de Voz\nPróximo e direto.\n',
+  '06_Operacao.md': '# Operação\n\n## Rotina\nAbre às 6h.\n'
+};
+
+test('doctor aponta número no formato brasileiro no cabeçalho do Financeiro e do Comercial, sem mexer nos arquivos', () => {
+  const dir = installed();
+  const financeiro = '---\nmargem_alvo: 30%   # meta\nmargem_minima: 20\ncustos_variaveis:\n  "Bolo de festa": R$ 45,50\n  "Pão": 2\nimposto_pct: 6\n---\n\n# Financeiro\n\n## Custos\nAluguel.\n';
+  const comercial = '---\npreco_piso: 1.500\ndesconto_max: 10\n---\n\n# Comercial\n\n## Preços\nTabela.\n';
+  mountedQuick(dir, { ...FULL_PILLARS, '03_Financeiro.md': financeiro, '04_Comercial.md': comercial });
+
+  const r = run(['doctor', '.', '--offline'], dir);
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.ok(r.stdout.includes('Números para corrigir'), r.stdout);
+  assert.ok(/03_Financeiro\.md — margem_alvo está escrito "30%"\. Deixe só o número: 30/.test(r.stdout), r.stdout);
+  assert.ok(r.stdout.includes('"Bolo de festa" (em custos_variaveis) está escrito "R$ 45,50". Deixe só o número: 45.5'), r.stdout);
+  assert.ok(/04_Comercial\.md — preco_piso está escrito "1\.500", que é lido como 1,5\. Se o valor é 1500, escreva 1500/.test(r.stdout), r.stdout);
+  assert.ok(!r.stdout.includes('Pilares com pendências: Nenhum'), 'um pilar com número quebrado não está "sem pendências"');
+  const sugestao = r.stdout.slice(r.stdout.indexOf('Sugestão:'));
+  assert.ok(sugestao.includes('Corrija os números apontados acima'), r.stdout);
+  assert.ok(!sugestao.includes('continuar onboarding'), 'o onboarding não corrige formato de número');
+  for (const bom of ['margem_minima', 'desconto_max', 'imposto_pct', '"Pão"']) {
+    assert.ok(!r.stdout.includes(`${bom} está escrito`), `${bom} está certo e não pode ser acusado`);
+  }
+  assert.equal(read(dir, path.join('Pilares', '03_Financeiro.md')), financeiro, 'o doctor só relata');
+  assert.equal(read(dir, path.join('Pilares', '04_Comercial.md')), comercial, 'o doctor só relata');
+});
+
+test('doctor não acusa números quando o cabeçalho está certo', () => {
+  const r = run(['doctor', path.join(ROOT, 'examples', 'estudio-lumen'), '--offline'], ROOT);
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.ok(!r.stdout.includes('Números para corrigir'), r.stdout);
+});
+
+function withArchiveInMap(dir, mapLines) {
+  mountedQuick(dir, FULL_PILLARS);
+  fs.appendFileSync(path.join(dir, 'Memoria', 'META.md'), mapLines.map((l) => `| Itens antigos | \`${l}\` | — |\n`).join(''));
+}
+
+test('doctor não chama de "Quebrado" o arquivo morto (Memoria/_Arquivo) que existe', () => {
+  const dir = installed();
+  fs.mkdirSync(path.join(dir, 'Memoria', '_Arquivo'));
+  fs.writeFileSync(path.join(dir, 'Memoria', '_Arquivo', '2025.md'), '# Arquivo 2025\n');
+  fs.writeFileSync(path.join(dir, 'Memoria', '_Arquivo', '2024.md'), '# Arquivo 2024\n');
+  withArchiveInMap(dir, ['Memoria/_Arquivo/', 'Memoria/_Arquivo/2025.md', 'Memoria/_Arquivo/AAAA.md',
+    'Memoria/_Arquivo/ (2024, 2025)', 'Memoria/_Arquivo/2024.md`, `Memoria/_Arquivo/2025.md']);
+
+  const r = run(['doctor', '.', '--offline'], dir);
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.ok(!r.stdout.includes('Quebrado'), r.stdout);
+  assert.ok(r.stdout.includes('META.md: sem inconsistências'), r.stdout);
+});
+
+test('doctor continua acusando o arquivo morto que está no mapa e sumiu do disco', () => {
+  const dir = installed();
+  fs.mkdirSync(path.join(dir, 'Memoria', '_Arquivo'));
+  fs.writeFileSync(path.join(dir, 'Memoria', '_Arquivo', '2025.md'), '# Arquivo 2025\n');
+  withArchiveInMap(dir, ['Memoria/_Arquivo/2024.md']);
+  let r = run(['doctor', '.', '--offline'], dir);
+  assert.ok(r.stdout.includes('Quebrado') && r.stdout.includes('Memoria/_Arquivo/2024.md'), r.stdout);
+
+  // Pasta existe, mas o arquivo citado não: sufixo, nome parecido, um dos dois anos.
+  const citados = ['Memoria/_Arquivo/2023.md (antigos)', 'Memoria/_Arquivos_Velhos.md',
+    'Memoria/_Arquivo/Decisoes_2023.md', 'Memoria/_Arquivo/2025.md, Memoria/_Arquivo/2019.md'];
+  const outro = installed();
+  fs.mkdirSync(path.join(outro, 'Memoria', '_Arquivo'));
+  fs.writeFileSync(path.join(outro, 'Memoria', '_Arquivo', '2025.md'), '# Arquivo 2025\n');
+  withArchiveInMap(outro, citados);
+  r = run(['doctor', '.', '--offline'], outro);
+  for (const linha of citados) {
+    assert.ok(r.stdout.includes(`Quebrado\u001b[0m — ${linha}`) || r.stdout.includes(`Quebrado — ${linha}`), `${linha}\n${r.stdout}`);
+  }
+
+  const semPasta = installed();
+  withArchiveInMap(semPasta, ['Memoria/_Arquivo/']);
+  r = run(['doctor', '.', '--offline'], semPasta);
+  assert.ok(r.stdout.includes('Quebrado') && r.stdout.includes('Memoria/_Arquivo/'), r.stdout);
+});

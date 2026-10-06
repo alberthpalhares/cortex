@@ -1,0 +1,91 @@
+CÓRTEX — COMECE AQUI
+====================
+
+O QUE É ESTA PASTA
+
+Esta pasta é a memória do seu negócio. Ela guarda, em arquivos de texto
+simples, o que você decidiu, aprendeu e combinou. A sua ferramenta de IA
+consulta esses arquivos antes de responder.
+
+
+PRIMEIRA VEZ
+
+1. Abra o seu aplicativo de IA (Claude Code, Gemini CLI...), escolha
+   "Abrir pasta" e aponte para esta pasta.
+
+2. Escreva no chat:
+
+       Quero montar meu Córtex
+
+3. Responda 4 perguntas rápidas (uns 5 minutos). Pronto.
+
+As pastas Pilares, Memoria e Ativos começam vazias de propósito: é essa
+conversa que preenche.
+
+A IA não começou a conversa? Confira se você abriu ESTA pasta (e não a
+pasta de cima) e escreva no chat:
+"Leia o arquivo .agents/skills/cortex-onboarding/SKILL.md e siga as
+instruções."
+
+
+FRASES DO DIA A DIA
+
+Depois da montagem, é só conversar em português, do seu jeito. Estas são
+as frases que você mais vai usar:
+
+  radar
+      o que está atrasado, o que está parado e em que focar hoje
+
+  registra que...
+      guarda uma decisão, uma lição, uma pendência ou uma pessoa
+
+  desfaz
+      apaga o que acabou de ser registrado, se você disse errado
+
+  me lembra de...
+      anota com data e mostra no radar (não manda aviso no celular)
+
+  o que você sabe sobre...
+      diz o que já está registrado, com data
+
+  quanto cobrar por...
+      do custo ao preço mínimo e ao preço-alvo, respeitando a sua margem
+
+  fechar a semana
+      5 minutos: o que andou, o que ficou e o foco da próxima
+
+  ajuda
+      mostra a lista completa do que dá para pedir
+
+  novidades
+      conta o que mudou na última atualização do Córtex
+
+E pode perguntar qualquer coisa sobre o negócio ("posso dar 15% de
+desconto?"): a IA consulta o que está registrado antes de responder.
+
+
+PARA ATUALIZAR O CÓRTEX
+
+Peça para a sua IA rodar, nesta pasta:
+
+       npx @aksp/cortex@latest update --force
+
+Ou rode você, no terminal, sem o --force. Atualizar pede o Node.js
+instalado no computador (nodejs.org). Os seus dados (Pilares, Memoria,
+Ativos) nunca são alterados pela atualização, e uma cópia do que muda
+fica guardada antes.
+
+
+SEUS DADOS
+
+Os arquivos são seus e ficam no seu computador. O Córtex não tem conta,
+não tem servidor e não coleta nada. Mas atenção: o que a IA lê para
+responder é enviado ao fornecedor da ferramenta de IA que você usa
+(Anthropic, Google, OpenAI...), como em qualquer conversa com IA.
+Não guarde senhas nem números de cartão nestes arquivos.
+
+
+Dúvidas e exemplos: https://github.com/alberthpalhares/cortex
+
+(Este arquivo veio com o Córtex e pode ser impresso. Se você escrever
+nele, as próximas atualizações deixam a sua versão como está.)

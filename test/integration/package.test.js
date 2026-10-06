@@ -101,16 +101,16 @@ test('instalação nova pelo pacote: init, init --targets, doctor, sync e update
 
   let r = run(['init', '.', '--force'], dir);
   assert.equal(r.status, 0, r.stdout + r.stderr);
-  for (const entry of ['.agents', 'Frameworks', 'Memoria', 'Pilares', 'Ativos', 'AGENTS.md', 'CLAUDE.md', '.gitignore', path.join('.cortex', 'version.json')]) {
+  for (const entry of ['.agents', 'Frameworks', 'Memoria', 'Pilares', 'Ativos', 'AGENTS.md', 'CLAUDE.md', 'GEMINI.md', '.gitignore', path.join('.cortex', 'version.json')]) {
     assert.ok(fs.existsSync(path.join(dir, entry)), `esperava "${entry}" depois do init pelo pacote`);
   }
   const gitignore = fs.readFileSync(path.join(dir, '.gitignore'), 'utf8');
   assert.ok(gitignore.includes('/Pilares/*') && gitignore.includes('/Memoria/*'), '.gitignore deve proteger os dados do negócio');
   assert.ok(!gitignore.includes('AUDITORIA'), '.gitignore do usuário não leva regras internas do repositório');
 
-  r = run(['init', '.', '--targets=GEMINI.md'], dir);
+  r = run(['init', '.', '--targets=.cursorrules'], dir);
   assert.equal(r.status, 0, r.stdout + r.stderr);
-  assert.ok(fs.existsSync(path.join(dir, 'GEMINI.md')), 'a dica do próprio init precisa funcionar');
+  assert.ok(fs.existsSync(path.join(dir, '.cursorrules')), 'a dica do próprio init precisa funcionar');
 
   r = run(['doctor', '.', '--offline'], dir);
   assert.notEqual(r.status, 0);

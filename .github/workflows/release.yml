@@ -1,0 +1,104 @@
+name: Release
+
+# Publicar uma versão = dar push numa tag vX.Y.Z (igual à versão do package.json).
+# A matriz de testes roda inteira; depois sai a publicação no npm e, só com ela
+# no ar, a Release do GitHub (com os ZIPs). A pasta pronta nunca fica à frente
+# do `npx @aksp/cortex@latest`, que é o comando que a atualiza.
+# O passo a passo está no CONTRIBUTING.md ("Publicar pela tag").
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Testes
+    uses: ./.github/workflows/ci.yml
+
+  publish:
+    name: Publicar no npm
+    needs: test
+    runs-on: ubuntu-latest
+    # Publicação sem token guardado (npm Trusted Publishing): o npm confia neste
+    # workflow por OIDC e gera o atestado de procedência do pacote.
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Configurar Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24.x
+          registry-url: https://registry.npmjs.org
+
+      # Falha aqui se a tag não for a versão do package.json ou se o CHANGELOG
+      # não tiver a seção da versão: nada é publicado.
+      - name: Conferir a tag
+        run: node scripts/release-notes.js "$GITHUB_REF_NAME" > /dev/null
+
+      # A publicação por OIDC pede o npm 11.5.1 ou mais novo.
+      - name: Atualizar o npm
+        run: npm install -g npm@latest
+
+      # --ignore-scripts: o prepublishOnly repetiria os testes que o job "test"
+      # acabou de rodar nos três sistemas.
+      # Rodar de novo é seguro: se a versão já está no npm, o passo só avisa.
+      - name: Publicar
+        run: |
+          NAME="$(node -p "require('./package.json').name")"
+          VERSION="${GITHUB_REF_NAME#v}"
+          if [ "$(npm view "$NAME@$VERSION" version 2> /dev/null)" = "$VERSION" ]; then
+            echo "::notice::$NAME@$VERSION já está no npm. Nada a publicar."
+            exit 0
+          fi
+          if ! npm publish --access public --provenance --ignore-scripts; then
+            echo "::error title=O npm recusou a publicação::Se esta é a primeira publicação pelo GitHub, falta o cadastro único deste repositório como Trusted Publisher do pacote em npmjs.com (passo a passo no CONTRIBUTING.md, seção Publicar pela tag). A Release do GitHub e os ZIPs só saem depois deste job. Depois de cadastrar, use Re-run failed jobs."
+            exit 1
+          fi
+
+  release:
+    name: Release no GitHub (com os ZIPs)
+    needs: [test, publish]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Configurar Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22.x
+
+      - name: Conferir a tag e separar as notas do CHANGELOG
+        run: node scripts/release-notes.js "$GITHUB_REF_NAME" > "$RUNNER_TEMP/notas.md"
+
+      # Os anexos levam nome fixo, para o README apontar sempre para
+      # releases/latest/download/cortex.zip.
+      - name: Gerar os ZIPs
+        run: |
+          node scripts/build-zip.js dist
+          cp "dist/cortex-${GITHUB_REF_NAME#v}.zip" dist/cortex.zip
+          cp "dist/cortex-exemplo-estudio-lumen-${GITHUB_REF_NAME#v}.zip" dist/cortex-exemplo-estudio-lumen.zip
+
+      # Com os arquivos no próprio comando, o gh cria a Release como rascunho,
+      # envia os ZIPs e só então publica: ela nunca aparece sem os anexos.
+      # Se a Release da tag já existe (publicada, ou um rascunho que uma execução
+      # anterior deixou pela metade), troca os anexos e publica.
+      - name: Publicar a Release já com os ZIPs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" dist/cortex.zip dist/cortex-exemplo-estudio-lumen.zip --clobber
+            gh release edit "$GITHUB_REF_NAME" --draft=false
+          else
+            gh release create "$GITHUB_REF_NAME" dist/cortex.zip dist/cortex-exemplo-estudio-lumen.zip --verify-tag --title "$GITHUB_REF_NAME" --notes-file "$RUNNER_TEMP/notas.md"
+          fi
