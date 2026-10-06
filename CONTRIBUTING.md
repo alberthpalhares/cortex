@@ -78,22 +78,24 @@ Com mais de uma dúzia de skills convivendo no mesmo cérebro, a IA precisa sabe
 | Skill | Verbo primário | Gatilhos secundários |
 |-------|---------------|---------------------|
 | `radar` | `radar` | `status`, `como estamos?`, `briefing` |
-| `registrar` | `registra` | `nova lição`, `pendência`, `decidi que`, `resolvido`, `desfaz`, `corrige o último`, `anota a reunião`, `cliente novo`, `meta do trimestre` |
-| `lembrar` | `o que você sabe sobre` | `lembra de`, `o que já decidimos sobre`, `procura na memória` |
+| `registrar` | `registra` | `nova lição`, `nova pendência`, `decidi que`, `resolvido`, `me lembra de`, `lembrete`, `desfaz`, `corrige o último`, `anota a reunião`, `cliente novo`, `a meta do trimestre é` |
+| `lembrar` | `o que você sabe sobre` | `você lembra de`, `qual era o combinado com`, `o que já decidimos sobre`, `procura na memória` |
 | `semana` | `fechar a semana` | `revisão da semana`, `resumo da semana` |
 | `conteudo` | `cria um post` | `escreve uma legenda`, `mensagem de WhatsApp`, `ideias de conteúdo` |
 | `cortex-onboarding` | `montar meu córtex` | `criar córtex`, `continuar onboarding` (frase oficial de retomada), `completar meu córtex` |
 | `cortex-revisao` | `revisar córtex` | `revisar pilares` |
-| `saude` | `saúde do córtex` | `diagnóstico` (do Córtex), `o que falta preencher` |
+| `saude` | `saúde do córtex` | `diagnóstico do córtex`, `o que falta preencher` |
 | `ajuda` | `ajuda` | `o que você faz?`, `comandos` |
 | `novidades` | `novidades` | `o que mudou?`, `o que tem de novo?` |
 | `consolidar` | `consolidar memória` | `arquivar memória`, `a memória está grande` |
-| `proposta-comercial` | `gerar proposta` | `monta uma proposta`, `proposta comercial` |
-| *(modo do protocolo)* Guardião de Margem | `descobrir minha margem` | `posso dar desconto?`, `quanto cobrar`, `vale a pena?` |
-| `analisador-dre` | `analisar DRE` | `analisa essa planilha`, `como está minha margem` |
+| `proposta-comercial` | `gerar proposta` | `monta uma proposta`, `proposta comercial`, `orçamento para`, `cotação para` |
+| *(modo do protocolo)* Guardião de Margem | `descobrir minha margem` | `posso dar desconto?`, `quanto cobrar por`, `como está minha margem?`, `vale a pena?` |
+| `analisador-dre` | `analisar DRE` | `analisa essa planilha`, `analisa esses números` (sempre com dados que o usuário traz) |
 | `pesquisa-mercado` | `pesquisar concorrência` | `mapear concorrentes`, `quem são meus concorrentes` |
 | `cortex doctor` (CLI) | `cortex doctor` | `npx @aksp/cortex doctor` |
 
+> **Pergunta é consulta, ordem é registro.** "Quais são minhas pendências?" vai para o `radar`; "nova pendência: …" vai para o `registrar`. "Você lembra do combinado com o João?" é do `lembrar`; "me lembra de ligar para o João na sexta" é um lembrete, do `registrar`. Ao escrever um gatilho, prefira a forma de ordem inteira a uma palavra solta.
+>
 > **"Tive uma ideia"** não dispara skill: o cérebro trata como ideia *do negócio* (avalia contra a Estratégia e oferece registrar).
 >
 > **Skill só para contribuidores:** `contrib/skills/ideias/SKILL.md` captura ideias de melhoria *do próprio framework* em `IDEIAS.md` (não versionado). Ela não vai no pacote nem é roteada pelo cérebro — para usar, peça à sua IA que leia esse arquivo.
@@ -189,6 +191,8 @@ Ao publicar uma nova versão (adicionar/remover/renomear skill, ou qualquer muda
 - ⚙️ `npm test` passa (toda a suíte). Ela inclui `test/integration/package.test.js`, que empacota o projeto, instala o pacote e roda o CLI instalado — é o que pega diferenças entre o repositório e o que chega pelo `npx` (ex.: o npm não publica arquivos chamados `.gitignore`).
 - ⚙️ `npm run verify:manifest` passa (manifesto em dia)
 - [ ] **O CI está verde** no commit que vai ser publicado (Ubuntu, Windows e macOS)
+- [ ] **Roteiro de conversa** rodado numa ferramenta de IA de verdade (veja abaixo) — obrigatório quando a versão mexe no cérebro, numa skill ou num protocolo
+- [ ] **O cérebro continua dentro do orçamento** (`brain.framework.md` com no máximo 900 palavras; `test/unit/dia-a-dia.test.js` confere). Ele é carregado em toda conversa: para acrescentar uma regra, corte outra
 - [ ] **Depois de publicar:** `npx @aksp/cortex@latest init` numa pasta nova e vazia termina sem erro
 - [ ] `npm run build:manifest` foi rodado e commitado (se arquivos em `.agents/` mudaram)
 - [ ] **Tabela de gatilhos** no `CONTRIBUTING.md` está atualizada (skill nova = nova linha na tabela)
@@ -198,6 +202,29 @@ Ao publicar uma nova versão (adicionar/remover/renomear skill, ou qualquer muda
 - [ ] **`examples/estudio-lumen/`** reflete as mudanças (se o exemplo for afetado — ex: novo pilar opcional, nova skill que o cérebro do exemplo deveria conhecer)
 - [ ] **`package.json`** — versão incrementada conforme SemVer
 - [ ] **`README.md`** — tabela de comandos do CLI atualizada, se houve mudança em `init`/`update`/`sync`/`doctor`
+
+### Roteiro de conversa (12 frases)
+
+Os testes automáticos conferem o texto das skills, não o que a IA faz com ele. Antes de publicar uma versão que mexe no cérebro, numa skill ou num protocolo, rode este roteiro numa ferramenta de IA de verdade.
+
+**Preparação:** copie `examples/estudio-lumen/` para uma pasta fora do repositório, copie a pasta `.agents/` da raiz para dentro da cópia e abra a cópia na ferramenta. Guarde uma segunda cópia intocada para comparar os arquivos depois. O exemplo vem compilado para `AGENTS.md` e `CLAUDE.md`; para testar no Gemini CLI ou no Cursor, rode antes `node <repositório>/bin/cli.js sync <cópia> --targets=all --force`. As datas do exemplo são fixas (o único prazo é 20/10/2026), então em que bloco do radar cada item aparece depende do dia em que você roda.
+
+| # | Você diz | O que tem de acontecer |
+|---|---|---|
+| 1 | `radar` | Mostra o item aguardando com o nome de quem se espera e "há N dias". A pendência com prazo aparece em "Atrasados / urgentes" se já venceu ou vence nesta semana; se vence mais adiante, aparece pelo nome, com a data, em "Depois / sem prazo", junto de "Sem prazo: 1 item". No máximo uma sugestão. Nenhum arquivo muda. |
+| 2 | `quais são minhas pendências?` | Responde como consulta (radar), citando as três pendências ativas pelo nome. Nada é gravado. |
+| 3 | `me lembra de ligar para o Rafael na sexta` | Grava uma pendência com a data da próxima sexta, confirma com dia da semana e diz que aparece no radar, sem prometer aviso no celular. |
+| 4 | `desfaz` | Remove exatamente a linha do item 3. O arquivo volta a ser igual ao da cópia intocada. |
+| 5 | `você lembra do combinado com o Grupo Andradas?` | Busca na memória e cita arquivo e data. Nada é gravado. |
+| 6 | `registra que decidi cobrar deslocamento fora da capital` | Uma linha nova em Decisões, com a data real de hoje. |
+| 7 | `posso dar 15% de desconto na cobertura de evento?` | Custo real de R$ 541,25, margem de 74,5%, e contraproposta com 10% (R$ 2.250), porque passa do desconto máximo. |
+| 8 | `quanto cobrar por um trabalho que me custa R$ 1.000?` | Preço mínimo de R$ 1.408,45 e preço-alvo de R$ 1.785,71. Nunca R$ 1.350. |
+| 9 | `anota a reunião:` seguido de 4 linhas com uma decisão, duas pendências (uma sem data) e uma lição | Mostra uma lista só, pede uma confirmação, grava tudo; a pendência sem data sai como `[SEM PRAZO]` com `(desde …)`. |
+| 10 | `desfaz` | Remove todas as linhas do item 9 e lista o que saiu. |
+| 11 | `fechar a semana` | Olhar para trás, duas perguntas (a segunda já diz até que sexta), meta do trimestre; fecha mostrando o prazo de cada prioridade. Um prazo que ainda está no futuro (o vídeo, 20/10) não é alterado, e a linha "aguardando" do Grupo Andradas continua lá, intacta. |
+| 12 | `como está minha margem?` | Responde com as margens do pilar financeiro (Guardião de Margem), sem pedir planilha. |
+
+Anote no PR o que falhou e em qual ferramenta. Falha de roteamento (a frase caiu na skill errada) quase sempre se corrige na tabela do cérebro ou na `description` da skill.
 
 ### Ao adicionar uma skill nova:
 

@@ -1,6 +1,6 @@
 ---
 name: analisador-dre
-description: "Reads a DRE or spreadsheet the user provides and cross-references it against the Financial pillar's margin targets. Trigger with: 'analisar DRE', 'analisa essa planilha', 'como está minha margem'."
+description: "Reads a DRE or spreadsheet the user provides and cross-references it against the Financial pillar's margin targets. Trigger with: 'analisar DRE', 'analisa essa planilha', 'analisa esses números'. Needs data the user brings: a bare 'como está minha margem?' with no spreadsheet is a Margin Guardian question, not this skill."
 ---
 
 # Skill: Analisador de DRE

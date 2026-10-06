@@ -174,7 +174,19 @@
 
 ---
 
-## 7. Versionamento e Migração
+## 7. Formato das Linhas da Memória e Protocolos
+
+**Propósito:** As skills gravam linhas de texto em `Memoria/`, e essas linhas são dados do usuário. Uma versão nova nunca pode deixar de entender o que uma versão antiga gravou.
+
+- **Formatos só crescem.** Um formato novo acrescenta informação opcional no fim da linha (ex.: `*(desde AAAA-MM-DD)*` nas pendências sem prazo, a partir da v1.5.0). Linhas no formato antigo continuam válidas e nunca são reescritas só para ganhar o campo novo.
+- **Nenhuma migração de dados automática.** O CLI não reescreve arquivos de `Memoria/` nem de `Pilares/`; uma skill só altera uma linha existente quando o usuário pede aquela alteração.
+- **Marcadores congelados:** `[DEADLINE AAAA-MM-DD]`, `[AGUARDANDO]` (opcionalmente `[AGUARDANDO: Nome]`), `[SEM PRAZO]`, `[REVOGADA em AAAA-MM-DD: …]`, o carimbo `**[AAAA-MM-DD]**` no início das linhas e a etiqueta de trimestre `[AAAA-T#]`.
+- **Protocolos na camada do framework (v1.5.0+).** `PROTOCOLO_AUTONOMIA.md` e `PROTOCOLO_MEMORIA.md` vivem em `.agents/cortex/` e são atualizados pelo `cortex update`. Cópias antigas em `Frameworks/` (instalações até a v1.4.2) não são apagadas nem lidas pelo cérebro novo; um cérebro ainda sem as camadas `CORTEX:BUSINESS`/`CORTEX:FRAMEWORK` continua apontando para elas.
+- **Garantia de breaking change:** remover ou mudar o significado de um marcador acima, ou passar a exigir um campo que linhas antigas não têm.
+
+---
+
+## 8. Versionamento e Migração
 
 - **SemVer estrito.** Breaking changes nos contratos acima → major bump (v2.0.0)
 - **Migração documentada.** Toda major version deve incluir no CHANGELOG um plano de migração para Córtex da versão anterior (ex: "Córtex v0.11.0 → v1.0.0: rode `cortex update`, o cérebro será migrado automaticamente se tiver as camadas CORTEX:BUSINESS/FRAMEWORK")

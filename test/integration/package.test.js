@@ -58,7 +58,12 @@ test('npm pack e npm install do pacote funcionam', () => {
 
 test('o pacote leva o framework e nenhum dado de negócio', () => {
   assert.ok(packedFiles.length > 0, 'não consegui ler a lista de arquivos do npm pack --json');
-  for (const needed of ['bin/cli.js', 'AGENTS.md', 'CLAUDE.md', '.agents/manifest.json', '.agents/cortex/brain.framework.md', '.agents/cortex/novidades.json']) {
+  for (const needed of [
+    'bin/cli.js', 'AGENTS.md', 'CLAUDE.md', '.agents/manifest.json',
+    '.agents/cortex/brain.framework.md', '.agents/cortex/novidades.json',
+    // O cérebro manda ler estes dois: sem eles no pacote, o Guardião de Margem não funciona.
+    '.agents/cortex/PROTOCOLO_AUTONOMIA.md', '.agents/cortex/PROTOCOLO_MEMORIA.md',
+  ]) {
     assert.ok(packedFiles.includes(needed), `faltou no pacote: ${needed}`);
   }
   // Um onboarding de teste feito na raiz do repositório não pode ir para o npm.

@@ -5,7 +5,7 @@ description: "Writes ready-to-publish content in the business's own voice: socia
 
 # Skill: Conteúdo
 
-Produces text the user can copy and publish, written the way this business actually talks — never generic marketing copy. It is the "Copy & Comms" mode of `Frameworks/PROTOCOLO_AUTONOMIA.md` turned into a concrete routine.
+Produces text the user can copy and publish, written the way this business actually talks — never generic marketing copy. It is the "Copy & Comms" mode of `.agents/cortex/PROTOCOLO_AUTONOMIA.md` turned into a concrete routine.
 
 ## Step by Step
 

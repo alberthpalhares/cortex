@@ -1,6 +1,8 @@
 {
-  "version": "1.4.2",
+  "version": "1.5.0",
   "files": [
+    ".agents/cortex/PROTOCOLO_AUTONOMIA.md",
+    ".agents/cortex/PROTOCOLO_MEMORIA.md",
     ".agents/cortex/brain.framework.md",
     ".agents/cortex/novidades.json",
     ".agents/skills/ajuda/SKILL.md",
@@ -10,8 +12,6 @@
     ".agents/skills/cortex-onboarding/README.md",
     ".agents/skills/cortex-onboarding/SKILL.md",
     ".agents/skills/cortex-onboarding/resources/CORTEX_TEMPLATE.md",
-    ".agents/skills/cortex-onboarding/templates/Frameworks/PROTOCOLO_AUTONOMIA.md",
-    ".agents/skills/cortex-onboarding/templates/Frameworks/PROTOCOLO_MEMORIA.md",
     ".agents/skills/cortex-onboarding/templates/Memoria/01_Decisoes.md",
     ".agents/skills/cortex-onboarding/templates/Memoria/02_Licoes.md",
     ".agents/skills/cortex-onboarding/templates/Memoria/03_Projetos.md",

@@ -42,7 +42,11 @@ Você conversa em português, do seu jeito. Alguns exemplos reais:
    • Renovar licença do editor de vídeo (vence sexta)
 
 ⏳ AGUARDANDO TERCEIROS:
-   • Aprovação do roteiro — cliente Beta
+   • Cliente Beta — aprovação do roteiro — há 6 dias
+
+🗂️ DEPOIS / SEM PRAZO:
+   • Entregar o vídeo institucional da Beta — 20/10
+   • Sem prazo: 2 itens, o mais antigo há 19 dias
 
 📂 PROJETOS ATIVOS:
    • Vídeo institucional Beta - EXECUÇÃO
@@ -68,15 +72,24 @@ Você conversa em português, do seu jeito. Alguns exemplos reais:
 • Atrasou a entrega do kit em maio; combinar sempre 3 dias de folga — Lições, 20/05/2026
 ```
 
-**Você pergunta `posso dar 15% de desconto para fechar com esse cliente?`** — e ela responde com base nas *suas* regras de preço e margem, não em conselho genérico:
+**Você pergunta `posso dar 15% de desconto na cobertura de evento para fechar com esse cliente?`** — e ela responde com base nas *suas* regras de preço e margem, não em conselho genérico:
 
 ```
-Custo Real: R$ 150 de custo direto + 9% de imposto e taxa
-Margem Resultante: 62% — de cada R$ 100 cobrados, sobram R$ 62
-Veredito: Aprovar com ressalva — passa do seu desconto máximo (10%); só com contrato recorrente.
+Custo Real: R$ 350 de custo direto + 9% de imposto e taxas (R$ 191,25) = R$ 541,25
+Margem Resultante: 74,5% — de cada R$ 100 cobrados, sobram R$ 74,50
+Veredito: Contraproposta — 15% passa do desconto máximo que você definiu (10%).
+          Com 10% fica R$ 2.250 e continua dentro da sua regra. Abrir exceção é decisão sua.
 ```
 
-Se você ainda não sabe a sua margem, ela não trava nem chuta: conduz você a descobrir, com um trabalho que você já fez.
+**Você pergunta `quanto cobrar por um trabalho que me custa R$ 1.000?`:**
+
+```
+Custo: R$ 1.000 de custo direto + 9% de imposto e taxas sobre o preço
+Preço mínimo: R$ 1.408,45 (margem de 20%)
+Preço-alvo: R$ 1.785,71 (margem de 35% — de cada R$ 100, sobram R$ 35)
+```
+
+Se você ainda não sabe a sua margem, ela não trava nem chuta: conduz você a descobrir, com um trabalho que você já fez. As contas usam os seus números; imposto e regime tributário continuam com o seu contador.
 
 ---
 
@@ -86,12 +99,14 @@ Se você ainda não sabe a sua margem, ela não trava nem chuta: conduz você a 
 |---|---|---|
 | **No dia a dia** | `radar` | O que está atrasado, parado e em que focar hoje |
 | | `registra que...` | Guarda uma decisão, lição, pendência ou pessoa (errou? `desfaz`) |
+| | `me lembra de...` | Vira uma pendência com data, que aparece no radar (ela não manda aviso no celular) |
 | | `anota a reunião` | Você cola as anotações; ela separa decisões, pendências e lições |
 | | `o que você sabe sobre...` | Diz o que já está registrado, com data |
 | | `fechar a semana` | 5 minutos: o que andou, o que ficou e o foco da próxima |
 | **Para vender e comunicar** | `gerar proposta para [cliente]` | Proposta pronta, com seus preços e seu tom |
 | | `cria um post sobre...` | Post, legenda ou mensagem de WhatsApp do seu jeito |
 | | `descobrir minha margem` | Em 5 minutos, com um trabalho seu de verdade, descobrimos quanto sobra de cada venda — não precisa saber nada antes |
+| | `quanto cobrar por...` | A partir do custo, calcula o preço mínimo e o preço-alvo que respeitam a sua margem |
 | | `analisar DRE` | Compara seus números com as suas metas de margem |
 | | `pesquisar concorrência` | Quem são, quanto cobram, onde você se diferencia |
 | **Para cuidar do Córtex** | `continuar onboarding` | Completa o que ficou faltando, um bloco de 2–5 minutos por vez |
@@ -188,11 +203,9 @@ SeuNegocio/
 │   └── 05_Registros_Gerais.md  ← Anotações diversas
 ├── Ativos/                     ← Seus logos e os documentos que a IA gera (propostas, textos)
 ├── Frameworks/
-│   ├── CEREBRO.md              ← As instruções da IA para o SEU negócio (fonte única)
-│   ├── PROTOCOLO_AUTONOMIA.md  ← Como a IA age com pedidos curtos
-│   └── PROTOCOLO_MEMORIA.md    ← Como a memória é arquivada sem perder histórico
+│   └── CEREBRO.md              ← As instruções da IA para o SEU negócio (fonte única)
 ├── AGENTS.md / CLAUDE.md       ← Gerados a partir do CEREBRO.md — não edite à mão
-├── .agents/                    ← O framework (habilidades da IA) — atualizado pelo `update`
+├── .agents/                    ← O framework (habilidades da IA e protocolos) — atualizado pelo `update`
 └── .cortex/                    ← Versão instalada, ferramentas escolhidas e dados básicos do negócio
 ```
 

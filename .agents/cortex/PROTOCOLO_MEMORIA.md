@@ -1,6 +1,6 @@
 # Living Memory Protocol
 
-*This protocol keeps Córtex's Memory lean and reliable over time, without ever silently deleting history. It's the "engine" behind the `consolidar` skill.*
+*This protocol keeps Córtex's Memory lean and reliable over time, without ever silently deleting history. It's the "engine" behind the `consolidar` skill. It ships with the framework (`.agents/cortex/`) and is refreshed by `cortex update`; never copy it into the user's folders.*
 
 ## Why it exists
 
@@ -8,13 +8,13 @@ Córtex's core promise is saving context: the AI reads `Pilares/` and `Memoria/`
 
 ## Rules
 
-1. **Archive, never delete.** Items in `Memoria/02_Licoes.md` (and, when applicable, old decisions and completed projects) older than 12 months — counted from the real system date — are candidates for archiving. They are moved, never deleted, to `Memoria/_Arquivo/AAAA.md` (one file per year, created on demand, where `AAAA` is the year of the batch's oldest item).
+1. **Archive, never delete.** Items in `Memoria/02_Licoes.md`, and projects marked `[CONCLUÍDO]`, older than 12 months — counted from the real system date and from the stamp at the start of the line — are candidates for archiving. A decision that is still in force is never archived by age: in `Memoria/01_Decisoes.md` only revoked decisions move (rule 2). Resolved pending items become candidates sooner, after 60 days: `Memoria/04_Pessoas_Pendencias.md` is read on every `radar`, so it must stay short. Everything is moved, never deleted, to `Memoria/_Arquivo/AAAA.md` (one file per year, created on demand, where `AAAA` is the year of the batch's oldest item).
 2. **Revoked decisions are marked, not removed.** When a decision in `01_Decisoes.md` stops applying, the original line is NEVER deleted. It gets the prefix `[REVOGADA em YYYY-MM-DD: motivo/nova decisão]` and stays in its original section until the next consolidation, when it can be moved to the matching year's file in `_Arquivo/`.
-3. **Duplicate merging.** Items that essentially say the same thing (the same decision restated, the same lesson repeated in different words) are merged into a single line, keeping the most recent date and citing the oldest one in parentheses.
+3. **Duplicate merging keeps the originals.** Items that essentially say the same thing (the same decision restated, the same lesson repeated in different words) are merged into a single line, keeping the most recent date and citing the oldest one in parentheses. Before merging, the original lines are copied word for word to `Memoria/_Arquivo/AAAA.md`, under a `## Fundidas em [data]` heading. Lines that differ in a number, a proper name or a condition (10% vs 15%, client A vs client B) are NOT duplicates: when in doubt, do not merge.
 4. **Consolidation triggers.** The `consolidar` skill runs:
    - (a) as part of `cortex-revisao`'s Closing step, every semi-annual review;
    - (b) on demand, when the user says something like "consolidar memória";
-   - (c) on `radar`'s suggestion, when a `Memoria/` file grows past a readable size limit (see `radar/SKILL.md`).
+   - (c) on `radar`'s suggestion, when at least 5 lines are eligible for archiving under this protocol (see `radar/SKILL.md`). File size alone is never the trigger.
 5. **Nothing is lost.** Archiving is not deleting. Everything that leaves an active file stays accessible in `Memoria/_Arquivo/`, and `Memoria/META.md` must index that folder as soon as the first archive file is created.
 
 ## `Memoria/_Arquivo/AAAA.md` format

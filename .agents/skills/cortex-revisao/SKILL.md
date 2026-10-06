@@ -64,7 +64,7 @@ After going through the existing pillars:
 
 ### Memory Consolidation (Living Memory Protocol)
 
-Now apply `Frameworks/PROTOCOLO_MEMORIA.md`: follow the `consolidar` skill's flow to identify items eligible for archiving (older than 12 months), decisions already marked `[REVOGADA ...]` ready to move, and duplicates. Show the batch summary and ask for confirmation before applying it, exactly as the `consolidar` skill describes. If nothing is eligible, silently skip this step and move to Closing.
+Now apply `.agents/cortex/PROTOCOLO_MEMORIA.md`: follow the `consolidar` skill's flow to identify items eligible for archiving (older than 12 months; resolved pending items older than 60 days), decisions already marked `[REVOGADA ...]` ready to move, and duplicates. Show the batch summary and ask for confirmation before applying it, exactly as the `consolidar` skill describes. If nothing is eligible, silently skip this step and move to Closing.
 
 ### Closing
 

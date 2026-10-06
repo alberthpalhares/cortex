@@ -564,18 +564,45 @@ function parseSimpleFrontmatter(content) {
 
 // Conta marcadores <!-- REVISAR --> e seções em branco num pilar.
 // Seções em branco: um heading seguido apenas de espaços/comentários HTML.
+const BLANK_BY_DESIGN_SECTIONS = ['Panorama Competitivo'];
+
+// Até a v1.4.2 os dois protocolos eram copiados para Frameworks/ na montagem e
+// nunca mais atualizados. Desde a v1.5.0 eles vêm com o framework, em
+// .agents/cortex/. As cópias antigas não são apagadas — só deixam de ser usadas.
+const LEGACY_PROTOCOL_FILES = ['PROTOCOLO_AUTONOMIA.md', 'PROTOCOLO_MEMORIA.md'];
+
+function findLegacyProtocols(targetDir) {
+  return LEGACY_PROTOCOL_FILES.filter((f) => fs.existsSync(path.join(targetDir, 'Frameworks', f)));
+}
+
+// Seções que ficam em branco de propósito (até a skill pesquisa-mercado rodar)
+// não são pendência: contá-las impediria qualquer Córtex de ficar "completo".
+function isBlankByDesignHeading(line) {
+  return BLANK_BY_DESIGN_SECTIONS.some((name) => new RegExp(`^##\\s+${name}\\b`, 'i').test(line));
+}
+
 function countRevisarAndBlanks(content) {
-  const revisarCount = (content.match(/<!--\s*REVISAR\s*-->/g) || []).length;
+  const normalized = normalizeEol(content);
+  const lines = normalized.split('\n');
+
+  // Marcadores REVISAR, menos os que estão dentro de uma seção em branco por
+  // desenho: a montagem rápida pode ter deixado um ali, e nenhuma pergunta do
+  // onboarding o resolveria.
+  let revisarCount = 0;
+  let insideExempt = false;
+  for (const line of lines) {
+    if (/^#{1,2}\s+\S/.test(line)) insideExempt = isBlankByDesignHeading(line);
+    if (!insideExempt) revisarCount += (line.match(/<!--\s*REVISAR\s*-->/g) || []).length;
+  }
 
   // Detecta seções em branco: ## heading seguido apenas de comentários/espaços
   // até o próximo heading de mesmo nível ou superior, ou fim do arquivo.
   let blankSections = 0;
-  const normalized = normalizeEol(content);
-  const lines = normalized.split('\n');
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (!/^##\s+\S/.test(line)) continue;
+    if (isBlankByDesignHeading(line)) continue;
 
     // Encontrou um heading ##. Avança para ver se há conteúdo real depois.
     let hasContent = false;
@@ -1451,7 +1478,9 @@ async function runUpdate() {
   }
 
   if (removidosPeloFramework.length > 0) {
-    const acao = isPrune ? `${red}serão removidos${reset} (--prune ativo)` : `${dim}mantidos — rode com --prune para remover${reset}`;
+    // O --prune só funciona nesta rodada: depois de aplicada a atualização, o
+    // manifesto instalado já é o novo e estes arquivos passam a parecer do usuário.
+    const acao = isPrune ? `${red}serão removidos${reset} (--prune ativo)` : `${dim}mantidos — para remover, cancele e rode este mesmo comando com --prune${reset}`;
     console.log(`  ${yellow}• ${removidosPeloFramework.length} arquivo(s) que o framework não usa mais nesta versão${reset} — ${acao}`);
     removidosPeloFramework.forEach((f) => console.log(`     ${yellow}•${reset} ${f}`));
   }
@@ -1549,6 +1578,21 @@ async function runUpdate() {
     writeTargets(targetDir, targets);
     console.log(`  ${green}✓${reset} Cérebro recompilado para: ${targets.join(', ')}`);
     await handleRetiredTargets(targetDir, isForce);
+  }
+
+  // Os protocolos passaram a vir com o framework. Uma cópia antiga em Frameworks/
+  // só deixa de ser lida quando o cérebro em camadas foi regenerado (é ele quem
+  // aponta o caminho). Sem CEREBRO.md ou sem as camadas, o cérebro antigo ainda
+  // lê a cópia — então nada de mandar apagar.
+  const legacyProtocols = findLegacyProtocols(targetDir);
+  if (legacyProtocols.length > 0 && (brain.status === 'updated' || brain.status === 'unchanged')) {
+    console.log(`  ${yellow}!${reset} Frameworks/${legacyProtocols.join(' e Frameworks/')} ${legacyProtocols.length > 1 ? 'não são mais usados' : 'não é mais usado'}:`);
+    console.log(`    ${dim}os protocolos agora vêm com o framework (.agents/cortex/) e se atualizam sozinhos. Pode apagar ${legacyProtocols.length > 1 ? 'esses arquivos' : 'esse arquivo'} quando quiser.${reset}`);
+  }
+
+  if (!isPrune && removidosPeloFramework.length > 0) {
+    console.log(`  ${dim}${removidosPeloFramework.length} arquivo(s) que o framework não usa mais ficaram em .agents/ e não são lidos por nada; pode apagar à mão:${reset}`);
+    removidosPeloFramework.forEach((f) => console.log(`     ${dim}• ${f}${reset}`));
   }
 
   reportGitignore();
@@ -1763,7 +1807,20 @@ async function runDoctor() {
   const completeness = calculateCompleteness(pillarResults);
 
   // --- 6. Relatório ---
-  console.log(`${bold}📊 Completude estimada:${reset} ~${completeness}% dos pilares obrigatórios sem pendências\n`);
+  // Em blocos e minutos, não em porcentagem: quem fez a montagem rápida fez tudo
+  // o que foi pedido, e um "~0%" diria a essa pessoa que ela falhou.
+  const essentialsPending = MANDATORY_PILLAR_PREFIXES.filter((prefix) => {
+    const entry = pillarResults.find((p) => p.file.startsWith(`Pilares/${prefix}`));
+    return entry && entry.exists && (entry.revisarCount > 0 || entry.blankSections > 0 || entry.nullFields.length > 0);
+  });
+  if (mandatoryMissing.length > 0) {
+    console.log(`${bold}📊 Montagem incompleta:${reset} faltam ${mandatoryMissing.length} dos ${MANDATORY_PILLAR_PREFIXES.length} pilares essenciais.\n`);
+  } else if (completeness === 100) {
+    console.log(`${bold}📊 Os ${MANDATORY_PILLAR_PREFIXES.length} pilares essenciais estão completos ✅${reset}\n`);
+  } else {
+    const names = essentialsPending.map((prefix) => MANDATORY_PILLAR_NAMES[prefix]).join(', ');
+    console.log(`${bold}📊 O essencial está funcionando.${reset} Falta completar ${essentialsPending.length} de ${MANDATORY_PILLAR_PREFIXES.length} pilares essenciais (${names}) — uns 2 a 5 minutos cada.\n`);
+  }
 
   if (mandatoryMissing.length > 0) {
     console.log(`${red}🔴 Pilares obrigatórios faltando:${reset}`);
@@ -1832,6 +1889,17 @@ async function runDoctor() {
   }
   if (brain.compiledTargets.length > 0) {
     console.log(`  ${dim}Alvos compilados: ${brain.compiledTargets.join(', ')}${reset}`);
+  }
+  // Só é "cópia antiga" depois do update: quando o cérebro já não cita
+  // Frameworks/<arquivo> e o protocolo novo existe em .agents/cortex/. Antes
+  // disso o cérebro ainda lê a cópia, e mandar apagar quebraria o Córtex.
+  const cerebroText = brain.hasCerebro ? fs.readFileSync(path.join(targetDir, CEREBRO_PATH), 'utf8') : '';
+  const legacyProtocols = findLegacyProtocols(targetDir).filter((f) =>
+    brain.hasLayers &&
+    !cerebroText.includes(`Frameworks/${f}`) &&
+    fs.existsSync(path.join(targetDir, '.agents', 'cortex', f)));
+  if (legacyProtocols.length > 0) {
+    console.log(`  ${dim}Frameworks/${legacyProtocols.join(' e Frameworks/')}: cópia antiga, não é mais usada (os protocolos agora vêm em .agents/cortex/). Pode apagar.${reset}`);
   }
 
   // --- 7. Versão ---
@@ -1913,6 +1981,8 @@ module.exports = {
   describeError,
   folderHint,
   findStaleTargets,
+  findLegacyProtocols,
+  LEGACY_PROTOCOL_FILES,
   INSTALL_ITEMS,
   USER_GITIGNORE,
   EXIT_NEEDS_CONFIRMATION,

@@ -5,48 +5,54 @@ description: "Applies the Living Memory Protocol: archives old Memory items, mar
 
 # Skill: Consolidar Memória
 
-This skill executes `Frameworks/PROTOCOLO_MEMORIA.md`. It keeps `Memoria/` lean over time, moving (never deleting) what has gone stale or redundant into `Memoria/_Arquivo/`.
+This skill executes `.agents/cortex/PROTOCOLO_MEMORIA.md`. It keeps `Memoria/` lean over time, moving (never deleting) what has gone stale or redundant into `Memoria/_Arquivo/`. The rules below are complete on their own: follow them even if an older copy of the protocol exists elsewhere in the folder.
 
 ## Step by Step
 
 1. **Check whether there's any Memory.** If neither `Memoria/01_Decisoes.md` nor `Memoria/02_Licoes.md` exist, tell the user there's nothing to consolidate yet. Stop here.
 
-2. **Get the real system date** (via terminal/whatever date tool is available) — never estimate. Every "more than 12 months" calculation depends on it.
+2. **Get the real system date** (via terminal/whatever date tool is available) — never estimate. Every age calculation depends on it.
 
 3. **Read the consolidation candidates:**
    - `Memoria/01_Decisoes.md` — look for lines already marked `[REVOGADA em ...]`.
    - `Memoria/02_Licoes.md` — look for items older than 12 months from today's real date.
    - `Memoria/03_Projetos.md` — projects with `[CONCLUÍDO]` status for more than 12 months (if applicable).
-   - `Memoria/04_Pessoas_Pendencias.md` — old items in the "Pendências Resolvidas" section (more than 12 months).
+   - `Memoria/04_Pessoas_Pendencias.md` — items in the "Pendências Resolvidas" section older than **60 days**. This file is read on every radar, so finished items leave it sooner.
 
-4. **Identify duplicates.** Within each file, look for items that essentially say the same thing (the same decision restated, the same lesson repeated). Flag them for merging.
+   Age is always counted from the `**[YYYY-MM-DD]**` stamp at the start of the line. A line with no stamp (older versions wrote resolved items without one) has an unknown age: never estimate it and never use a leftover `[DEADLINE …]` date as if it were the resolution date. Show such lines as their own entry in the batch summary — *"[N] pendências resolvidas sem data — arquivo também?"* — and archive them only if the user says yes. A decision that is still in force is never archived, however old: in `01_Decisoes.md` only `[REVOGADA …]` lines are candidates.
 
-5. **Assemble a batch summary** — never apply item by item without showing the whole set first:
+4. **Identify duplicates, conservatively.** Within each file, look for items that say the same thing (the same decision restated, the same lesson repeated). Two lines that differ in a number, a proper name or a condition (10% vs 15%, client A vs client B, "always" vs "only with a contract") are NOT duplicates. When in doubt, do not merge.
+
+5. **Assemble a batch summary** — never apply item by item without showing the whole set first. For every merge, show the exact text that will remain:
 
    ```
    🗄️ **CONSOLIDAÇÃO DE MEMÓRIA — [Nome do Negócio]**
 
-   📦 Itens a arquivar (mais de 12 meses ou já revogados):
+   📦 Itens a arquivar:
       • [Memoria/02_Licoes.md] "..." (YYYY-MM-DD)
       • [Memoria/01_Decisoes.md] "..." — revogada em YYYY-MM-DD
+      • [Memoria/04_Pessoas_Pendencias.md] [N] pendências resolvidas há mais de 60 dias
 
    🔗 Itens a fundir (duplicatas):
-      • "..." + "..." → versão única mantida
+      • "..." + "..."
+        → fica: "[texto final da linha única] (primeiro registro em YYYY-MM-DD)"
 
-   Isso vai mover esses itens para Memoria/_Arquivo/AAAA.md — nada é apagado, só sai dos arquivos ativos. Posso aplicar?
+   Isso move esses itens para Memoria/_Arquivo/AAAA.md — nada é apagado, só sai dos arquivos ativos. As linhas fundidas também ficam guardadas lá, como estavam. Posso aplicar?
    ```
 
-6. **Only after the user confirms**, apply it:
-   - Create (or update) `Memoria/_Arquivo/AAAA.md` for each year needed, following the format described in `Frameworks/PROTOCOLO_MEMORIA.md`.
-   - Remove the moved lines from the source files.
-   - Merge the identified duplicates into a single line, keeping the most recent date.
-   - If `Memoria/_Arquivo/` was just created for the first time, add a line for it in `Memoria/META.md`'s File Map.
+6. **Only after the user confirms**, apply it in this order:
+   1. Create (or update) `Memoria/_Arquivo/AAAA.md` for each year needed, following the format described in `.agents/cortex/PROTOCOLO_MEMORIA.md`, and copy there every line that is going to be archived.
+   2. For each merge, copy the original lines **word for word** into that same archive file, under a `## Fundidas em [YYYY-MM-DD]` heading.
+   3. Only then remove the archived lines from the source files and replace each group of duplicates with its single merged line — most recent date first, the oldest date cited in parentheses.
+   4. If `Memoria/_Arquivo/` was just created for the first time, add a line for it in `Memoria/META.md`'s File Map.
 
-7. **Show a final summary** of what was moved/merged and where to find it (`Memoria/_Arquivo/AAAA.md`).
+7. **Check your own work before saying it is done.** Take the lines that existed before and account for every one of them: it is still in its file, or it is in the archive. Report it in one line — *"Das 96 linhas de antes, 62 continuam onde estavam e 34 estão no arquivo; 2 linhas novas de fusão."* If any line cannot be found in either place, name it and say the consolidation is NOT complete.
+
+8. **Show a final summary** of what was moved/merged and where to find it (`Memoria/_Arquivo/AAAA.md`).
 
 ## Rules
 
-1. **Never delete information.** Everything that leaves an active file must already be saved in `Memoria/_Arquivo/` before being removed from the source.
+1. **Never delete information.** Everything that leaves an active file — archived or merged — must already be saved in `Memoria/_Arquivo/` before being removed from the source.
 2. **Always confirm as a batch before applying.** Don't ask item by item — show the whole package at once (step 5).
 3. **If nothing is eligible**, say so briefly and don't generate an empty report.
 4. **Relative paths.** All paths are relative to the workspace root.

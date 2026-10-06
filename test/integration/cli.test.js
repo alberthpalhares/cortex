@@ -374,7 +374,9 @@ test('doctor audita um córtex com pendências e inconsistências', () => {
 
   const out = result.stdout;
   assert.ok(out.includes('Empresa Teste'), 'deve mostrar o nome do negócio');
-  assert.ok(/[~]?\d+%/.test(out), 'deve mostrar índice de completude');
+  assert.ok(out.includes('Montagem incompleta') && out.includes('faltam 2 dos 4 pilares essenciais'), 'deve dizer quantos pilares essenciais faltam');
+  assert.ok(!out.includes('O essencial está funcionando'), 'com pilar essencial faltando, não diz que o essencial funciona');
+  assert.ok(!/~\d+%/.test(out), 'não mostra mais uma porcentagem de completude');
   assert.ok(out.includes('🔴') || out.includes('Faltando') || out.includes('05_') || out.includes('06_'), 'deve reportar pilares obrigatórios faltando');
   assert.ok(out.includes('REVISAR'), 'deve contar marcadores REVISAR');
   assert.ok(out.includes('null'), 'deve reportar campos null no frontmatter');

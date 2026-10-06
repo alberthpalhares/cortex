@@ -28,5 +28,20 @@
     "version": "1.4.1",
     "texto": "Depois de cada atualização eu te conto o que mudou, e o radar avisa quando fizer muito tempo sem atualizar",
     "diga": "novidades"
+  },
+  {
+    "version": "1.5.0",
+    "texto": "Pode me pedir lembretes: eu anoto com a data certa e mostro no radar (não mando aviso no celular)",
+    "diga": "me lembra de..."
+  },
+  {
+    "version": "1.5.0",
+    "texto": "Eu calculo quanto cobrar a partir do custo, respeitando a sua margem mínima e a margem-alvo",
+    "diga": "quanto cobrar por..."
+  },
+  {
+    "version": "1.5.0",
+    "texto": "O radar agora mostra também o que está sem prazo e os prazos mais adiante e, para o que você anotar daqui em diante, há quantos dias cada item em espera está parado",
+    "diga": "radar"
   }
 ]

@@ -6,6 +6,45 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-10-05
+
+O dia a dia funciona de verdade: o Guardião de Margem novo chega a quem já usa o Córtex e aprende a responder "quanto cobrar?", lembretes viram lembretes, e nada do que foi anotado some do radar.
+
+### Migração (quem já usa)
+- Rode `npx @aksp/cortex@latest update`. O cérebro passa a apontar para os protocolos que vêm com o framework; nenhum dado seu é tocado.
+- Os arquivos `Frameworks/PROTOCOLO_AUTONOMIA.md` e `Frameworks/PROTOCOLO_MEMORIA.md` deixam de ser usados **depois** do `update`. Ele avisa e não apaga nada; pode removê-los quando quiser. Não apague antes de atualizar: até lá o cérebro ainda lê essas cópias. (Exceção: um cérebro ainda sem as camadas `CORTEX:BUSINESS`/`CORTEX:FRAMEWORK`, ou um Córtex anterior ao `CEREBRO.md`, continua lendo essas cópias mesmo depois — nesses casos o `update` não manda apagar, e "revisar córtex" faz a migração.)
+- Os dois moldes antigos em `.agents/skills/cortex-onboarding/templates/Frameworks/` ficam na pasta, sem uso, a menos que você rode o `update` com `--prune`. O `update` lista esses arquivos no fim.
+- Pendências antigas continuam valendo como estão. O formato novo só acrescenta `*(desde AAAA-MM-DD)*` ao que for anotado daqui em diante.
+
+### Corrigido
+- **O Guardião de Margem da 1.4.0 não chegava a quem já tinha o Córtex.** Os dois protocolos eram copiados para `Frameworks/` na montagem e nunca mais atualizados. Agora vivem em `.agents/cortex/`, a camada que o `update` renova.
+- **O exemplo oficial ensinava a conta errada.** O Estúdio Lumen orçava "custo direto + margem-alvo de 35%", o que deixa cerca de 17% de margem, não 35%. O exemplo, o protocolo e o README passaram a usar a conta certa, e um teste confere os números.
+- **O exemplo de desconto do README não seguia a ordem do protocolo** nem os números do próprio exemplo. Foi refeito e também é conferido por teste.
+- **"Me lembra de…" acionava a busca na memória** e o compromisso não era anotado. Agora vira uma pendência com data, confirmada com o dia da semana ("Anotado para sexta, 09/10"), e o Córtex diz que ela aparece no radar — sem prometer aviso no celular.
+- **Pendências sem prazo sumiam do radar.** Ele ganhou o bloco "Depois / sem prazo", que mostra pelo nome os próximos prazos e conta o que não tem data. Também diz de quem se espera e há quantos dias cada item em espera está parado (para o que for anotado daqui em diante), e limita a 5 as atrasadas na tela — sem nunca esconder o que vence hoje ou nesta semana.
+- **O radar repetia a mesma sugestão todo dia** e sugeria "consolidar memória" quando não havia nada para consolidar. As sugestões agora se revezam conforme o dia, e a de consolidar só aparece quando há pelo menos 5 linhas que podem ser arquivadas (uma decisão em vigor nunca conta, por mais antiga que seja).
+- **"Consolidar memória" fundia duplicatas sem guardar o texto original**, contra a promessa de que nada é apagado. As linhas originais passam a ser copiadas para o arquivo antes da fusão, a confirmação mostra o texto final, e a skill confere no fim que nenhuma linha se perdeu.
+- **Quem fazia a montagem rápida recebia "~0% de completude"** no `doctor` e na skill de saúde. Agora a resposta é "o essencial está funcionando; falta completar N de 4 pilares essenciais". A seção "Panorama Competitivo", que fica em branco de propósito, deixou de contar como pendência.
+- **"Quais são minhas pendências?" caía no registro**, e "descobrir minha margem" não estava na tabela do cérebro. Pergunta virou consulta; ordem, registro; e a margem ganhou linha própria.
+- **Textos do onboarding:** regras que contradiziam o modo rápido, o nome de uma ferramenta de um ambiente específico e um caminho que não existe.
+
+### Adicionado
+- **"Quanto cobrar por…?"** O Guardião calcula, a partir do custo, o preço mínimo e o preço-alvo que respeitam as suas margens depois de imposto e taxas, e confere a própria conta antes de responder. Também passa a dizer que regime tributário e pró-labore são com o contador.
+- **A contraproposta do Guardião é sempre um preço em reais** e respeita de uma vez o desconto máximo, o piso e a margem mínima; se não houver espaço para desconto, ele diz isso em vez de sugerir um preço que quebra outra regra sua.
+- **"Como está minha margem?"** sem planilha passa a ser respondido com as suas margens e a margem de cada serviço a preço de tabela, em vez de pedir uma DRE.
+- **O primeiro radar já nasce com conteúdo.** A quarta pergunta da montagem rápida passa a ser "2 ou 3 coisas que não podem cair no esquecimento esta semana", e a montagem termina mostrando o radar com elas. (A regra de preço sai das 4 perguntas e fica para o bloco opcional de preços.)
+- **Radar vazio convida a despejar o que está na cabeça** e organiza a resposta de uma vez.
+- **Fechamento da semana limpa o que venceu há muito:** uma pergunta só para os itens vencidos há mais de duas semanas (novo prazo, deixar de lado ou manter). Também fecha a meta quando o trimestre vira e lembra da revisão semestral. As prioridades ganham prazo numa sexta definida por regra (a próxima, se você fecha de sábado a segunda; a da semana seguinte, nos outros dias); um prazo que ainda está no futuro nunca é trocado, e uma pendência "aguardando" nunca é convertida.
+- **Datas conferidas com a ferramenta de data:** lembretes, prioridades e os itens da montagem rápida passam a ter a data calculada e o dia da semana conferido, em vez de conta de cabeça.
+- **"Desfaz" vale para a operação inteira** (uma reunião anotada, um fechamento de semana), e toda atualização de pessoa, meta ou projeto mostra "antes → agora".
+- **Pendências resolvidas há mais de 60 dias** podem ir para o arquivo na consolidação, para o arquivo lido a cada radar não crescer sem parar.
+- **Roteiro de conversa de 12 frases** no checklist de release, e um teste que limita o cérebro a 900 palavras.
+
+### Alterado
+- O lembrete de revisão semestral saiu do cérebro (onde era repetido a cada conversa nova) e passou para o radar e o fechamento da semana.
+- `CONTRACTS.md` ganhou a regra dos formatos de linha da Memória: formatos só crescem, e linhas antigas nunca são reescritas.
+- CI: `actions/checkout` e `actions/setup-node` na versão 5.
+
 ## [1.4.2] - 2026-10-05
 
 Correção: a instalação nova pelo npm estava quebrada nas versões 1.4.0 e 1.4.1.

@@ -9,14 +9,14 @@ After `cortex update`, the CLI leaves a short list at `.cortex/novidades.md`. Th
 
 ## Step by Step
 
-1. **Silently read** `.cortex/novidades.md`.
+1. **Silently read** `.cortex/novidades.md` — the file in the hidden `.cortex/` folder at the workspace root. (`.agents/cortex/novidades.json` is the framework's full list, not the user's pending notice: never read that one here.)
 2. **If it is missing or has no `- ` lines**, reply in two lines and stop:
    ```
    ✨ Nenhuma novidade pendente — você já viu tudo da última atualização.
    Para buscar uma versão mais nova do Córtex, rode no terminal, dentro desta pasta: `npx @aksp/cortex@latest update` (seus dados não são tocados).
    ```
-3. **Drop what is already done.** If an item is about margin and `Pilares/03_Financeiro.md` already has `margem_alvo` and `margem_minima` filled, don't list it as something to do.
-4. **Present the rest** using the format below: at most 6 lines, each with the phrase the user can say. Keep the wording of the file; don't add features that are not listed.
+3. **Drop what is already done.** If `Pilares/03_Financeiro.md` already has `margem_alvo` and `margem_minima` filled, drop only the item whose phrase is `descobrir minha margem`. Keep every other item, including `quanto cobrar por...`.
+4. **Present the rest** using the format below, each with the phrase the user can say. The file lists the oldest news first: when there are more than 6 items, show the **last 6** (the newest) and add one line — *"… e mais [N] de versões anteriores; diga `ajuda` para ver tudo o que eu faço."* Keep the wording of the file; don't add features that are not listed.
 5. **Offer ONE thing to do now**: the item that needs the user's input (e.g. `descobrir minha margem`) if there is one, otherwise the item most relevant to what you know about the business. If the user accepts, follow the corresponding skill or protocol.
 6. **Clear the list**: delete `.cortex/novidades.md`. If you can't delete files, overwrite it with an empty file. Do this without asking — it is a generated notice, not business data — and do it even if the user declines the offer.
 

@@ -12,7 +12,7 @@ This skill quickly answers "what can I do here" without requiring the user to me
 1. **Silently read** `Memoria/META.md`, if it exists, to find out the business name and whether there are custom pillars.
 2. Reply with the list below, adapting the closing line to the Córtex's current state.
 3. Be direct — no long intro, and do not explain how Córtex works internally.
-4. Omit the "Para vender" lines about proposals and margin if `Pilares/04_Comercial.md` and `Pilares/03_Financeiro.md` do not exist; in that case add one line: `🧩 continuar onboarding — para eu aprender seus preços e poder montar propostas`.
+4. Omit the "Para vender" lines about proposals, margin and pricing if `Pilares/04_Comercial.md` and `Pilares/03_Financeiro.md` do not exist; in that case add one line: `🧩 continuar onboarding — para eu aprender seus preços e poder montar propostas`.
 
 ## Output Format
 
@@ -22,6 +22,7 @@ This skill quickly answers "what can I do here" without requiring the user to me
 **No dia a dia**
 📡 `radar` — o que está atrasado, o que está parado e em que focar hoje
 📝 `registra que...` — guardo uma decisão, lição, pendência ou pessoa (errou? diga `desfaz`)
+⏰ `me lembra de...` — anoto com data e mostro no radar (não mando aviso no celular)
 📋 `anota a reunião` — cole suas anotações e eu separo decisões, pendências e lições
 🔎 `o que você sabe sobre...` — digo o que já está registrado, com data
 🗓️ `fechar a semana` — 5 minutos: o que andou, o que ficou e o foco da próxima
@@ -30,6 +31,7 @@ This skill quickly answers "what can I do here" without requiring the user to me
 🧾 `gerar proposta para [cliente]` — proposta pronta, com seus preços e seu tom
 ✍️ `cria um post sobre...` — post, legenda ou mensagem de WhatsApp do seu jeito
 💰 `descobrir minha margem` — em 5 minutos descobrimos quanto sobra de verdade nos seus trabalhos
+💵 `quanto cobrar por...` — do custo ao preço mínimo e ao preço-alvo, respeitando a sua margem
 📊 `analisar DRE` — comparo seus números com as suas metas de margem
 🔍 `pesquisar concorrência` — quem são, quanto cobram e onde você se diferencia
 

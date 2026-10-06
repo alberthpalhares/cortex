@@ -6,7 +6,8 @@
 
 ## Pendências Ativas
 - 🔴 **[DEADLINE 2026-10-20]** Finalizar edição do vídeo institucional da TechNova Sistemas.
-- ⏳ **[AGUARDANDO]** Enviar contrato de recorrência para o Grupo Andradas assim que confirmarem o sinal.
+- ⏳ **[AGUARDANDO: Grupo Andradas]** Enviar contrato de recorrência assim que confirmarem o sinal. *(desde 2026-09-28)*
+- ⏳ **[SEM PRAZO]** Pesquisar um seguro de equipamento mais barato para a próxima renovação. *(desde 2026-09-15)*
 
 ## Pendências Resolvidas
 - ✅ **[2026-06-01]** Renovação do seguro de equipamento.
