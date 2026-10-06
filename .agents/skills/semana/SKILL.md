@@ -10,7 +10,7 @@ description: "Runs a five-minute weekly close: what got resolved, what slipped, 
 ## Step by Step
 
 1. **Get the real system date and weekday** (terminal / date tool). The "week" being closed is the last 7 days ending today (closing on 05/10 covers 29/09 to 05/10). Weeks run Monday to Sunday.
-   - **Work out the planning Friday now, with the date tool, and check that it is a Friday:** the coming Friday when today is Saturday, Sunday or Monday; otherwise the Friday of the following week. (Closing on Monday 05/10 plans up to Friday 09/10; closing on Friday 09/10 plans up to Friday 16/10.) Every new priority gets this date.
+   - **Work out the planning Friday now, with the date tool, and check that it is a Friday:** the nearest Friday ONLY when today is Saturday, Sunday or Monday; on Tuesday, Wednesday, Thursday or Friday, skip the nearest Friday and use the one after it. (Monday 05/10 → Friday 09/10; Tuesday 06/10 → Friday 16/10, not 09/10; Friday 09/10 → Friday 16/10.) Every new priority gets this date.
 2. **Silently read:**
    - `Memoria/04_Pessoas_Pendencias.md` — active and resolved pending items
    - `Memoria/03_Projetos.md` — active projects and the `## Metas do Trimestre` section
@@ -34,7 +34,7 @@ description: "Runs a five-minute weekly close: what got resolved, what slipped, 
    - the lesson → `Memoria/02_Licoes.md`, in the `registrar` format `- **[YYYY-MM-DD]** **[CATEGORIA]** [Texto]`, under the section that fits it (a success goes under the "Acertos" section, a mistake under the "Erros" one)
    - the three priorities → `Memoria/04_Pessoas_Pendencias.md` under "Pendências Ativas", as `- 🔴 **[DEADLINE YYYY-MM-DD]** [Texto]` with the planning Friday as the deadline. A priority that is already a `🔴 **[DEADLINE …]**` line for the same task is not duplicated:
      - its deadline has already passed → update the deadline on its existing line to the planning Friday, so a chosen priority never stays overdue;
-     - its deadline is still ahead → that is a real due date: leave the line untouched and show its own date in the close.
+     - its deadline is still ahead → that is a real due date: leave the line untouched and, in the close, show its own date in place of the planning Friday ("— até terça, 20/10"), with no comment after it.
    - Never reword, convert or remove an `[AGUARDANDO]` or `[SEM PRAZO]` line. A priority about something that is waiting ("cobrar o Grupo Andradas") is a new line; the waiting line stays as it is.
    - the goal or its progress → `Memoria/03_Projetos.md` under `## Metas do Trimestre`, as `- 🎯 **[AAAA-T#]** [Meta] — [progresso, com data]`
 8. **Close** with the second block of the output format, and nothing after it.
@@ -50,7 +50,7 @@ Look-back (step 3):
    • [item resolvido na semana]
 
 ⏳ **Ficou para trás:**
-   • [pendência vencida ou que não andou]
+   • [pendência com prazo vencido — se não houver nenhuma, escreva só "nada com prazo vencido"]
 
 📝 **Registrado na semana:** [N] decisões, [N] lições
 🎯 **Meta do trimestre:** [meta e progresso, ou "ainda não definida"]

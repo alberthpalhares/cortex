@@ -124,7 +124,7 @@ test('fechar a semana: limpa o que venceu há muito, vira o trimestre e lembra d
   assert.ok(semana.includes('update the deadline on its existing line'), 'prioridade vencida escolhida de novo não fica vencida');
   assert.ok(semana.includes('its deadline is still ahead → that is a real due date: leave the line untouched'), 'um prazo futuro de verdade nunca é trocado');
   assert.ok(semana.includes('Never reword, convert or remove an `[AGUARDANDO]` or `[SEM PRAZO]` line'));
-  assert.ok(semana.includes('the coming Friday when today is Saturday, Sunday or Monday; otherwise the Friday of the following week'), 'o prazo das prioridades tem regra exata');
+  assert.ok(semana.includes('the nearest Friday ONLY when today is Saturday, Sunday or Monday; on Tuesday, Wednesday, Thursday or Friday, skip the nearest Friday and use the one after it'), 'o prazo das prioridades tem regra exata');
   assert.ok(semana.includes('✏️ Prazo atualizado'), 'a mudança de prazo aparece com antes e depois');
   assert.ok(semana.includes('revisar córtex'), 'o lembrete de revisão saiu do cérebro e mora aqui e no radar');
   assert.ok(!BRAIN.includes('Review reminder'), 'o cérebro não repete mais o lembrete de revisão em toda conversa');

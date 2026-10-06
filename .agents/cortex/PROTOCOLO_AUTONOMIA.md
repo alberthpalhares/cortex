@@ -46,7 +46,11 @@ Whenever the user asks for something, the Agent should not ask obvious questions
   - **Margem Resultante:** (X% — and R$ left per R$ 100 charged)
   - **Veredito:** (Aprovar / Aprovar com ressalva / Recusar / Contraproposta with a concrete price in R$). In a counter-offer the price comes first, then the reason in one clause, then — when it is a discount above the maximum — that opening an exception is the owner's call.
 
-For "quanto cobrar por…", answer instead with: **Custo** · **Preço mínimo** · **Preço-alvo** *(de cada R$ 100, sobram R$ W)*. Those three lines are the whole answer; bring up a discount only if the user asks.
+For "quanto cobrar por…", answer instead with exactly these three lines, one per line and keeping the labels; bring up a discount only if the user asks:
+
+- **Custo:** R$ X
+- **Preço mínimo:** R$ Y (margem de `margem_minima`%)
+- **Preço-alvo:** R$ Z (margem de `margem_alvo`% — de cada R$ 100, sobram R$ W)
 
 For "como está minha margem?" with no deal on the table: state `margem_alvo` and `margem_minima`, then run the first formula on each item of `custos_variaveis` at its list price (the prices are in `Pilares/04_Comercial.md`) and show one line per item, with no verdict. Say it is the margin per job at list price, before fixed costs. Never ask for a spreadsheet first — a DRE is only for the result after fixed costs.
 

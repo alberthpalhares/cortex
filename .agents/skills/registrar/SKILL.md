@@ -58,7 +58,7 @@ A policy with no number in it ("cobrar deslocamento fora da capital") is not a p
 ## 4. Undo and Correct
 - **"desfaz" / "apaga o último registro"** undoes the last **operation** of this conversation, not just one line:
   - a single entry → remove that line and confirm with `↩️ Removido: [linha]`
-  - a batch ("anota a reunião") or a weekly close ("fechar a semana") → remove every line that operation wrote, and list them
+  - a batch ("anota a reunião") or a weekly close ("fechar a semana") → remove every line that operation wrote, and list them. Remove only those lines: each file must end up exactly as it was before, with no blank line left behind and its final line break intact
   - an item moved to "resolved" → move it back
   - an in-place update → restore the previous text
 - **"corrige o último" / "na verdade era...":** replace that same line with the corrected version and show `✏️ Antes: ... → Agora: ...`.
@@ -68,8 +68,8 @@ A policy with no number in it ("cobrar deslocamento fora da capital") is not a p
 
 ## 5. Batch Capture ("anota a reunião")
 When the user pastes meeting notes, a call summary, a transcript, or dictates several things at once:
-1. Extract every decision, pending item (with owner and deadline when stated), lesson and person mentioned.
-2. Show them as **one** list, already in the formats above, grouped by type:
+1. Extract every decision, pending item (with owner and deadline when stated), lesson and NEW person mentioned by name. A company or client that already appears in the Memory files is not a person line, and no line may only repeat another one.
+2. Show them as **one** list, already in the formats above (in the list the `•` replaces the leading `- `, which is written only in the file), grouped by type:
 
    ```
    📋 **Encontrei [N] itens nessa anotação:**
