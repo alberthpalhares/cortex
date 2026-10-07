@@ -261,9 +261,9 @@ Os testes automáticos conferem o texto das skills, não o que a IA faz com ele.
 | 6 | `registra que decidi cobrar deslocamento fora da capital` | Uma linha nova em Decisões, com a data real de hoje. |
 | 7 | `posso dar 15% de desconto na cobertura de evento?` | Custo real de R$ 541,25, margem de 74,5%, e contraproposta com 10% (R$ 2.250), porque passa do desconto máximo. |
 | 8 | `quanto cobrar por um trabalho que me custa R$ 1.000?` | Preço mínimo de R$ 1.408,45 e preço-alvo de R$ 1.785,71. Nunca R$ 1.350. |
-| 9 | `anota a reunião:` seguido de 4 linhas com uma decisão, duas pendências (uma sem data) e uma lição | Mostra uma lista só, pede uma confirmação, grava tudo; a pendência sem data sai como `[SEM PRAZO]` com `(desde …)`. |
-| 10 | `desfaz` | Remove todas as linhas do item 9 e lista o que saiu. |
-| 11 | `fechar a semana` | Olhar para trás, duas perguntas (a segunda já diz até que sexta), meta do trimestre; fecha mostrando o prazo de cada prioridade e, no primeiro fechamento da pasta, o bloco 📅 (grava uma linha `Lembretes na agenda` em `05_Registros_Gerais.md`). Um prazo que ainda está no futuro (o vídeo, 20/10) não é alterado, e a linha "aguardando" do Grupo Andradas continua lá, intacta. |
+| 9 | `anota a reunião:` seguido de 4 linhas com uma decisão, duas pendências (uma sem data) e uma lição | Mostra uma lista só e pede uma confirmação: nada é gravado ainda. **Responda `pode gravar`** e só então ela grava tudo; a pendência sem data sai como `[SEM PRAZO]` com `(desde …)`. |
+| 10 | `desfaz` (depois do `pode gravar` do item 9) | Remove todas as linhas do item 9 e lista o que saiu. |
+| 11 | `fechar a semana`, e **responda cada pergunta** que ela fizer (a lição, as 3 prioridades, como vai a meta) | Olhar para trás, duas perguntas (a segunda já diz até que sexta), meta do trimestre; fecha mostrando o prazo de cada prioridade e, no primeiro fechamento da pasta, o bloco 📅 (grava uma linha `Lembretes na agenda` em `05_Registros_Gerais.md`). Um prazo que ainda está no futuro (o vídeo, 20/10) não é alterado, e a linha "aguardando" do Grupo Andradas continua lá, intacta. Se parar na primeira pergunta, o resto do fechamento não é testado. |
 | 12 | `como está minha margem?` | Responde com as margens do pilar financeiro (Guardião de Margem), sem pedir planilha. |
 
 Anote no PR o que falhou e em qual ferramenta. Falha de roteamento (a frase caiu na skill errada) quase sempre se corrige na tabela do cérebro ou na `description` da skill.
