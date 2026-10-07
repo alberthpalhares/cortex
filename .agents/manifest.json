@@ -35,6 +35,9 @@
     ".agents/skills/proposta-comercial/SKILL.md",
     ".agents/skills/radar/SKILL.md",
     ".agents/skills/registrar/SKILL.md",
+    ".agents/skills/registrar/decisoes.md",
+    ".agents/skills/registrar/lote.md",
+    ".agents/skills/registrar/propostas.md",
     ".agents/skills/saude/SKILL.md",
     ".agents/skills/semana/SKILL.md"
   ]

@@ -78,7 +78,7 @@ Seu radar está limpo. O que está na sua cabeça hoje? Conta tudo de uma vez qu
 [✨ ou 🔄 — SOMENTE se houver novidades pendentes ou se a data de revisão já passou; nenhuma outra sugestão aqui]
 ```
 
-Treat the answer as a batch for the `registrar` skill ("anota a reunião" flow): one list, one confirmation.
+Treat the answer as a batch for the `registrar` skill ("anota a reunião" flow, in its `lote.md`): one list, one confirmation.
 
 ## Formatting Rules
 - Never bring up resolved pending items.

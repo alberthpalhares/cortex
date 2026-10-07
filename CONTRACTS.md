@@ -215,6 +215,7 @@ Cada cópia é uma pasta `<rótulo>-<data ISO com "-" no lugar de ":" e ".">`. O
 
 - Skills do framework vivem em `.agents/skills/<nome>/SKILL.md`
 - Skills customizadas do usuário também vivem em `.agents/skills/<nome>/SKILL.md`
+- A pasta de uma skill pode ter arquivos de apoio (ex.: `registrar/lote.md`), lidos só quando o `SKILL.md` dela manda: o `SKILL.md` continua sendo a única porta de entrada, e os arquivos de apoio entram no manifesto como qualquer outro arquivo da camada de framework
 - A distinção é feita exclusivamente pelo manifesto: se o caminho está em `.agents/manifest.json` → framework; senão → usuário
 - **Garantia de breaking change:** mudar o diretório de skills, ou o mecanismo de distinção framework vs usuário
 

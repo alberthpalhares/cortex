@@ -45,6 +45,8 @@ Segurança é um requisito inegociável no Córtex. Ao submeter qualquer código
 
 Skills são o principal formato de contribuição no Córtex. Elas devem ser salvas na pasta `.agents/skills/<nome-da-skill>/SKILL.md`.
 
+Uma skill que cresceu demais pode ter **arquivos de apoio** na mesma pasta, lidos só quando o caso pede. O `registrar` é o exemplo: o `SKILL.md` é o núcleo (no máximo 2.000 palavras, conferido em `test/unit/dia-a-dia.test.js`) e manda ler `lote.md`, `propostas.md` ou `decisoes.md` conforme a frase do usuário. Cada regra mora em um arquivo só, e as referências entre arquivos usam o título da seção ou o nome do arquivo, nunca o número da seção.
+
 ### Estrutura obrigatória de uma Skill:
 
 ```markdown

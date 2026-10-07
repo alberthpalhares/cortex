@@ -24,6 +24,9 @@ O Córtex acompanha o que acontece depois: a proposta enviada, o porquê da deci
 - **Os dois momentos da semana na sua agenda.** Como a IA não avisa no celular, no primeiro "fechar a semana" ela sugere, uma vez só, dois compromissos que se repetem: "radar" na segunda e "fechar a semana" na sexta, com link pronto para a Google Agenda.
 - **Fale com o criador sem sair da conversa.** Diga "deu problema no Córtex" ou "tenho uma sugestão para o Córtex": a IA escreve um recado curto, sem nenhum nome, valor ou trecho dos seus arquivos, e mostra para você copiar, avisando antes que a página de envio (GitHub) é pública. Funciona mesmo antes da conversa de montagem. Nada é enviado sozinho, e o Córtex continua sem coletar nada.
 
+### Alterado
+- **Anotar no dia a dia ficou mais leve.** As instruções do "registra que…" foram divididas: a IA lê sempre a parte curta e só abre o resto quando o caso pede (uma reunião inteira, uma proposta, uma decisão). Nada muda no que ela faz nem no que você diz.
+
 ### Corrigido
 - **Clientes, fornecedores e parceiros não tinham lugar certo na Memória.** Quem é a pessoa fica numa linha; o que foi combinado com ela vira uma decisão com o nome na frente, e um acordo antigo não some quando você anota outra coisa sobre ela.
 - **Dois computadores, sócio ou pasta na nuvem.** Antes de gravar, a IA relê o arquivo e acrescenta só as linhas novas, em vez de regravar tudo a partir de uma leitura antiga. Se a nuvem criou uma "cópia em conflito", ela avisa.
