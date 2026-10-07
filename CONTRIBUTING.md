@@ -206,7 +206,7 @@ Ao publicar uma nova versão (adicionar/remover/renomear skill, ou qualquer muda
 - [ ] **CHANGELOG.md** está atualizado com as mudanças desta versão
 - [ ] **`examples/estudio-lumen/`** reflete as mudanças (se o exemplo for afetado — ex: novo pilar opcional, nova skill que o cérebro do exemplo deveria conhecer)
 - [ ] **`package.json`** — versão incrementada conforme SemVer
-- [ ] **`README.md`** — tabela de comandos do CLI atualizada, se houve mudança em `init`/`update`/`sync`/`backup`/`doctor`
+- [ ] **`README.md`** — tabela de comandos do CLI atualizada, se houve mudança em `init`/`update`/`sync`/`backup`/`restore`/`doctor`
 
 ### Publicar pela tag
 
@@ -245,11 +245,13 @@ Requisitos que o workflow já cumpre: repositório público, runner do próprio 
 
 Para testar os ZIPs antes de criar a tag: `npm run build:zip` grava os dois em `dist/` (pasta ignorada pelo git e fora do pacote do npm), com a versão no nome.
 
+**Os ZIPs da última versão são gerados de novo todo mês** pelo `.github/workflows/zips-em-dia.yml` (dia 1º, ou à mão em *Actions → ZIPs em dia → Run workflow*): ele pega o código da tag da última Release, roda o `build-zip` e troca os dois anexos dessa Release. É o que mantém as datas do exemplo na semana certa. Ele não publica no npm, não cria tag nem Release e não altera o repositório; sem nenhuma Release, não faz nada. O GitHub desliga agendamentos de repositórios sem atividade por 60 dias: se isso acontecer, reative em *Actions*.
+
 ### Roteiro de conversa (12 frases)
 
 Os testes automáticos conferem o texto das skills, não o que a IA faz com ele. Antes de publicar uma versão que mexe no cérebro, numa skill ou num protocolo, rode este roteiro numa ferramenta de IA de verdade.
 
-**Preparação:** rode `npm run build:zip` e descompacte `dist/cortex-exemplo-estudio-lumen-<versão>.zip` numa pasta fora do repositório (é o exemplo já com a pasta `.agents/` desta versão); abra essa pasta na ferramenta. Guarde uma segunda cópia intocada para comparar os arquivos depois. O ZIP vem compilado para `AGENTS.md`, `CLAUDE.md` e `GEMINI.md`; para testar no Cursor, rode antes `node <repositório>/bin/cli.js sync <cópia> --targets=all --force`. As datas do exemplo são fixas (o único prazo é 20/10/2026), então em que bloco do radar cada item aparece depende do dia em que você roda.
+**Preparação:** rode `npm run build:zip` e descompacte `dist/cortex-exemplo-estudio-lumen-<versão>.zip` numa pasta fora do repositório (é o exemplo já com a pasta `.agents/` desta versão); abra essa pasta na ferramenta. Guarde uma segunda cópia intocada para comparar os arquivos depois. O ZIP vem compilado para `AGENTS.md`, `CLAUDE.md` e `GEMINI.md`; para testar no Cursor, rode antes `node <repositório>/bin/cli.js sync <cópia> --targets=all --force`. No ZIP, as datas do exemplo andam semanas inteiras até a semana em que ele é gerado: o prazo do vídeo cai duas semanas adiante, a rotina do contador cai no sábado da semana (a etiqueta `dia N` acompanha) e os dois meses de resultado são os dois anteriores ao mês passado. As datas e os meses da tabela abaixo são os do repositório; para gerar o ZIP exatamente com eles, rode `npm run build:zip -- --hoje=2026-10-05` (aí, em que bloco do radar cada item aparece depende do dia em que você roda).
 
 | # | Você diz | O que tem de acontecer |
 |---|---|---|

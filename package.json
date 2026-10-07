@@ -1,6 +1,6 @@
 {
   "name": "@aksp/cortex",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "O sócio que lembra de tudo: a memória do seu negócio em arquivos simples, no seu computador, que a sua ferramenta de IA consulta antes de responder.",
   "main": "bin/cli.js",
   "bin": {

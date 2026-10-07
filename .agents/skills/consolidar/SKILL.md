@@ -49,7 +49,7 @@ This skill executes `.agents/cortex/PROTOCOLO_MEMORIA.md`. It keeps `Memoria/` l
 
 7. **Check your own work before saying it is done.** Take the lines that existed before and account for every one of them: it is still in its file, or it is in the archive. Report it in one line — *"Das 96 linhas de antes, 62 continuam onde estavam e 34 estão no arquivo; 2 linhas novas de fusão."* If any line cannot be found in either place, name it and say the consolidation is NOT complete.
 
-8. **Show a final summary** of what was moved/merged and where to find it (`Memoria/_Arquivo/AAAA.md`), ending with one line naming the real folder of the safety copy: *"Antes de mexer, guardei uma cópia de como estava em `.cortex/backups/dados-…`."*
+8. **Show a final summary** of what was moved/merged and where to find it (`Memoria/_Arquivo/AAAA.md`), ending with one line naming the real folder of the safety copy and the command that brings it back: *"Antes de mexer, guardei uma cópia de como estava em `.cortex/backups/dados-…`. Para voltar a ela: `npx @aksp/cortex@latest restore --from=dados-…`."*
 
 ## Rules
 

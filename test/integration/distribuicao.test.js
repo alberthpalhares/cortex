@@ -212,9 +212,13 @@ test('createZip grava a data no horário de Brasília, para o arquivo extraído 
 const outDir = mkTmpDir('cortex-dist-');
 const installZip = path.join(outDir, `cortex-${PKG.version}.zip`);
 const exampleZip = path.join(outDir, `cortex-exemplo-estudio-lumen-${PKG.version}.zip`);
+// O dia "de hoje" dos ZIPs destes testes é fixo: 13 semanas depois da semana
+// para a qual o exemplo foi escrito, já em outro ano e em outro trimestre.
+const HOJE = '2027-01-06';
+const SEMANAS = 13;
 let builtZips = null;
 function zips() {
-  if (!builtZips) builtZips = zip.buildZips(outDir);
+  if (!builtZips) builtZips = zip.buildZips(outDir, { hoje: HOJE });
   return builtZips;
 }
 
@@ -350,6 +354,13 @@ test('o ZIP do exemplo abre pronto para dizer "radar": dados + framework + toda 
   // não diz que a pasta está incompleta e não promete ferramenta que a pasta não prepara.
   const inside = text('README.md');
   assert.ok(inside.includes('já está completa') && inside.includes('`radar`'), inside);
+  // E diz para que semana as datas foram ajustadas, com as datas que valem dentro deste ZIP.
+  assert.ok(inside.includes('As datas deste exemplo foram ajustadas para a semana de 04/01/2027 (a semana em que este ZIP foi gerado)'), inside);
+  assert.ok(inside.includes('O único prazo é 19/01/2027.') && inside.includes('A rotina de todo dia 9 está em aberto a partir de 09/01/2027.'), inside);
+  assert.ok(inside.includes('2 meses de resultado guardados (outubro e novembro de 2026): pergunte `como foi novembro?`'), inside);
+  assert.ok(!/20\/10\/2026|10\/10\/2026|agosto/.test(inside), 'nenhuma data do repositório sobra no README do ZIP: ' + inside);
+  assert.ok(text('Memoria/04_Pessoas_Pendencias.md').includes('[DEADLINE 2027-01-19]'), 'os dados do ZIP são os ajustados');
+  assert.ok(text('GEMINI.md').includes('**Onboarding realizado em:** 2026-04-16'), 'os arquivos compilados saem do cérebro ajustado');
   for (const wrong of ['Baixe o', 'pasta do repositório', 'npm run', 'Cursor']) {
     assert.ok(!inside.includes(wrong), `o README de dentro do ZIP não pode dizer "${wrong}"`);
   }
@@ -372,6 +383,148 @@ test('o ZIP do exemplo abre pronto para dizer "radar": dados + framework + toda 
   }
   const r = run(['doctor', '.', '--offline'], dest);
   assert.equal(r.status, 0, r.stdout + r.stderr);
+});
+
+// ── As datas do exemplo ───────────────────────────────────────────
+
+const DAY = 24 * 60 * 60 * 1000;
+const plusDays = (iso, n) => new Date(Date.parse(iso + 'T00:00:00Z') + n * DAY).toISOString().slice(0, 10);
+const EXAMPLE = path.join(ROOT, 'examples', 'estudio-lumen');
+const DATA_FILES = walk(EXAMPLE).filter((f) => /^(Memoria|Pilares)\/.*\.md$/.test(f));
+
+test('datas do exemplo: o repositório fica fixo, e o dia de referência é uma segunda-feira que o README dele cita', () => {
+  const ref = zip.EXAMPLE_REFERENCE_DAY;
+  assert.equal(new Date(ref + 'T12:00:00Z').getUTCDay(), 1, 'segunda-feira: a semana do exemplo começa nela');
+  const [y, m, d] = ref.split('-');
+  assert.ok(read(EXAMPLE, 'README.md').includes(`semana de ${d}/${m}/${y}`), 'o README do exemplo diz para que semana as datas foram escritas');
+  // As datas que os testes e a documentação citam continuam no repositório.
+  const pend = read(EXAMPLE, path.join('Memoria', '04_Pessoas_Pendencias.md'));
+  assert.ok(pend.includes('[DEADLINE 2026-10-20]') && pend.includes('**[TODO MÊS: dia 10]**') && pend.includes('próxima 2026-10-10'));
+  assert.ok(read(EXAMPLE, path.join('Memoria', '03_Projetos.md')).includes('**[2026-T4]**'));
+
+  // Semanas inteiras: qualquer dia da mesma semana dá o mesmo exemplo, e os dias da semana não mudam.
+  assert.deepEqual(zip.exampleShift(ref), { days: 0, months: 0, quarters: 0, weekOf: ref });
+  assert.equal(zip.exampleShift('2026-10-11').days, 0, 'domingo ainda é a semana de referência');
+  assert.deepEqual(zip.exampleShift('2026-10-12'), { days: 7, months: 0, quarters: 0, weekOf: '2026-10-12' });
+  assert.deepEqual(zip.exampleShift('2026-11-03'), { days: 28, months: 1, quarters: 0, weekOf: '2026-11-02' });
+  assert.deepEqual(zip.exampleShift(HOJE), { days: SEMANAS * 7, months: 3, quarters: 1, weekOf: '2027-01-04' });
+  assert.equal(zip.exampleShift('2026-10-04').days, -7, 'antes da referência anda para trás, também em semanas inteiras');
+  for (const bad of ['06/01/2027', '2027-02-30', 'amanhã']) {
+    assert.throws(() => zip.exampleShift(bad), /Data inválida para --hoje/, bad);
+  }
+
+  // Gerado no dia de referência, o exemplo sai com as datas do repositório, byte a byte.
+  const same = path.join(mkTmpDir('cortex-exemplo-ref-'), 'exemplo');
+  zip.stageExample(same, ref);
+  for (const f of DATA_FILES.concat(['Frameworks/CEREBRO.md'])) {
+    assert.equal(read(same, f), read(EXAMPLE, f), `${f} não pode mudar quando o deslocamento é zero`);
+  }
+});
+
+test('datas do exemplo no ZIP: tudo anda as mesmas semanas, e meses, trimestre e rotinas continuam coerentes', () => {
+  const dir = path.join(mkTmpDir('cortex-exemplo-datas-'), 'exemplo');
+  const shift = zip.stageExample(dir, HOJE);
+  assert.equal(shift.days, SEMANAS * 7);
+
+  // Regra geral: mesma quantidade de linhas, e cada data completa é a do repositório + 91 dias
+  // (mesmo dia da semana). Ficam de fora só as linhas "do mês", conferidas abaixo.
+  const special = (line) => /\*\*\[\d{4}-\d{2}\]\*\*|\[TODO ANO:/.test(line);
+  let moved = 0;
+  for (const f of DATA_FILES) {
+    const before = read(EXAMPLE, f).split('\n');
+    const after = read(dir, f).split('\n');
+    assert.equal(after.length, before.length, f);
+    before.forEach((line, i) => {
+      if (special(line)) return;
+      const was = [...line.matchAll(/\d{4}-\d{2}-\d{2}/g)].map((m) => m[0]);
+      const now = [...after[i].matchAll(/\d{4}-\d{2}-\d{2}/g)].map((m) => m[0]);
+      assert.deepEqual(now, was.map((d) => plusDays(d, SEMANAS * 7)), `${f}, linha ${i + 1}`);
+      if (was.length === 0 && !/\d{4}-(\d{2}|T\d)/.test(line)) assert.equal(after[i], line, `${f}, linha ${i + 1}: linha sem data não muda`);
+      moved += was.length;
+    });
+  }
+  assert.ok(moved >= 30, `esperava conferir as datas do exemplo (conferi ${moved})`);
+
+  const pend = read(dir, 'Memoria/04_Pessoas_Pendencias.md');
+  const projetos = read(dir, 'Memoria/03_Projetos.md');
+  const registros = read(dir, 'Memoria/05_Registros_Gerais.md');
+  // O prazo, a espera e a rotina do mês: a etiqueta "dia N" acompanha a data "próxima".
+  assert.ok(pend.includes('**[DEADLINE 2027-01-19]**') && pend.includes('*(desde 2026-12-28)*'), pend);
+  assert.ok(pend.includes('**[TODO MÊS: dia 9]**') && pend.includes('*(desde 2026-12-15 · próxima 2027-01-09)*'), pend);
+  // A rotina anual: o mês da etiqueta é o do "feito em", e a "próxima" é o último dia desse mês, um ano depois.
+  assert.ok(pend.includes('**[TODO ANO: agosto]**') && pend.includes('*(feito em 2026-08-31 · próxima 2027-08-31)*'), pend);
+  assert.ok(pend.includes('✅ **[2026-08-31]** Renovação do seguro'), 'a mesma renovação, na mesma data: ' + pend);
+  // A meta fica no trimestre da semana do ZIP; o mês solto anda em meses; o ano do evento acompanha a data dele.
+  assert.ok(projetos.includes('🎯 **[2027-T1]**') && projetos.includes('*(2026-12-28)*'), projetos);
+  assert.ok(projetos.includes('adiou indefinidamente em 2026-02 ') && projetos.includes('Entrega prevista para 2027-01-19'), projetos);
+  assert.ok(projetos.includes('Congresso RH Norte 2026** — entregue em 2026-10-19'), projetos);
+  // Resultado mês a mês: os meses andam juntos e cada um continua analisado no mês seguinte ao dele.
+  assert.ok(registros.includes('📊 **[2026-11]** Receita R$ 18.000') && registros.includes('*(analisado em 2026-12-08)*'), registros);
+  assert.ok(registros.includes('📊 **[2026-10]** Receita R$ 15.200') && registros.includes('*(analisado em 2026-11-06)*'), registros);
+
+  // O cérebro: só a área do negócio anda; as regras do Córtex são as desta versão, intactas.
+  const cerebro = read(dir, 'Frameworks/CEREBRO.md');
+  assert.ok(cerebro.includes('- **Onboarding realizado em:** 2026-04-16') && cerebro.includes('- **Próxima revisão sugerida:** 2027-04-16'), cerebro.slice(0, 1200));
+  assert.ok(read(dir, 'Memoria/META.md').includes('**Onboarding realizado em:** 2026-04-16'), 'o índice e o cérebro dizem a mesma data');
+  const split = (text) => text.slice(text.indexOf('<!-- CORTEX:FRAMEWORK:START -->'));
+  assert.equal(split(cerebro), split(read(EXAMPLE, 'Frameworks/CEREBRO.md')));
+  assert.ok(read(dir, 'AGENTS.md').includes('- **Onboarding realizado em:** 2026-04-16'), 'o arquivo compilado sai do cérebro ajustado');
+
+  // Regras da linha, em casos que o exemplo de hoje não tem.
+  const far = zip.exampleShift('2027-03-03');
+  assert.equal(zip.shiftExampleLine('- 🔁 **[TODO ANO: 15/03]** Renovar o alvará. *(desde 2026-03-10 · próxima 2027-03-15)*', far),
+    '- 🔁 **[TODO ANO: 09/08]** Renovar o alvará. *(desde 2026-08-04 · próxima 2027-08-09)*');
+  assert.equal(zip.shiftExampleLine('- 🔁 **[TODA SEMANA: segunda]** Relatório. *(desde 2026-09-28 · próxima 2026-10-05)*', far),
+    '- 🔁 **[TODA SEMANA: segunda]** Relatório. *(desde 2027-02-22 · próxima 2027-03-01)*');
+  assert.equal(zip.shiftExampleLine('Reunião em 20/10/2026, meta **[2026-T4]**, custo R$ 2.026 e 20-30% de margem.', far),
+    'Reunião em 16/03/2027, meta **[2027-T1]**, custo R$ 2.026 e 20-30% de margem.');
+  assert.equal(zip.shiftExampleLine('- 📊 **[2026-12]** Receita R$ 1 *(analisado em 2027-01-31)*', zip.exampleShift('2026-11-03')),
+    '- 📊 **[2027-01]** Receita R$ 1 *(analisado em 2027-02-28)*', 'o último dia do mês continua sendo o último dia');
+
+  // E o exemplo ajustado continua passando no doctor.
+  const r = run(['doctor', '.', '--offline'], dir);
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.ok(r.stdout.includes('Próxima revisão:') && r.stdout.includes('2027-04-16') && !r.stdout.includes('Instalação incompleta'), r.stdout);
+});
+
+test('build-zip --hoje: uma data inválida para antes de gerar qualquer coisa', () => {
+  const script = path.join(ROOT, 'scripts', 'build-zip.js');
+  const out = path.join(mkTmpDir('cortex-dist-hoje-'), 'dist');
+  const env = { ...process.env };
+  delete env.CORTEX_ZIP_HOJE;
+  let r = spawnSync(process.execPath, [script, out, '--hoje=06/01/2027'], { encoding: 'utf8', env });
+  assert.equal(r.status, 1, r.stdout + r.stderr);
+  assert.ok(r.stderr.includes('Data inválida para --hoje') && r.stderr.includes('AAAA-MM-DD'), r.stderr);
+  assert.equal(fs.existsSync(out), false, 'nada é gerado');
+  // A variável de ambiente vale quando a opção não vem.
+  r = spawnSync(process.execPath, [script, out], { encoding: 'utf8', env: { ...env, CORTEX_ZIP_HOJE: 'ontem' } });
+  assert.equal(r.status, 1, r.stdout + r.stderr);
+  assert.ok(r.stderr.includes('"ontem"'), r.stderr);
+  assert.equal(fs.existsSync(out), false);
+});
+
+test('build-zip --hoje: o mesmo dia gera os mesmos ZIPs, byte a byte, em qualquer hora', () => {
+  zips();
+  // Nada dentro dos ZIPs leva o relógio de quem gerou: nem a hora das entradas, nem o "Gerado … em".
+  const example = readZip(fs.readFileSync(exampleZip));
+  for (const name of ['AGENTS.md', 'CLAUDE.md', 'GEMINI.md']) {
+    const stamps = example.find((e) => e.name === name).data.toString('utf8').match(/Gerado:\s+cortex sync \(v[^)]*\) em (\S+)/);
+    assert.equal(stamps && stamps[1], HOJE, `${name}: o carimbo é o do dia pedido`);
+  }
+  for (const file of [installZip, exampleZip]) {
+    const buf = fs.readFileSync(file);
+    // Cabeçalho local da primeira entrada: hora (2 bytes) e data (2 bytes) no formato do ZIP — a meia-noite de HOJE.
+    assert.equal(buf.readUInt16LE(10), 0, `${path.basename(file)}: hora das entradas`);
+    assert.equal(buf.readUInt16LE(12), ((2027 - 1980) << 9) | (1 << 5) | 6, `${path.basename(file)}: data das entradas`);
+    for (const e of readZip(buf).filter((x) => x.name === '.cortex/targets.json')) {
+      assert.equal(JSON.parse(e.data.toString('utf8')).updatedAt, `${HOJE}T03:00:00.000Z`);
+    }
+  }
+  const again = mkTmpDir('cortex-dist-de-novo-');
+  zip.buildZips(again, { hoje: HOJE });
+  for (const file of [installZip, exampleZip]) {
+    assert.ok(fs.readFileSync(path.join(again, path.basename(file))).equals(fs.readFileSync(file)), `${path.basename(file)} saiu diferente na segunda geração`);
+  }
 });
 
 test('o README do exemplo não promete "radar" numa pasta sem habilidades', () => {
@@ -457,7 +610,7 @@ test('release.yml: confere a tag antes de publicar, npm antes da Release, e a Re
 test('os workflows só chamam scripts, comandos e arquivos que existem', () => {
   const dir = path.join(ROOT, '.github', 'workflows');
   const files = fs.readdirSync(dir).filter((f) => /\.ya?ml$/.test(f));
-  assert.ok(files.includes('ci.yml') && files.includes('release.yml'));
+  assert.ok(files.includes('ci.yml') && files.includes('release.yml') && files.includes('zips-em-dia.yml'));
 
   for (const file of files) {
     const text = read(dir, file);
@@ -498,6 +651,53 @@ test('os workflows só chamam scripts, comandos e arquivos que existem', () => {
   const tagPush = guide.indexOf('git push origin v');
   assert.ok(tagPush !== -1 && guide.indexOf('git push origin master', tagPush) > tagPush, 'o master só é enviado depois da tag');
   assert.ok(/README\.md` novo e a tag saem juntos/.test(guide), 'o checklist avisa que o README e a tag saem juntos');
+});
+
+test('zips-em-dia.yml: todo mês gera de novo os ZIPs da última Release e só troca os anexos dela', () => {
+  const text = read(path.join(ROOT, '.github', 'workflows'), 'zips-em-dia.yml');
+  // Só as linhas que rodam: um comando citado num comentário não conta.
+  const live = text.split('\n').filter((line) => !/^\s*#/.test(line)).join('\n');
+
+  // Quando roda: uma vez por mês e à mão. Nunca num push, numa tag ou num PR.
+  const cron = /^ {2}schedule:\n {4}- cron: '(\d+) (\d+) (\d+) \* \*'$/m.exec(live);
+  assert.ok(cron && Number(cron[3]) >= 1 && Number(cron[3]) <= 28, 'agendado para um dia fixo de cada mês');
+  assert.ok(/^ {2}workflow_dispatch:/m.test(live), 'também pode ser disparado à mão');
+  assert.ok(!/^ {2}(push|pull_request|release|workflow_call):/m.test(live), 'nenhum outro gatilho');
+
+  // O que pode: escrever em Releases (contents: write), e só isso.
+  assert.ok(/^permissions:\n {2}contents: read$/m.test(live), 'o padrão do workflow é só leitura');
+  assert.deepEqual(live.match(/^\s+[\w-]+: write$/gm).map((l) => l.trim()), ['contents: write']);
+  for (const forbidden of ['npm publish', 'npm version', 'git push', 'git tag', 'git commit', 'gh release create', 'gh release edit', 'gh release delete', 'id-token', 'NPM_TOKEN', 'NODE_AUTH_TOKEN']) {
+    assert.ok(!live.includes(forbidden), `o workflow dos ZIPs não pode ter "${forbidden}"`);
+  }
+  assert.ok(/persist-credentials: false/.test(live), 'o checkout não deixa credencial para um push');
+
+  // Sem Release, nada roda: todo passo depois do primeiro depende de a tag ter sido achada.
+  const steps = live.split(/^ {6}- name: /m).slice(1);
+  assert.ok(steps.length >= 4 && steps[0].startsWith('Achar a última Release'), steps.map((s) => s.split('\n')[0]).join(' | '));
+  assert.ok(steps[0].includes('gh release list') && steps[0].includes('select(.isLatest)') && steps[0].includes('Nada a fazer'), steps[0]);
+  assert.ok(steps[0].includes('echo "tag=$TAG" >> "$GITHUB_OUTPUT"'), steps[0]);
+  for (const step of steps.slice(1)) {
+    assert.ok(/^ {8}if: steps\.latest\.outputs\.tag != ''$/m.test(step), `passo sem a condição: ${step.split('\n')[0]}`);
+  }
+
+  // O código é o da tag da última Release; os ZIPs saem do mesmo script e levam os nomes fixos.
+  assert.ok(/uses: actions\/checkout@v\d+\n {8}with:\n {10}ref: \$\{\{ steps\.latest\.outputs\.tag \}\}/.test(live), 'checkout na tag da Release');
+  assert.ok(live.includes('node scripts/build-zip.js dist'));
+  const produced = zips().map((b) => path.basename(b.file));
+  const copied = [...live.matchAll(/cp "dist\/([^"]+)" dist\/(\S+)/g)];
+  assert.deepEqual(copied.map((m) => m[2]).sort(), ['cortex-exemplo-estudio-lumen.zip', 'cortex.zip']);
+  for (const [, from] of copied) {
+    assert.ok(produced.includes(from.replace('$VERSION', PKG.version)), `o build-zip não gera ${from}`);
+  }
+  assert.ok(live.includes(`VERSION="$(node -p "require('./package.json').version")"`), 'a versão é a do código da tag');
+  const upload = live.split('\n').find((line) => line.includes('gh release upload'));
+  assert.ok(upload && upload.includes('gh release upload "$TAG" dist/cortex.zip dist/cortex-exemplo-estudio-lumen.zip --clobber'), upload);
+  assert.ok(/TAG: \$\{\{ steps\.latest\.outputs\.tag \}\}/.test(live), 'a tag chega ao comando por variável de ambiente');
+
+  // O release.yml continua sendo o único que publica.
+  assert.ok(!/schedule:|workflow_dispatch:/.test(read(path.join(ROOT, '.github', 'workflows'), 'release.yml')));
+  assert.ok(read(ROOT, 'CONTRIBUTING.md').includes('zips-em-dia.yml'), 'o guia de release explica o workflow mensal');
 });
 
 test('os testes apagam as pastas temporárias que criam', () => {

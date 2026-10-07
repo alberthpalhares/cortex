@@ -1,0 +1,76 @@
+name: ZIPs em dia
+
+# As datas do exemplo (Estúdio Lumen) são ajustadas para a semana em que o ZIP
+# é gerado. Para o exemplo que as pessoas baixam não envelhecer, este workflow
+# gera os dois ZIPs de novo, todo mês, a partir do código da tag da última
+# Release, e troca os anexos dela.
+# Ele NÃO publica no npm, não cria tag nem Release e não altera o repositório.
+# Sem nenhuma Release publicada, não faz nada.
+
+on:
+  schedule:
+    # Dia 1º de cada mês, 09:00 UTC (06:00 em Brasília).
+    - cron: '0 9 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  refresh:
+    name: Gerar de novo os ZIPs da última Release
+    runs-on: ubuntu-latest
+    # contents: write é o que permite trocar os anexos de uma Release. Nada mais.
+    permissions:
+      contents: write
+    steps:
+      # A Release marcada como "Latest" (nunca um rascunho nem um pré-lançamento):
+      # é para ela que apontam os links releases/latest/download/… do README.
+      # Sem nenhuma, a lista vem vazia e os passos seguintes são pulados; uma
+      # falha ao consultar o GitHub derruba o passo, em vez de passar por "nada a fazer".
+      - name: Achar a última Release
+        id: latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="$(gh release list --repo "$GITHUB_REPOSITORY" --limit 100 --json tagName,isLatest --jq '.[] | select(.isLatest) | .tagName')"
+          if [ -z "$TAG" ]; then
+            echo "::notice::Ainda não há Release publicada. Nada a fazer."
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      # O código é o da tag da Release (não o do master): o ZIP continua sendo
+      # o daquela versão, só com as datas do exemplo em dia.
+      - name: Checkout do código da Release
+        if: steps.latest.outputs.tag != ''
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.latest.outputs.tag }}
+          persist-credentials: false
+
+      - name: Configurar Node
+        if: steps.latest.outputs.tag != ''
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22.x
+
+      # Os anexos levam nome fixo, como no release.yml. O dia fica fixado (e no
+      # registro, com o SHA-256): quem gerar com --hoje=<esse dia>, na mesma tag,
+      # obtém os mesmos bytes e pode conferir o anexo.
+      - name: Gerar os ZIPs
+        if: steps.latest.outputs.tag != ''
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          export CORTEX_ZIP_HOJE="$(TZ=America/Sao_Paulo date +%F)"
+          echo "Dia usado na geração: $CORTEX_ZIP_HOJE"
+          node scripts/build-zip.js dist
+          cp "dist/cortex-$VERSION.zip" dist/cortex.zip
+          cp "dist/cortex-exemplo-estudio-lumen-$VERSION.zip" dist/cortex-exemplo-estudio-lumen.zip
+          sha256sum dist/cortex.zip dist/cortex-exemplo-estudio-lumen.zip
+
+      - name: Trocar os anexos da Release
+        if: steps.latest.outputs.tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.latest.outputs.tag }}
+        run: gh release upload "$TAG" dist/cortex.zip dist/cortex-exemplo-estudio-lumen.zip --clobber --repo "$GITHUB_REPOSITORY"

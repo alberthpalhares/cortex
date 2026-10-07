@@ -94,6 +94,22 @@ Ativos) nunca são alterados pela atualização, e uma cópia do que muda
 fica guardada antes.
 
 
+PARA GUARDAR E RECUPERAR OS SEUS DADOS
+
+Antes de uma arrumação grande, peça para a sua IA rodar:
+
+       npx @aksp/cortex@latest backup
+
+Ele guarda uma cópia dos seus dados dentro desta pasta, sem alterar
+nada. Apagou ou estragou alguma coisa? Peça para a IA rodar:
+
+       npx @aksp/cortex@latest restore
+
+Ele mostra o que vai voltar a ser como estava no último backup e só
+restaura depois do seu "sim". Antes, guarda como está agora e diz
+como desfazer. Nada é apagado.
+
+
 SEUS DADOS
 
 Os arquivos são seus e ficam no seu computador. O Córtex não tem conta,

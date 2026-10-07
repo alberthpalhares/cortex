@@ -549,7 +549,7 @@ test('backup copia os dados do negócio para .cortex/backups/dados-<data>/ sem a
   }
   assert.equal(fs.existsSync(path.join(saved, '.agents')), false, 'o framework não entra na cópia dos dados');
   assert.ok(r.stdout.includes(sub), 'diz onde a cópia ficou');
-  assert.ok(r.stdout.includes('Para restaurar'), 'diz como restaurar à mão');
+  assert.ok(r.stdout.includes('Para restaurar') && r.stdout.includes(`restore --from=${sub}`), 'diz o comando que restaura esta cópia: ' + r.stdout);
   assert.equal(read(dir, 'Pilares/01_Estrategia.md'), 'MEU PILAR');
 
   // As atualizações seguintes não apagam a cópia dos dados.

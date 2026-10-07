@@ -6,6 +6,23 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-10-07
+
+Sem becos sem saída: dá para voltar a um backup com um comando, reconstruir o Córtex quando só os dados sobraram, e o exemplo para baixar não envelhece.
+
+### Migração (quem já usa)
+- Rode `npx @aksp/cortex@latest update`. Nenhum dado seu é tocado.
+
+### Adicionado
+- **Comando `restore`.** `npx @aksp/cortex@latest restore` traz de volta os dados do seu último backup. Antes de mexer, ele mostra o que vai mudar e guarda uma cópia de como está agora; no fim, mostra o comando que desfaz. `restore --list` mostra as cópias que existem, com a data por extenso, e `restore --from=<cópia>` escolhe uma delas.
+- **Restaurar nunca apaga.** Um arquivo que você criou depois da cópia fica como está, e é listado. As regras de funcionamento do Córtex continuam as da versão instalada, mesmo que o backup seja antigo.
+- **O `backup` termina com o comando exato para voltar àquela cópia**, e a IA diz esse comando quando guarda uma cópia antes de consolidar a memória ou revisar os pilares.
+- **Reconstruir a partir dos dados.** Só as pastas de dados vieram para o computador novo, ou o resto se perdeu? `npx @aksp/cortex@latest update` agora repõe as habilidades e monta o cérebro com o que está escrito nos seus arquivos, sem alterar nenhum deles. O que não der para saber não é inventado: fica marcado, e é só dizer "revisar córtex" para completar.
+- **Exemplo que não envelhece.** As datas do exemplo para baixar (Estúdio Lumen) são ajustadas para a semana em que o ZIP é gerado, e o ZIP é gerado de novo todo mês. O README de dentro dele diz para que semana as datas valem.
+
+### Corrigido
+- **O `init` e o `doctor` mandavam "trazer a pasta inteira de volta"** quando só os dados tinham sobrado, sem oferecer saída. Agora indicam o comando que reconstrói.
+
 ## [1.8.0] - 2026-10-07
 
 O que se repete e o que passou: as rotinas voltam sozinhas ao radar, e o resultado de cada mês fica guardado para comparar.

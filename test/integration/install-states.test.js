@@ -395,27 +395,24 @@ test('update que repõe a .agents/ inteira não afirma que guardou uma cópia de
   assert.ok(r2.stdout.includes('a sua versão está lá') && r2.stdout.includes('Copie tudo o que há dentro da pasta'), r2.stdout);
 });
 
-test('pasta que só tem Memoria/META.md: o update não instala meio Córtex e o doctor não manda um comando que não resolve', () => {
+test('pasta que só tem Memoria/META.md: o doctor manda o comando que reconstrói, e o Córtex antigo com arquivo na raiz segue como era', () => {
   const dir = mkTmpDir();
   fs.mkdirSync(path.join(dir, 'Memoria'));
   fs.writeFileSync(path.join(dir, 'Memoria', 'META.md'), '# META\n');
   assert.equal(cli.hasBrainEntry(dir), false);
+  assert.equal(cli.needsBrainRebuild(dir), true);
 
   let r = run(['doctor', '.'], dir);
   assert.ok(r.stdout.includes('Instalação incompleta'), r.stdout);
-  assert.ok(!r.stdout.includes('update'), 'o update recusa esta pasta: ' + r.stdout);
-  assert.ok(r.stdout.includes('Traga a pasta do negócio inteira'), r.stdout);
-  assert.ok(/Sugestão:.*traga de volta a pasta do negócio inteira/.test(r.stdout), r.stdout);
+  assert.ok(!r.stdout.includes('Traga a pasta do negócio inteira'), 'o beco sem saída acabou: ' + r.stdout);
+  assert.deepEqual(fixCommand(r.stdout), ['update', '--force'], 'o doctor mostra o comando que reconstrói');
+  assert.ok(/Sugestão:.*reconstrua o cérebro.*update --force.*revisar córtex/.test(r.stdout), r.stdout);
   assert.ok(!r.stdout.includes('Está tudo em dia'), r.stdout);
+  assert.deepEqual(fs.readdirSync(dir), ['Memoria'], 'o doctor não grava nada');
 
-  r = run(['update', '.', '--force'], dir);
-  assert.equal(r.status, 1, r.stdout + r.stderr);
-  assert.ok(r.stdout.includes('Nenhum arquivo foi alterado') && r.stdout.includes('Traga a pasta do negócio inteira'), r.stdout);
-  assert.ok(!r.stdout.includes('Framework atualizado'), r.stdout);
-  assert.deepEqual(fs.readdirSync(dir), ['Memoria'], 'nada é gravado');
-
-  // Córtex antigo: o arquivo de instrução na raiz é por onde a IA começa — aí a reposição vale.
+  // Córtex antigo: o arquivo de instrução na raiz é por onde a IA começa — aí vale a reposição de sempre, sem cérebro novo.
   fs.writeFileSync(path.join(dir, 'AGENTS.md'), 'CÉREBRO ANTIGO ESCRITO À MÃO');
+  assert.equal(cli.needsBrainRebuild(dir), false);
   assert.equal(cli.hasBrainEntry(dir), true);
   r = run(fixCommand(run(['doctor', '.'], dir).stdout), dir);
   assert.equal(r.status, 0, r.stdout + r.stderr);
@@ -424,6 +421,7 @@ test('pasta que só tem Memoria/META.md: o update não instala meio Córtex e o 
   assert.ok(r.stdout.includes('A pasta .agents/ não estava aqui e foi reposta do zero.'), r.stdout);
   assert.ok(!r.stdout.includes('ficou guardado em'), 'sem .agents/ e sem cérebro não havia o que guardar: ' + r.stdout);
   assert.ok(!r.stdout.includes('Backup salvo em'), r.stdout);
+  assert.equal(fs.existsSync(path.join(dir, 'Frameworks', 'CEREBRO.md')), false, 'o cérebro antigo é o arquivo da raiz: nenhum outro é criado');
 });
 
 test('pasta só instalada sem a .agents/: o doctor e o update mandam o init com @latest e com a pasta', () => {
@@ -879,7 +877,7 @@ test('GEMINI.md por padrão vale para instalação nova; quem já escolheu as fe
   }
 });
 
-test('pasta só com a Memória: o init não manda rodar o update, que a recusaria', () => {
+test('pasta só com a Memória: o init não instala por cima e aponta o comando que reconstrói o cérebro', () => {
   const dir = mkTmpDir();
   fs.mkdirSync(path.join(dir, 'Memoria'));
   fs.writeFileSync(path.join(dir, 'Memoria', 'META.md'), '# META\n');
@@ -887,6 +885,15 @@ test('pasta só com a Memória: o init não manda rodar o update, que a recusari
   assert.equal(r.status, 1, r.stdout + r.stderr);
   assert.ok(r.stdout.includes('Achei a Memória do negócio'), r.stdout);
   assert.ok(r.stdout.includes('Nenhum arquivo foi alterado'), r.stdout);
-  assert.ok(!/cortex@latest update/.test(r.stdout), 'não pode indicar um comando que recusa esta pasta');
+  assert.ok(/^\s+npx @aksp\/cortex@latest update$/m.test(r.stdout), 'indica o update, que reconstrói o que falta: ' + r.stdout);
+  assert.ok(!r.stdout.includes('Traga a pasta do negócio inteira'), r.stdout);
   assert.deepEqual(fs.readdirSync(dir), ['Memoria']);
+
+  // Com o nome da pasta, quando o comando foi rodado de fora dela.
+  const parent = mkTmpDir();
+  const named = path.join(parent, 'Loja da Ana');
+  cli.copyRecursiveSync(dir, named);
+  const r2 = run(['init', 'Loja da Ana', '--force'], parent);
+  assert.equal(r2.status, 1, r2.stdout + r2.stderr);
+  assert.ok(r2.stdout.includes('npx @aksp/cortex@latest update "Loja da Ana"'), r2.stdout);
 });

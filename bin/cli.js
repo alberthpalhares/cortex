@@ -919,6 +919,7 @@ ${bold}USO:${reset}
   $ npx @aksp/cortex update [pasta]
   $ npx @aksp/cortex sync [pasta]
   $ npx @aksp/cortex backup [pasta]
+  $ npx @aksp/cortex restore [pasta]
   $ npx @aksp/cortex doctor [pasta]
 
   ${dim}Sempre com o prefixo @aksp/ — "cortex" sozinho é outro pacote no npm.${reset}
@@ -938,6 +939,9 @@ ${bold}COMANDOS:${reset}
                   ${dim}--prune${reset}       Remove arquivos que o framework descontinuou (deixaram de existir no
                                 manifesto da versão atual). Nunca remove customizações suas — só o que
                                 o próprio framework já possuiu e abandonou. Um backup já é feito antes.
+                  Numa pasta que só tem os dados do negócio (Memoria/, Pilares/…), sem o cérebro e
+                  sem as habilidades, reconstrói o que falta a partir desses dados, sem alterá-los:
+                  o que não der para saber fica marcado com <!-- REVISAR -->.
   ${green}sync [pasta]${reset}   Compila Frameworks/CEREBRO.md nos arquivos de instrução que a sua ferramenta de IA lê.
                   AGENTS.md e GEMINI.md levam o cérebro completo; CLAUDE.md o importa (@AGENTS.md).
                   Numa pasta que já tem os seus arquivos escolhidos, gera só esses.
@@ -949,13 +953,20 @@ ${bold}COMANDOS:${reset}
                   Frameworks/CEREBRO.md) em .cortex/backups/dados-<data>/. Não altera nada e
                   essas cópias nunca são apagadas sozinhas. Atalhos para outras pastas não são
                   seguidos: a cópia avisa quais ficaram de fora.
+  ${green}restore [pasta]${reset} Traz de volta os dados de uma dessas cópias (a mais recente, se você não
+                  escolher). Antes de mexer, guarda uma cópia de como está agora, para dar para
+                  desfazer (ela aparece marcada na lista e só vale com --from). Só copia por cima:
+                  arquivo que existe hoje e não está na cópia fica como está. Depois recompila os arquivos de instrução, como o sync.
+                  ${dim}--list${reset}          só mostra as cópias que existem; não altera nada
+                  ${dim}--from=<nome>${reset}   escolhe a cópia pelo nome que o --list mostra (dados-…)
+                  ${dim}Alias: restaurar${reset}
   ${green}doctor [pasta]${reset} Audita a estrutura do Córtex sem depender de IA: pilares faltando, habilidades faltando em .agents/,
                   marcadores REVISAR pendentes, frontmatter incompleto, número de margem ou
                   preço escrito de um jeito que muda o valor (ex.: 1.500, 30%), saúde do cérebro.
                   Avisa se existe versão nova (consulta só o número da versão no npm).
                   ${dim}--offline${reset}     não consulta o npm
                   ${dim}Aliases: checkup, diagnostico${reset}
-  ${green}--force, -f${reset}    Em init, update e sync: não pede confirmação.
+  ${green}--force, -f${reset}    Em init, update, sync e restore: não pede confirmação.
                   ${dim}Sem terminal interativo (uma IA rodando o comando, um script), o que
                   precisaria de confirmação não é feito sem --force: o comando mostra o
                   plano e sai com código 2. O init numa pasta sem nenhum nome igual ao do
@@ -970,6 +981,7 @@ ${bold}EXEMPLOS:${reset}
   $ npx @aksp/cortex update --prune
   $ npx @aksp/cortex sync --targets=all
   $ npx @aksp/cortex@latest backup
+  $ npx @aksp/cortex@latest restore --list
   $ npx @aksp/cortex doctor
 `);
 }
@@ -1269,13 +1281,14 @@ function findMissingFrameworkFiles(targetDir, templateDir) {
 const INSTALL_LIST_LIMIT = 8;
 function printInstallProblem(install, targetArg, targetDir) {
   const fixCommand = `npx @aksp/cortex@latest update${folderHint(targetArg)} --force`;
-  if (install.wholeFolder && targetDir && !hasBrainEntry(targetDir)) {
-    // O update recusa esta pasta (ver hasBrainEntry): não se mostra um comando que não resolve.
-    console.log(`${red}🧩 Instalação incompleta:${reset} esta pasta tem a Memória do negócio, mas não a pasta .agents/ (as habilidades do Córtex),`);
-    console.log(`   nem o cérebro (${toPosix(CEREBRO_PATH)}), nem o arquivo de instrução que a IA lê (AGENTS.md).`);
+  if (targetDir && needsBrainRebuild(targetDir)) {
+    // Só os dados vieram para cá: o mesmo comando repõe as habilidades e reconstrói o cérebro.
+    console.log(`${red}🧩 Instalação incompleta:${reset} esta pasta tem a Memória do negócio, mas não o cérebro (${toPosix(CEREBRO_PATH)})`);
+    console.log(`   nem o arquivo de instrução que a IA lê (AGENTS.md)${install.wholeFolder ? ', nem a pasta .agents/ (as habilidades do Córtex)' : ''}. Sem eles a IA não carrega o Córtex.`);
     console.log(`   ${BRAINLESS_ADVICE}`);
-    console.log(`   Seus dados (Pilares/, Memoria/, Ativos/) estão aqui e não são tocados.`);
-    return '';
+    console.log(`     ${cyan}${fixCommand}${reset}`);
+    console.log(`   ${dim}Seus dados (Pilares/, Memoria/, Ativos/) não são alterados; o que não der para saber fica marcado para você completar.${reset}`);
+    return fixCommand;
   }
   if (install.wholeFolder) {
     console.log(`${red}🧩 Instalação incompleta:${reset} falta a pasta .agents/ inteira — é nela que ficam as habilidades do Córtex (radar, registrar, proposta…).`);
@@ -1501,8 +1514,9 @@ function isCortexMounted(targetDir) {
 
 // Há por onde a IA começar: o cérebro, ou um arquivo de instrução na raiz (o
 // Córtex antigo só tinha esse). Uma pasta só com Memoria/META.md — os dados
-// copiados sem o resto — não tem nenhum dos dois: repor a .agents/ ali deixaria
-// um Córtex que nenhuma ferramenta de IA carrega, e o init não roda nela.
+// copiados sem o resto — não tem nenhum dos dois: repor só a .agents/ ali deixaria
+// um Córtex que nenhuma ferramenta de IA carrega, e o init não roda nela. Nesse
+// caso o update reconstrói também o cérebro (ver needsBrainRebuild).
 function hasBrainEntry(targetDir) {
   return (
     fs.existsSync(path.join(targetDir, CEREBRO_PATH)) ||
@@ -1510,7 +1524,14 @@ function hasBrainEntry(targetDir) {
   );
 }
 
-const BRAINLESS_ADVICE = 'Traga a pasta do negócio inteira, de onde ela foi copiada ou de um backup seu — incluindo a pasta Frameworks/ e o AGENTS.md — e rode este comando de novo.';
+// Pasta que só tem os dados do negócio (a Memória, talvez Pilares/ e Ativos/),
+// sem cérebro e sem arquivo de instrução: o `update` reconstrói o que falta a
+// partir desses dados (ver rebuildFromData), sem alterar nenhum deles.
+function needsBrainRebuild(targetDir) {
+  return fs.existsSync(path.join(targetDir, 'Memoria', 'META.md')) && !hasBrainEntry(targetDir);
+}
+
+const BRAINLESS_ADVICE = 'Dá para reconstruir o que falta a partir dos dados que estão aqui, sem alterar nenhum deles. Rode:';
 
 // "Instalado" = o init já rodou nesta pasta (montado ou não).
 function isCortexInstalled(targetDir) {
@@ -1684,9 +1705,10 @@ async function runInit() {
   }
 
   if (isCortexMounted(targetDir) && !hasBrainEntry(targetDir)) {
-    // Só a Memória veio para cá: mandar rodar o update seria um beco sem saída (ele recusa esta pasta).
+    // Só a Memória veio para cá: quem reconstrói o resto, sem tocar nos dados, é o update.
     console.log(`${red}Achei a Memória do negócio nesta pasta, mas não o cérebro (${toPosix(CEREBRO_PATH)}) nem o arquivo de instrução que a IA lê (AGENTS.md).${reset}`);
     console.log(`O \`init\` não instala por cima de dados que já existem. ${BRAINLESS_ADVICE}`);
+    console.log(`  ${cyan}npx @aksp/cortex@latest update${folderHint(targetArg)}${reset}`);
     console.log(`Nenhum arquivo foi alterado.\n`);
     process.exit(1);
   }
@@ -1901,6 +1923,184 @@ ${dim}Dúvidas e exemplos: https://github.com/alberthpalhares/cortex${reset}
 `);
 }
 
+// Quem instalou pelo npm até a 1.3.0 nunca recebeu o .gitignore (o pacote não
+// o trazia). Cria quando não existe; um .gitignore do usuário nunca é tocado.
+function reportGitignore(targetDir) {
+  const isGitRepo = fs.existsSync(path.join(targetDir, '.git'));
+  const hasFile = fs.existsSync(path.join(targetDir, '.gitignore'));
+  let status;
+  try {
+    // Repositório Git sem .gitignore: o usuário pode estar versionando os dados
+    // de propósito (backup). Criar o arquivo faria os arquivos novos sumirem do
+    // repositório dele em silêncio — então só avisa.
+    status = isGitRepo && !hasFile ? 'missing-rules' : ensureGitignore(targetDir, { appendToExisting: false });
+  } catch (e) {
+    // Um .gitignore que não pôde ser lido não pode derrubar a atualização no fim.
+    console.log(`  ${yellow}!${reset} Não consegui conferir o .gitignore agora ${dim}(${e.code || e.message})${reset} — a atualização seguiu normalmente.`);
+    return;
+  }
+  if (status === 'created') {
+    console.log(`  ${green}✓${reset} .gitignore criado ${dim}— mantém Pilares/, Memoria/ e Ativos/ fora de um repositório Git${reset}`);
+  } else if (status === 'missing-rules' && isGitRepo) {
+    console.log(`  ${yellow}!${reset} Esta pasta é um repositório Git e o .gitignore ${hasFile ? 'não tem as regras do Córtex' : 'não existe'}.`);
+    console.log(`    Se você NÃO quer os dados do negócio no repositório, acrescente estas linhas ao .gitignore (uma por linha):`);
+    USER_GITIGNORE_DATA_RULES.forEach((rule) => console.log(`      ${rule}`));
+  }
+}
+
+// O molde do cérebro (o mesmo que a conversa de montagem preenche) e a marca
+// que fica onde um fato do negócio não pôde ser lido da pasta.
+const BRAIN_TEMPLATE_REL_PATH = path.join('.agents', 'skills', 'cortex-onboarding', 'resources', 'CORTEX_TEMPLATE.md');
+const REVISAR_MARK = '<!-- REVISAR -->';
+
+// Monta um Frameworks/CEREBRO.md a partir do molde, para uma pasta que só tem
+// os dados do negócio. A área CORTEX:BUSINESS leva SÓ o que está escrito na
+// pasta: .cortex/meta.json (se existir), o cabeçalho e o mapa de arquivos de
+// Memoria/META.md e os arquivos que existem em Pilares/. O que não está lá vira
+// <!-- REVISAR --> — nunca um nome ou uma data inventados.
+// Retorna { content, known: [{ label, value }], missing: [label] }.
+function buildBrainFromData(targetDir, templateDir) {
+  const template = normalizeEol(fs.readFileSync(path.join(templateDir, BRAIN_TEMPLATE_REL_PATH), 'utf8'));
+  const metaText = normalizeEol(fs.readFileSync(path.join(targetDir, 'Memoria', 'META.md'), 'utf8'));
+  const headers = parseMetaHeaders(metaText);
+  const meta = readCortexMeta(targetDir) || {};
+
+  // Um valor só vale se for texto de verdade: nada de "[Nome do negócio]" (o
+  // molde por preencher), de {{VARIÁVEL}} nem de um REVISAR que já estava lá.
+  const text = (v) => (typeof v === 'string' && v.trim() !== '' && !/[[\]{}]|REVISAR/.test(v) ? v.trim() : null);
+  const date = (v) => (text(v) && /^(\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4})$/.test(v.trim()) ? v.trim() : null);
+
+  // Pilares: os arquivos que existem, com os tópicos que o mapa do META.md dá a cada um.
+  const topics = {};
+  for (const line of metaText.split('\n')) {
+    const cols = line.trim().split('|').map((s) => s.trim());
+    const file = (cols[2] || '').replace(/`/g, '');
+    if (cols.length >= 4 && cols[0] === '' && file.startsWith('Pilares/') && text(cols[1])) {
+      (topics[file] = topics[file] || []).push(cols[1]);
+    }
+  }
+  const pillars = listRealFiles(targetDir).filter((f) => f.startsWith('Pilares/')).sort();
+  const pillarList = pillars
+    .map((f) => `- \`${f.slice('Pilares/'.length)}\`${topics[f] ? ` — ${topics[f].join('; ')}` : ''}`)
+    .join('\n');
+
+  const facts = [
+    { key: 'NOME_NEGOCIO', label: 'nome do negócio', value: text(meta.businessName) || text(headers.businessName) },
+    { key: 'SETOR', label: 'setor', value: text(headers.sector) },
+    { key: 'DATA_ONBOARDING', label: 'data da montagem', value: date(meta.onboardedAt) || date(headers.onboardedAt) },
+    { key: 'DATA_REVISAO', label: 'data da próxima revisão', value: date(meta.nextReview) || date(headers.nextReview) },
+    { key: 'LISTA_PILARES', label: 'lista de pilares', value: pillarList || null, shown: `${pillars.length} arquivo(s) em Pilares/` },
+  ];
+
+  let business = extractRegion(template, BUSINESS_START, BUSINESS_END);
+  if (business === null) throw new Error(`O molde do cérebro (${toPosix(BRAIN_TEMPLATE_REL_PATH)}) está sem a área CORTEX:BUSINESS.`);
+  // Uma passada só: o texto que entra (um nome de arquivo com "{{SETOR}}", por
+  // exemplo) não é lido de novo como variável. Uma variável que este comando
+  // ainda não conhece (molde de versão futura) vira REVISAR: também não pode
+  // chegar aos arquivos que a IA lê.
+  const values = Object.create(null);
+  for (const fact of facts) values[fact.key] = fact.value;
+  business = business.replace(/\{\{([^{}\n]*)\}\}/g, (all, key) => values[key] || REVISAR_MARK);
+
+  return {
+    content: replaceRegion(template, BUSINESS_START, BUSINESS_END, business),
+    known: facts.filter((f) => f.value).map((f) => ({ label: f.label, value: f.shown || f.value })),
+    missing: facts.filter((f) => !f.value).map((f) => f.label),
+  };
+}
+
+// `update` numa pasta que só tem os dados do negócio: instala o que falta do
+// framework, cria o cérebro a partir dos dados (buildBrainFromData) e compila os
+// arquivos de instrução. Nenhum arquivo que já existe em Pilares/, Memoria/ ou
+// Ativos/ é aberto para escrita.
+async function rebuildFromData(targetDir, templateDir, targetArg, isForce, installed) {
+  const hasFramework = fs.existsSync(path.join(targetDir, '.agents'));
+
+  // Um ARQUIVO do usuário no lugar de uma pasta que precisa existir: para antes de gravar.
+  const blockers = ['.agents', 'Frameworks'].filter((item) => {
+    const p = path.join(targetDir, item);
+    return fs.existsSync(p) && !fs.statSync(p).isDirectory();
+  });
+  if (blockers.length > 0) {
+    console.log(`  ${yellow}Nesta pasta existe um arquivo chamado ${blockers.join(', ')}, e o Córtex precisa de uma pasta com esse nome.${reset}`);
+    console.log(`  Renomeie o seu arquivo (por exemplo, para "${blockers[0]}-antigo") e rode o mesmo comando de novo.`);
+    console.log(`\nNada foi alterado.\n`);
+    process.exit(1);
+  }
+
+  const { novos, alterados } = diffFrameworkLayer(templateDir, targetDir);
+  const brain = buildBrainFromData(targetDir, templateDir);
+  const targets = readTargets(targetDir);
+  const hasStartHere = fs.existsSync(path.join(targetDir, START_HERE_FILE));
+
+  console.log(`${yellow}Esta pasta tem os dados do negócio (a Memória), mas não o cérebro (${toPosix(CEREBRO_PATH)}) nem o arquivo de instrução que a IA lê.${reset}`);
+  console.log(`Dá para reconstruir o que falta a partir dos dados que estão aqui.\n`);
+  console.log(`${bold}O que será criado:${reset}`);
+  if (!hasFramework) {
+    console.log(`  ${green}+${reset} a pasta .agents/ ${dim}— as habilidades do Córtex (radar, registrar, proposta…)${reset}`);
+  } else if (novos.length + alterados.length > 0) {
+    console.log(`  ${yellow}~${reset} ${novos.length + alterados.length} arquivo(s) do Córtex em .agents/ repostos ou atualizados ${dim}— com uma cópia da pasta guardada antes${reset}`);
+  }
+  console.log(`  ${green}+${reset} ${toPosix(CEREBRO_PATH)} ${dim}— o cérebro, só com o que está escrito nesta pasta:${reset}`);
+  brain.known.forEach((f) => console.log(`       ${green}✓${reset} ${f.label}: ${f.value}`));
+  brain.missing.forEach((f) => console.log(`       ${yellow}?${reset} ${f}: não encontrei nos arquivos — fica marcado com ${REVISAR_MARK} para você completar`));
+  console.log(`  ${green}+${reset} ${targets.join(', ')} ${dim}— os arquivos que a sua ferramenta de IA lê${reset}`);
+  if (!hasStartHere) console.log(`  ${green}+${reset} ${START_HERE_FILE} ${dim}— a folha com as frases do dia a dia${reset}`);
+  console.log(`\n${bold}O que NÃO é alterado:${reset} nenhum arquivo que já existe em Pilares/, Memoria/ e Ativos/.\n`);
+
+  if (!isForce) {
+    const confirmed = await askConfirmation(`  Reconstruir o Córtex nesta pasta? (s/N): `);
+    if (!confirmed) {
+      console.log(`\n${red}Reconstrução cancelada. Nenhum arquivo foi alterado.${reset}\n`);
+      return;
+    }
+  }
+
+  // 1. O framework. Uma .agents/ que já estava aqui ganha cópia antes de ser mexida.
+  if (hasFramework && alterados.length > 0) {
+    const backupDir = makeBackupDir(targetDir, 'update');
+    copyRecursiveSync(path.join(targetDir, '.agents'), path.join(backupDir, 'agents'));
+    console.log(`  ${dim}Cópia da pasta .agents/ de antes guardada em:${reset} ${toPosix(path.relative(targetDir, backupDir))}`);
+    pruneBackups(targetDir, BACKUPS_TO_KEEP);
+  }
+  applyFrameworkUpdate(templateDir, targetDir, novos, alterados);
+  console.log(`  ${green}✓${reset} .agents/ ${dim}— ${hasFramework ? 'conferida e completada' : 'instalada'}${reset}`);
+
+  // 2. As pastas que faltarem (vazias). As que existem não são tocadas.
+  for (const item of ['Frameworks', 'Pilares', 'Ativos']) {
+    if (!fs.existsSync(path.join(targetDir, item))) copyRecursiveSync(path.join(templateDir, item), path.join(targetDir, item));
+  }
+  fs.mkdirSync(path.join(targetDir, 'Frameworks'), { recursive: true });
+
+  // 3. O cérebro e os arquivos que a IA lê.
+  fs.writeFileSync(path.join(targetDir, CEREBRO_PATH), brain.content);
+  refreshBrainFramework(targetDir, templateDir);
+  console.log(`  ${green}✓${reset} ${toPosix(CEREBRO_PATH)}`);
+  const compiled = compileTargets(targetDir, targets, VERSION);
+  writeTargets(targetDir, targets);
+  console.log(`  ${green}✓${reset} Cérebro compilado para: ${targets.join(', ')}`);
+  reportUserTargets(targetDir, compiled);
+
+  const startHere = refreshStartHere(targetDir, null);
+  if (startHere === 'written') console.log(`  ${green}✓${reset} ${START_HERE_FILE}`);
+  reportGitignore(targetDir);
+  if (installed && installed.version) writeNovidades(targetDir, templateDir, installed.version, VERSION);
+  // A versão por último, como no update: uma rodada interrompida se termina repetindo o comando.
+  writeVersionFile(targetDir, VERSION);
+
+  const n = brain.missing.length;
+  console.log(`
+${bold}${green}🎉 Córtex reconstruído a partir dos seus dados (v${VERSION}).${reset}
+
+${dim}Nenhum arquivo de Pilares/, Memoria/ e Ativos/ foi alterado.${reset}
+
+${bold}Agora abra esta pasta no seu aplicativo de IA e diga:${reset} ${bold}${yellow}"revisar córtex"${reset}
+${n > 0
+    ? `Ela completa com você o que ficou marcado (${n === 1 ? '1 item' : `${n} itens`}: ${brain.missing.join(', ')}) e confere se o resto ainda vale.`
+    : `Ela confere com você se o que foi lido da pasta ainda vale. O ${bold}radar${reset} já funciona.`}
+`);
+}
+
 async function runUpdate() {
   const targetArg = args[1] && !args[1].startsWith('-') ? args[1] : '.';
   const targetDir = path.resolve(process.cwd(), targetArg);
@@ -1930,18 +2130,19 @@ async function runUpdate() {
     process.exit(1);
   }
 
-  if (restoringFramework && !hasBrainEntry(targetDir)) {
-    console.log(`${red}Achei a Memória do negócio nesta pasta, mas não o cérebro (${toPosix(CEREBRO_PATH)}) nem o arquivo de instrução que a IA lê (AGENTS.md).${reset}`);
-    console.log(`Sem um dos dois, repor a pasta .agents/ deixaria um Córtex que a sua IA não carrega. ${BRAINLESS_ADVICE}`);
-    console.log(`Nenhum arquivo foi alterado.\n`);
-    process.exit(1);
-  }
-
   if (installed && compareVersions(installed.version, VERSION) > 0 && !isForce) {
     console.log(`${yellow}Este projeto está na v${installed.version}, mas o comando que você rodou é a v${VERSION} (mais antiga).${reset}`);
     console.log(`  Atualizar agora faria o seu Córtex voltar no tempo. Use a versão mais recente:`);
     console.log(`    ${cyan}npx @aksp/cortex@latest update${reset}\n`);
     process.exit(1);
+  }
+
+  // Só os dados do negócio estão aqui (sem cérebro e sem arquivo de instrução):
+  // repor a .agents/ sozinha deixaria um Córtex que nenhuma IA carrega. O
+  // cérebro é reconstruído a partir dos dados, e nenhum deles é alterado.
+  if (needsBrainRebuild(targetDir)) {
+    await rebuildFromData(targetDir, templateDir, targetArg, isForce, installed);
+    return;
   }
 
   if (!installed) {
@@ -1968,31 +2169,6 @@ async function runUpdate() {
 
   console.log(`  ${dim}Versão instalada no projeto:${reset} ${installed ? 'v' + installed.version : 'desconhecida'}`);
   console.log(`  ${dim}Versão do CLI:${reset} v${VERSION}\n`);
-
-  // Quem instalou pelo npm até a 1.3.0 nunca recebeu o .gitignore (o pacote não
-  // o trazia). Cria quando não existe; um .gitignore do usuário nunca é tocado.
-  const reportGitignore = () => {
-    const isGitRepo = fs.existsSync(path.join(targetDir, '.git'));
-    const hasFile = fs.existsSync(path.join(targetDir, '.gitignore'));
-    let status;
-    try {
-      // Repositório Git sem .gitignore: o usuário pode estar versionando os dados
-      // de propósito (backup). Criar o arquivo faria os arquivos novos sumirem do
-      // repositório dele em silêncio — então só avisa.
-      status = isGitRepo && !hasFile ? 'missing-rules' : ensureGitignore(targetDir, { appendToExisting: false });
-    } catch (e) {
-      // Um .gitignore que não pôde ser lido não pode derrubar a atualização no fim.
-      console.log(`  ${yellow}!${reset} Não consegui conferir o .gitignore agora ${dim}(${e.code || e.message})${reset} — a atualização seguiu normalmente.`);
-      return;
-    }
-    if (status === 'created') {
-      console.log(`  ${green}✓${reset} .gitignore criado ${dim}— mantém Pilares/, Memoria/ e Ativos/ fora de um repositório Git${reset}`);
-    } else if (status === 'missing-rules' && isGitRepo) {
-      console.log(`  ${yellow}!${reset} Esta pasta é um repositório Git e o .gitignore ${hasFile ? 'não tem as regras do Córtex' : 'não existe'}.`);
-      console.log(`    Se você NÃO quer os dados do negócio no repositório, acrescente estas linhas ao .gitignore (uma por linha):`);
-      USER_GITIGNORE_DATA_RULES.forEach((rule) => console.log(`      ${rule}`));
-    }
-  };
 
   const { novos, alterados, semMudanca, preservados } = diffFrameworkLayer(templateDir, targetDir);
   const { removidosPeloFramework, personalizados } = classifyPreserved(preservados, targetDir, templateDir);
@@ -2047,7 +2223,7 @@ async function runUpdate() {
 
   if (!hasFrameworkChanges && !hasPruneWork && !hasBrainWork && !hasStaleTargets) {
     console.log(`${green}Nada para atualizar em .agents/.${reset}`);
-    reportGitignore();
+    reportGitignore(targetDir);
     // Uma rodada anterior pode ter parado depois de atualizar tudo e antes de
     // registrar as novidades: num Córtex montado elas ainda precisam ser contadas.
     if (fs.existsSync(path.join(targetDir, CEREBRO_PATH))) {
@@ -2157,7 +2333,7 @@ async function runUpdate() {
     removidosPeloFramework.forEach((f) => console.log(`     ${dim}• ${f}${reset}`));
   }
 
-  reportGitignore();
+  reportGitignore(targetDir);
   // A versão é a última coisa gravada: se algo falhar antes, o projeto continua
   // marcado com a versão antiga e rodar o mesmo comando de novo termina o serviço.
   const novidades = writeNovidades(targetDir, templateDir, installed && installed.version, VERSION);
@@ -2355,13 +2531,397 @@ function runBackup() {
 ${bold}${green}Cópia guardada:${reset} ${total} arquivo(s) em
   ${backupDir}
 
-${bold}Para restaurar:${reset} abra essa pasta e copie de volta, por cima, o arquivo ou a pasta que você quer
-  recuperar (ex.: ${backupRel}/Memoria → Memoria). Os nomes e os lugares são os mesmos da pasta do negócio.
-  ${dim}Se restaurar o ${toPosix(CEREBRO_PATH)}, rode depois: npx @aksp/cortex sync${folderHint(targetArg)}${reset}
+${bold}Para restaurar${reset} os dados como estão nesta cópia, rode:
+  ${cyan}npx @aksp/cortex@latest restore${folderHint(targetArg)} --from=${path.basename(backupDir)}${reset}
+  ${dim}Ele mostra o que vai mudar e guarda antes uma cópia de como estiver na hora. Quer só um arquivo? Abra a pasta${reset}
+  ${dim}acima e copie-o de volta à mão (ex.: ${backupRel}/Memoria/01_Decisoes.md): os nomes e os lugares são os mesmos.${reset}
 
 ${dim}Estas cópias (pastas "dados-...") nunca são apagadas sozinhas: quando juntar muitas, apague as mais antigas à mão.${reset}
 ${dim}Elas ficam dentro da própria pasta do negócio. Para se proteger de perder o computador, copie a pasta inteira para fora dele.${reset}
 `);
+}
+
+// ── Restaurar uma cópia dos dados ─────────────────────────────────
+
+const DATA_COPY_PREFIX = 'dados-';
+const INCOMPLETE_SUFFIX = '-incompleta';
+const RESTORE_MARK_FILE = '.antes-de-restaurar';
+const RESTORE_LIST_LIMIT = 8;
+const MONTH_NAMES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+
+// A data que o nome de uma cópia carrega, em palavras. As cópias do `backup`
+// trazem dia e hora (gravados em UTC; aqui vão no horário do computador); as
+// feitas à mão pela IA (dados-AAAA-MM-DD, dados-AAAA-MM-DD-2) trazem só o dia.
+function describeCopyDate(name) {
+  const m = String(name).match(/^dados-(\d{4})-(\d{2})-(\d{2})(?:T(\d{2})-(\d{2})-(\d{2})-\d{3}Z)?/);
+  if (!m || !MONTH_NAMES[m[2] - 1]) return 'data não identificada';
+  if (!m[4]) return `${Number(m[3])} de ${MONTH_NAMES[m[2] - 1]} de ${m[1]}`;
+  const d = new Date(Date.UTC(m[1], m[2] - 1, m[3], m[4], m[5], m[6]));
+  return `${d.getDate()} de ${MONTH_NAMES[d.getMonth()]} de ${d.getFullYear()}, às ${d.getHours()}h${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+// Arquivos de uma pasta (caminhos com "/", relativos a `base`), sem atravessar
+// atalhos: os que aparecem no caminho vão para `links`. Mesma regra do backup.
+function listFilesNoLinks(dir, base, links) {
+  let out = [];
+  for (const entry of fs.readdirSync(dir).sort()) {
+    const full = path.join(dir, entry);
+    const stats = fs.lstatSync(full);
+    if (stats.isSymbolicLink()) links.push(toPosix(path.relative(base, full)));
+    else if (stats.isDirectory()) out = out.concat(listFilesNoLinks(full, base, links));
+    else if (stats.isFile()) out.push(toPosix(path.relative(base, full)));
+  }
+  return out;
+}
+
+// Os arquivos de dados do negócio que há em `root` (a pasta do negócio ou uma
+// cópia dela): só o que o backup guarda — Pilares/, Memoria/, Ativos/ e o cérebro.
+function listDataFiles(root, links) {
+  let out = [];
+  for (const item of DATA_BACKUP_ITEMS) {
+    const full = path.join(root, item);
+    if (hasLinkInPath(root, toPosix(item))) links.push(toPosix(item));
+    else if (!fs.existsSync(full)) continue;
+    else if (fs.statSync(full).isDirectory()) out = out.concat(listFilesNoLinks(full, root, links));
+    else out.push(toPosix(item));
+  }
+  return out;
+}
+
+// Há um atalho em algum trecho do caminho `rel` dentro de `root`?
+function hasLinkInPath(root, rel) {
+  let current = root;
+  for (const part of rel.split('/')) {
+    current = path.join(current, part);
+    if (isSymlink(current)) return true;
+  }
+  return false;
+}
+
+function sameFileContent(a, b) {
+  try {
+    const sa = fs.statSync(a);
+    const sb = fs.statSync(b);
+    return sa.isFile() && sb.isFile() && sa.size === sb.size && fs.readFileSync(a).equals(fs.readFileSync(b));
+  } catch (e) {
+    return false;
+  }
+}
+
+// O cérebro de `a` e o de `b` só diferem nas regras do Córtex (a área
+// CORTEX:FRAMEWORK)? Essa área é do framework, não um dado do dono: quem a
+// escreve é a versão instalada, não uma cópia dos dados.
+function sameBrainBusiness(a, b) {
+  try {
+    const strip = (file) => replaceRegion(normalizeEol(fs.readFileSync(file, 'utf8')), FRAMEWORK_START, FRAMEWORK_END, '');
+    const ca = strip(a);
+    return ca !== null && ca === strip(b);
+  } catch (e) {
+    return false;
+  }
+}
+
+// O instante de uma cópia, para ordenar (o nome não serve: 'T' vem depois de
+// '-', e -10 antes de -9). As do `backup` trazem a hora no nome, em UTC. As
+// feitas à mão pela IA só trazem o dia, no horário do computador: vale a hora
+// em que a pasta foi criada, se ela cai nesse dia; senão, o fim do dia.
+// Retorna { at, seq }: `seq` é o -N do nome, que desempata no mesmo instante.
+function copyTimeKey(name, dir) {
+  const m = name.match(/^dados-(\d{4})-(\d{2})-(\d{2})(?:T(\d{2})-(\d{2})-(\d{2})-(\d{3})Z|-(\d+))?$/);
+  if (!m) return { at: -Infinity, seq: 0 };
+  if (m[4]) return { at: Date.UTC(m[1], m[2] - 1, m[3], m[4], m[5], m[6], m[7]), seq: 0 };
+  const dayStart = new Date(m[1], m[2] - 1, m[3]).getTime();
+  const dayEnd = new Date(m[1], m[2] - 1, Number(m[3]) + 1).getTime() - 1;
+  let made = dayEnd;
+  try {
+    const mtime = fs.statSync(dir).mtimeMs;
+    if (mtime >= dayStart && mtime <= dayEnd) made = mtime;
+  } catch (e) {}
+  return { at: made, seq: Number(m[8] || 1) };
+}
+
+// A cópia que o `restore` tira antes de mexer leva este arquivo, com o nome da
+// cópia que foi restaurada: ela guarda o estado que o dono quis abandonar.
+function readRestoreMark(dir) {
+  try {
+    const text = fs.readFileSync(path.join(dir, RESTORE_MARK_FILE), 'utf8').trim();
+    return /^dados-[\w-]+$/.test(text) ? text : '';
+  } catch (e) {
+    return null;
+  }
+}
+
+// As cópias dos dados que existem na pasta, da mais recente para a mais antiga
+// (pelo instante de cada uma: ver copyTimeKey). Uma pasta "-incompleta" é de
+// uma cópia que não terminou e nunca entra na lista: vai em `incomplete`.
+// `others` são as pastas de outro tipo (update-…, init-…, originais-…), que o
+// restore não usa. `restoredFrom` (null numa cópia comum) marca a cópia tirada
+// por um restore: o nome da cópia restaurada, ou '' se não der para ler.
+function listDataCopies(targetDir) {
+  const base = path.join(targetDir, BACKUPS_REL);
+  const result = { copies: [], incomplete: [], others: [] };
+  if (!fs.existsSync(base)) return result;
+  for (const name of fs.readdirSync(base).sort().reverse()) {
+    const dir = path.join(base, name);
+    if (isSymlink(dir) || !fs.statSync(dir).isDirectory()) continue;
+    if (!name.startsWith(DATA_COPY_PREFIX)) result.others.push(name);
+    else if (name.endsWith(INCOMPLETE_SUFFIX)) result.incomplete.push(name);
+    else result.copies.push({ name, dir, files: listDataFiles(dir, []), restoredFrom: readRestoreMark(dir), key: copyTimeKey(name, dir) });
+  }
+  // A ordem pelo nome (acima) fica como desempate: a ordenação é estável.
+  result.copies.sort((a, b) => b.key.at - a.key.at || b.key.seq - a.key.seq);
+  return result;
+}
+
+// O que dizer, na lista e no plano, de uma cópia tirada por um restore.
+function restoreMarkNote(copy) {
+  if (copy.restoredFrom === null) return '';
+  return ` ${yellow}— como estava antes de uma restauração${copy.restoredFrom ? ` (a da cópia ${copy.restoredFrom})` : ''}${reset}`;
+}
+
+function printShortList(items, mark) {
+  items.slice(0, RESTORE_LIST_LIMIT).forEach((f) => console.log(`       ${mark} ${f}`));
+  if (items.length > RESTORE_LIST_LIMIT) console.log(`       ${dim}… e mais ${items.length - RESTORE_LIST_LIMIT}${reset}`);
+}
+
+function printDataCopies(found) {
+  console.log(`${bold}Cópias dos dados guardadas nesta pasta${reset} ${dim}(a mais recente primeiro)${reset}:`);
+  found.copies.forEach((c, i) => {
+    console.log(`  ${i + 1}. ${cyan}${c.name}${reset} — ${describeCopyDate(c.name)} — ${c.files.length} arquivo(s)${restoreMarkNote(c)}`);
+  });
+  if (found.copies.some((c) => c.restoredFrom !== null)) {
+    console.log(`  ${dim}As marcadas "como estava antes de uma restauração" servem para desfazê-la: o restore só as usa quando indicadas em --from.${reset}`);
+  }
+  printOtherBackupNotes(found);
+}
+
+function printOtherBackupNotes(found) {
+  if (found.incomplete.length > 0) {
+    console.log(`  ${yellow}!${reset} ${found.incomplete.length === 1 ? 'Há uma pasta' : `Há ${found.incomplete.length} pastas`} de cópia que não terminou (${found.incomplete.join(', ')}): não serve para restaurar e pode ser apagada.`);
+  }
+  if (found.others.length > 0) {
+    console.log(`  ${dim}As outras pastas de ${toPosix(BACKUPS_REL)} (update-…, init-…, originais-…) guardam o framework e arquivos soltos da raiz,${reset}`);
+    console.log(`  ${dim}não os dados do negócio: este comando não mexe com elas.${reset}`);
+  }
+}
+
+// Traz de volta os dados de uma cópia `dados-…`. Só copia por cima: nada é
+// apagado. Antes de mexer, guarda uma cópia nova do estado atual — é ela que
+// permite desfazer a restauração com outro `restore`.
+async function runRestore() {
+  // --from=<nome> ou --from <nome>: no segundo jeito, o nome não é a pasta do negócio.
+  const fromAt = args.indexOf('--from');
+  const fromFlag = args.find((a) => a.startsWith('--from=')) || (fromAt !== -1 ? `--from=${args[fromAt + 1] || ''}` : undefined);
+  const targetArg = args.slice(1).find((a, i) => !a.startsWith('-') && args[i] !== '--from') || '.';
+  const targetDir = path.resolve(process.cwd(), targetArg);
+  const isForce = args.includes('--force') || args.includes('-f');
+  const wantsList = args.includes('--list');
+  const restoreCommand = `npx @aksp/cortex@latest restore${folderHint(targetArg)}`;
+
+  console.log(`\n${bold}${cyan}🧠 Restaurar os dados do seu negócio a partir de uma cópia${reset}\n`);
+
+  if (!fs.existsSync(targetDir)) {
+    console.log(`${red}Pasta não encontrada:${reset} ${targetDir}`);
+    process.exit(1);
+  }
+
+  const found = listDataCopies(targetDir);
+
+  if (found.copies.length === 0) {
+    if (!isCortexInstalled(targetDir) && !isCortexMounted(targetDir) && found.incomplete.length + found.others.length === 0) {
+      console.log(`${red}Não encontrei um Córtex nesta pasta.${reset} Confira se você está na pasta do seu negócio.`);
+      console.log(`Nada foi alterado.\n`);
+      process.exit(1);
+    }
+    console.log(`${yellow}Ainda não há nenhuma cópia dos dados nesta pasta${reset} (as cópias ficam em ${toPosix(BACKUPS_REL)}, em pastas "dados-…").`);
+    printOtherBackupNotes(found);
+    if (isCortexMounted(targetDir)) {
+      console.log(`Para guardar uma agora, rode: ${cyan}npx @aksp/cortex@latest backup${folderHint(targetArg)}${reset}`);
+    } else {
+      console.log(`O Córtex está instalado aqui, mas a conversa de montagem ainda não aconteceu: não há dados para guardar nem para restaurar.`);
+    }
+    console.log(`Nada foi alterado.\n`);
+    process.exit(wantsList ? 0 : 1);
+  }
+
+  if (wantsList) {
+    printDataCopies(found);
+    if (found.copies.some((c) => c.restoredFrom === null)) console.log(`\nPara restaurar a mais recente:  ${cyan}${restoreCommand}${reset}`);
+    else console.log('');
+    console.log(`Para restaurar outra:           ${cyan}${restoreCommand} --from=<nome da cópia>${reset}`);
+    console.log(`\nNada foi alterado.\n`);
+    return;
+  }
+
+  // Qual cópia: a pedida em --from (pelo nome que o --list mostra) ou a mais
+  // recente — sem contar as que um restore tirou antes de mexer: elas guardam o
+  // estado que o dono abandonou, e escolhê-las sozinho desfaria a restauração.
+  let chosen = found.copies.find((c) => c.restoredFrom === null);
+  const skipped = fromFlag || !chosen ? [] : found.copies.slice(0, found.copies.indexOf(chosen));
+  if (!fromFlag && !chosen) {
+    console.log(`${yellow}Todas as cópias desta pasta guardam como estava antes de uma restauração:${reset} não escolho uma delas sozinho.`);
+    console.log(`Para voltar a uma delas (desfazer aquela restauração), indique o nome: ${cyan}${restoreCommand} --from=<nome da cópia>${reset}\n`);
+    printDataCopies(found);
+    console.log(`\nNada foi alterado.\n`);
+    process.exit(1);
+  }
+  if (fromFlag) {
+    const asked = path.basename(fromFlag.slice('--from='.length).trim().replace(/^["']|["']$/g, '').replace(/[\\/]+$/, '').replace(/\\/g, '/'));
+    chosen = found.copies.find((c) => c.name === asked);
+    if (!chosen) {
+      if (found.incomplete.includes(asked)) {
+        console.log(`${red}"${asked}" é de uma cópia que não terminou:${reset} está pela metade e não serve para restaurar.`);
+      } else if (found.others.includes(asked)) {
+        console.log(`${red}"${asked}" não é uma cópia dos dados do negócio.${reset} Este comando só restaura as pastas "dados-…".`);
+        console.log(`  ${dim}update-… guarda o framework de antes de uma atualização (o fim do \`update\` mostra como voltar);${reset}`);
+        console.log(`  ${dim}init-… e originais-… guardam arquivos soltos da raiz que eram seus: abra a pasta e copie o arquivo de volta à mão.${reset}`);
+      } else {
+        console.log(`${red}Não encontrei a cópia "${asked}".${reset} O nome precisa ser igual ao da lista abaixo.`);
+      }
+      console.log('');
+      printDataCopies(found);
+      console.log(`\nNada foi alterado.\n`);
+      process.exit(1);
+    }
+  }
+
+  if (chosen.files.length === 0) {
+    console.log(`${red}A cópia ${chosen.name} está vazia:${reset} não há o que restaurar dela.`);
+    console.log(`Para ver as outras: ${cyan}${restoreCommand} --list${reset}\nNada foi alterado.\n`);
+    process.exit(1);
+  }
+
+  // O plano, antes de qualquer gravação.
+  const linksNow = [];
+  const currentFiles = listDataFiles(targetDir, linksNow);
+  const inCopy = new Set(chosen.files);
+  const plan = { troca: [], volta: [], igual: [], atalho: [] };
+  for (const rel of chosen.files) {
+    const dest = path.join(targetDir, rel);
+    if (hasLinkInPath(targetDir, rel)) plan.atalho.push(rel);
+    else if (!fs.existsSync(dest)) plan.volta.push(rel);
+    else if (sameFileContent(path.join(chosen.dir, rel), dest)) plan.igual.push(rel);
+    // O cérebro só conta como "troca" pelo que é do dono: as regras do Córtex não vêm da cópia.
+    else if (rel === toPosix(CEREBRO_PATH) && sameBrainBusiness(path.join(chosen.dir, rel), dest)) plan.igual.push(rel);
+    else plan.troca.push(rel);
+  }
+  const kept = currentFiles.filter((f) => !inCopy.has(f) && path.basename(f) !== '.gitkeep');
+
+  console.log(`  ${bold}Cópia escolhida:${reset} ${cyan}${chosen.name}${reset} — ${describeCopyDate(chosen.name)} — ${chosen.files.length} arquivo(s)${fromFlag ? '' : ` ${dim}(${skipped.length > 0 ? 'o backup mais recente' : 'a mais recente'})${reset}`}${restoreMarkNote(chosen)}`);
+  if (skipped.length > 0) {
+    console.log(`  ${yellow}!${reset} Há ${skipped.length === 1 ? 'uma cópia mais nova, que guarda' : `${skipped.length} cópias mais novas, que guardam`} como estava antes de uma restauração: não ${skipped.length === 1 ? 'é ela' : 'são elas'} que eu uso aqui.`);
+    console.log(`    Para desfazer a última restauração, o comando é: ${cyan}${restoreCommand} --from=${skipped[0].name}${reset}`);
+  }
+  if (!fromFlag && found.copies.length > 1) {
+    console.log(`  ${dim}Há outras ${found.copies.length - 1}. Para ver todas: ${restoreCommand} --list${reset}`);
+  }
+  console.log(`\n${bold}O que a restauração faz:${reset}`);
+  if (plan.troca.length > 0) {
+    console.log(`  ${yellow}~ ${plan.troca.length} arquivo(s) voltam a ser como estavam na cópia${reset} ${dim}(o texto de hoje é substituído)${reset}`);
+    printShortList(plan.troca, `${yellow}~${reset}`);
+  }
+  if (plan.volta.length > 0) {
+    console.log(`  ${green}+ ${plan.volta.length} arquivo(s) que não existem mais voltam para a pasta${reset}`);
+    printShortList(plan.volta, `${green}+${reset}`);
+  }
+  console.log(`  ${dim}= ${plan.igual.length} arquivo(s) já estão iguais à cópia${reset}`);
+  if (kept.length > 0) {
+    console.log(`  ${cyan}• ${kept.length} arquivo(s) que existem hoje e não estão na cópia ficam como estão${reset} ${dim}(você pode tê-los criado depois dela; nada é apagado)${reset}`);
+    printShortList(kept, `${cyan}•${reset}`);
+  }
+  if (plan.atalho.length > 0) {
+    console.log(`  ${yellow}! ${plan.atalho.length} arquivo(s) NÃO serão restaurados: no lugar deles há um atalho para outra pasta, e eu não gravo através de atalhos${reset}`);
+    printShortList(plan.atalho, `${yellow}!${reset}`);
+  }
+
+  if (plan.troca.length + plan.volta.length === 0) {
+    console.log(`\n${green}Os dados desta pasta já estão iguais aos da cópia.${reset} Nada foi alterado.\n`);
+    return;
+  }
+
+  console.log(`\n  Antes de mexer, guardo uma cópia de como está agora: é com ela que você desfaz a restauração, se quiser.\n`);
+
+  if (!isForce) {
+    const confirmed = await askConfirmation(`  Restaurar os dados desta cópia? (s/N): `);
+    if (!confirmed) {
+      console.log(`\n${red}Restauração cancelada. Nenhum arquivo foi alterado.${reset}\n`);
+      return;
+    }
+  }
+
+  // A cópia de "como está agora". Se ela falhar, nada é restaurado.
+  let beforeDir = null;
+  if (currentFiles.length > 0) {
+    console.log(`  ${dim}Guardando como está agora...${reset}`);
+    try {
+      beforeDir = copyBusinessData(targetDir).backupDir;
+    } catch (err) {
+      console.log(`  ${red}Sem essa cópia eu não restauro: nenhum arquivo do negócio foi alterado.${reset}`);
+      throw err;
+    }
+    // A marca de que esta cópia é o "antes" de uma restauração (ver readRestoreMark).
+    // Sem ela a cópia continua valendo; só deixa de ser distinguida na lista.
+    try {
+      fs.writeFileSync(path.join(beforeDir, RESTORE_MARK_FILE), `${chosen.name}\n`);
+    } catch (e) {}
+  }
+  const beforeName = beforeDir ? path.basename(beforeDir) : null;
+  const undoCommand = beforeName ? `${restoreCommand} --from=${beforeName}` : null;
+
+  const done = [];
+  try {
+    for (const rel of plan.troca.concat(plan.volta)) {
+      const dest = path.join(targetDir, rel);
+      fs.mkdirSync(path.dirname(dest), { recursive: true });
+      fs.copyFileSync(path.join(chosen.dir, rel), dest);
+      done.push(rel);
+    }
+  } catch (err) {
+    const { lines, detail } = describeError(err);
+    console.log(`\n${red}A restauração parou no meio:${reset} ${done.length} de ${plan.troca.length + plan.volta.length} arquivo(s) já voltaram.`);
+    lines.forEach((l) => console.log(`  ${l}`));
+    if (undoCommand) {
+      console.log(`  Como estava antes de começar ficou guardado em ${toPosix(path.relative(targetDir, beforeDir))}. Para voltar a esse ponto:`);
+      console.log(`    ${cyan}${undoCommand}${reset}`);
+    }
+    console.log(`\n${dim}Detalhe técnico:\n${detail}${reset}\n`);
+    process.exit(1);
+  }
+
+  console.log(`\n${bold}${green}🎉 Dados restaurados da cópia ${chosen.name}${reset} ${dim}(${describeCopyDate(chosen.name)})${reset}`);
+  if (plan.troca.length > 0) console.log(`  ${yellow}~${reset} ${plan.troca.length} arquivo(s) voltaram a ser como estavam na cópia`);
+  if (plan.volta.length > 0) console.log(`  ${green}+${reset} ${plan.volta.length} arquivo(s) voltaram para a pasta`);
+  if (kept.length > 0) console.log(`  ${cyan}•${reset} ${kept.length} arquivo(s) que não estavam na cópia ficaram como estavam`);
+
+  // O cérebro pode ter voltado: os arquivos de instrução são recompilados como no sync.
+  // As regras do Córtex dentro dele (CORTEX:FRAMEWORK) não são dado do dono: se a
+  // cópia trouxe as de outra versão, voltam a ser as da versão instalada em .agents/.
+  if (fs.existsSync(path.join(targetDir, CEREBRO_PATH))) {
+    if (done.includes(toPosix(CEREBRO_PATH)) && refreshBrainFramework(targetDir, targetDir).changed) {
+      console.log(`  ${green}✓${reset} As regras do Córtex dentro do cérebro continuam as da versão instalada ${dim}(a cópia trazia as de outra versão; a parte do seu negócio é a da cópia)${reset}`);
+    }
+    const targets = readTargets(targetDir);
+    const compiled = compileTargets(targetDir, targets, VERSION);
+    writeTargets(targetDir, targets);
+    console.log(`  ${green}✓${reset} Cérebro recompilado para: ${targets.join(', ')}`);
+    reportUserTargets(targetDir, compiled);
+  } else if (needsBrainRebuild(targetDir)) {
+    console.log(`  ${yellow}!${reset} Esta pasta continua sem o cérebro (${toPosix(CEREBRO_PATH)}): a cópia não o trazia. Para reconstruí-lo a partir dos dados, rode:`);
+    console.log(`    ${cyan}npx @aksp/cortex@latest update${folderHint(targetArg)}${reset}`);
+  }
+
+  if (undoCommand) {
+    console.log(`
+${bold}Como estava antes da restauração${reset} ficou guardado em:
+  ${beforeDir}
+
+${bold}Para desfazer esta restauração, rode:${reset}
+  ${cyan}${undoCommand}${reset}
+  ${dim}${plan.volta.length > 0 ? 'Desfazer devolve o texto de antes; os arquivos que voltaram para a pasta continuam nela (nada é apagado).' : 'Ele devolve os arquivos ao texto que tinham antes desta restauração.'}${reset}
+`);
+  } else {
+    console.log(`\n${dim}Não havia dados do negócio nesta pasta antes da restauração: não há um "antes" para guardar nem para desfazer.${reset}\n`);
+  }
 }
 
 async function runDoctor() {
@@ -2596,6 +3156,7 @@ async function runDoctor() {
   }
 
   console.log(`${bold}🧠 System prompt:${reset}`, (() => {
+    if (!brain.hasCerebro && needsBrainRebuild(targetDir)) return `${red}Sem CEREBRO.md e sem arquivo de instrução — veja "Instalação incompleta" abaixo${reset}`;
     if (!brain.hasCerebro) return `${red}Sem CEREBRO.md — rode "revisar córtex" no chat`;
     if (brain.hasLayers) return `${green}Fonte única (Frameworks/CEREBRO.md) com camadas ✅${reset}`;
     if (brain.isLegacy) return `${yellow}Formato antigo (sem camadas CORTEX:BUSINESS/FRAMEWORK) — rode "revisar córtex" no chat para migrar${reset}`;
@@ -2624,7 +3185,10 @@ async function runDoctor() {
   // Só o que FALTA em .agents/. Skill editada pelo dono não é problema, e o que
   // sobrou de versões antigas é assunto do update (--prune).
   const install = findMissingFrameworkFiles(targetDir, path.resolve(__dirname, '..'));
-  const installBroken = install.wholeFolder || install.missing.length > 0;
+  // Sem cérebro e sem arquivo de instrução, a pasta conta como incompleta mesmo
+  // com a .agents/ inteira: nenhuma ferramenta de IA carrega o Córtex.
+  const brainless = needsBrainRebuild(targetDir);
+  const installBroken = brainless || install.wholeFolder || install.missing.length > 0;
   let installFix = '';
   console.log('');
   const unverifiedFix = `npx @aksp/cortex@latest update${folderHint(targetArg)} --force`;
@@ -2658,7 +3222,7 @@ async function runDoctor() {
   console.log(`\n${bold}💡 Sugestão:${reset}`, (() => {
     // Vem primeiro: as outras sugestões mandam "dizer no chat", e sem as
     // habilidades na pasta a IA não tem como atender.
-    if (installBroken && !installFix) return `Primeiro traga de volta a pasta do negócio inteira (veja "Instalação incompleta" acima). Depois rode este diagnóstico de novo.`;
+    if (brainless) return `Primeiro reconstrua o cérebro a partir dos seus dados — rode "${installFix}". Depois abra a pasta na sua IA e diga "revisar córtex".`;
     if (installBroken) return `Primeiro reponha o que falta na instalação — rode "${installFix}". Depois rode este diagnóstico de novo.`;
     if (mandatoryMissing.length > 0) return `Crie os pilares obrigatórios faltantes — diga "revisar córtex" no chat.`;
     if (withNumberIssues.length > 0) {
@@ -2686,6 +3250,8 @@ async function main() {
     await runSync();
   } else if (command === 'backup') {
     runBackup();
+  } else if (command === 'restore' || command === 'restaurar') {
+    await runRestore();
   } else if (command === 'doctor' || command === 'checkup' || command === 'diagnostico') {
     await runDoctor();
   } else if (command === '--help' || command === '-h' || command === 'help') {
@@ -2727,6 +3293,10 @@ module.exports = {
   makeBackupDir,
   isCortexMounted,
   hasBrainEntry,
+  needsBrainRebuild,
+  buildBrainFromData,
+  listDataCopies,
+  describeCopyDate,
   BACKUPS_TO_KEEP,
   isCortexInstalled,
   addMissingBootstrapTargets,
