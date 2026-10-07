@@ -56,9 +56,10 @@
 | Lições — acertos e casos de sucesso | `Memoria/02_Licoes.md` | `## Acertos e Casos de Sucesso` |
 | Lições — operacionais | `Memoria/02_Licoes.md` | `## Lições Operacionais` |
 | Projetos ativos e pipeline | `Memoria/03_Projetos.md` | — |
-| Stakeholders (pessoas-chave) | `Memoria/04_Pessoas_Pendencias.md` | `## Stakeholders (Pessoas-Chave)` |
-| Pendências ativas | `Memoria/04_Pessoas_Pendencias.md` | `## Pendências Ativas` |
-| Anotações diversas | `Memoria/05_Registros_Gerais.md` | — |
+| Meta do trimestre | `Memoria/03_Projetos.md` | `## Metas do Trimestre` |
+| Pessoas-chave: clientes, fornecedores, parceiros, equipe | `Memoria/04_Pessoas_Pendencias.md` | `## Stakeholders (Pessoas-Chave)` |
+| Pendências ativas e propostas sem resposta | `Memoria/04_Pessoas_Pendencias.md` | `## Pendências Ativas` |
+| Onde ficam os acessos, anotações diversas | `Memoria/05_Registros_Gerais.md` | — |
 <!-- Include a line for Memoria/_Arquivo/ (with the available year(s)) ONLY after the "consolidar" skill creates the first file there -->
 
 ## Pilares Customizados

@@ -7,6 +7,8 @@ description: "Delivers a fast, up-to-date snapshot of all active pending items a
 
 You've just been triggered to run the business's **Radar**. The goal of this skill is to give the user an instant snapshot (10 to 15 lines max) of where the current bottleneck is. This skill only reads: it never changes a file.
 
+"Briefing" alone is the radar. A briefing about one person or one meeting ("briefing da reunião com a Marina", "preparar reunião com o Grupo Andradas") is not: follow the `lembrar` skill instead.
+
 ## Step by Step
 
 1. **Silently read** `Memoria/META.md` to find out the business name.
@@ -57,7 +59,7 @@ You've just been triggered to run the business's **Radar**. The goal of this ski
 [✨ O Córtex foi atualizado e tem novidade para você — diga "novidades".]
 [🔄 Já passou da data de revisão do Córtex — quer rodar "revisar córtex"?]
 [🗄️ Há itens antigos que já podem ir para o arquivo — quer rodar "consolidar memória"? Nada é apagado.]
-[🕰️ Faz [N] dias que nada é registrado. Aconteceu algo que vale guardar? É só dizer "registra que..."]
+[🕰️ A anotação mais recente é de [N] dias atrás. Aconteceu algo depois disso que vale guardar? É só dizer "registra que..."]
 [💰 Ainda não sei a sua margem, então não consigo conferir preços e descontos. 5 minutos? Diga "descobrir minha margem".]
 [🧩 Ainda não sei seu tom de voz — 2 minutos para eu aprender? Diga "continuar onboarding".]
 [📦 Faz [N] meses que o Córtex não é atualizado. Para buscar a versão nova, rode no terminal desta pasta: npx @aksp/cortex@latest update (seus dados não são tocados).]
@@ -82,7 +84,8 @@ Treat the answer as a batch for the `registrar` skill ("anota a reunião" flow):
 - Never bring up resolved pending items.
 - **Overdue items are capped at 5 lines**, the longest-overdue first; summarize the other overdue ones as "… e mais N atrasadas". Items due today or later this week are always listed, every one of them, and never count toward that limit — a reminder must show up by name on its day.
 - If nothing is overdue or due this week, keep the 🔴 heading with a single line under it: "Nenhum atraso crítico hoje. ✅".
-- A waiting item that has been stuck for more than 10 days gets `— quer que eu escreva a cobrança?` at the end of its line. Add it to one item only: the oldest.
+- A waiting item that has been stuck for more than 10 days gets `— quer que eu escreva a cobrança?` at the end of its line. Add it to one item only: the oldest. If the user says yes, write it as the `conteudo` skill describes ("Message to one person").
+- **Proposals out with a client.** A waiting line whose text starts with `Resposta da proposta` is a proposal the user sent (written by `registrar`). Keep the service and the `R$` value in its line; if it has `vale até YYYY-MM-DD`, show `vale até DD/MM`, or `venceu em DD/MM` once that date has passed. A proposal waiting for more than 3 days, or past its `vale até` date, gets `— quer uma mensagem de retorno?` at the end, never the "cobrança" line above. Add it to one proposal only: the oldest. A proposal line with no `(desde …)` and no `vale até` just shows up with no age and no nudge. If the user says yes, write that message as the `conteudo` skill describes ("Message to one person").
 - "Sem prazo" items are only counted, and the age shown is that of the oldest one that has `(desde …)`. Exception: when the user asked for the pending items themselves ("quais são minhas pendências?", "mostra todas"), list them by name too.
 - **Quarterly goal.** Quarters: T1 = Jan–Mar, T2 = Apr–Jun, T3 = Jul–Sep, T4 = Oct–Dec. Show the goal tagged with the current quarter. If the only goal on record is tagged with a quarter that has already ended, the 🎯 line becomes: `🎯 **META DO TRIMESTRE:** O trimestre virou — a meta era "[meta]". Diga "fechar a semana" para fechar essa e definir a próxima.` With no goal at all, omit the line.
 - Omit a whole block (e.g. "AGUARDANDO TERCEIROS") when it has no items, instead of printing an empty heading.

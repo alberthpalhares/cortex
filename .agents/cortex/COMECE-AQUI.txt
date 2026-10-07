@@ -64,6 +64,24 @@ E pode perguntar qualquer coisa sobre o negócio ("posso dar 15% de
 desconto?"): a IA consulta o que está registrado antes de responder.
 
 
+LONGE DO COMPUTADOR
+
+1. No celular, mande para você mesmo no WhatsApp (um grupo só com
+   você) o que for acontecendo, digitando ou ditando pelo microfone
+   do teclado.
+
+2. No computador, copie as mensagens no WhatsApp Web, cole no chat
+   e escreva:
+
+       anota isso
+
+   Cada anotação fica com a data do dia dela, não a de hoje.
+
+Áudio gravado não é lido: mande texto. E a IA não avisa no celular:
+ponha na sua agenda, toda semana, "radar" na segunda e "fechar a
+semana" na sexta.
+
+
 PARA ATUALIZAR O CÓRTEX
 
 Peça para a sua IA rodar, nesta pasta:
@@ -84,6 +102,12 @@ responder é enviado ao fornecedor da ferramenta de IA que você usa
 (Anthropic, Google, OpenAI...), como em qualquer conversa com IA.
 Não guarde senhas nem números de cartão nestes arquivos.
 
+
+Algo não funcionou, ou tem uma sugestão? Escreva no chat "deu problema
+no Córtex" ou "tenho uma sugestão para o Córtex": a IA monta um recado
+sem dados do seu negócio, e você decide se envia. Funciona mesmo antes
+da conversa de montagem. O envio é numa página pública do GitHub:
+qualquer pessoa pode ler o que você colar lá.
 
 Dúvidas e exemplos: https://github.com/alberthpalhares/cortex
 

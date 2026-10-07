@@ -1,6 +1,6 @@
 ---
 name: saude
-description: "Runs an X-ray of the Córtex structure: missing pillars, pending REVISAR markers, an out-of-sync META.md, and what is left to fill in. Trigger with: 'saúde do córtex', 'diagnóstico do córtex', 'cortex doctor', 'o que falta preencher'. Tip: 'npx @aksp/cortex doctor' runs the same check from the terminal, without using AI tokens."
+description: "Runs an X-ray of the Córtex structure: missing pillars, pending REVISAR markers, an out-of-sync META.md, Córtex files missing from .agents/, and what is left to fill in. Trigger with: 'saúde do córtex', 'diagnóstico do córtex', 'cortex doctor', 'o que falta preencher'. Tip: 'npx @aksp/cortex doctor' runs the same check from the terminal, without using AI tokens."
 ---
 
 # Skill: Saúde do Córtex
@@ -29,9 +29,11 @@ This skill doesn't judge the business's content — it audits the Córtex's **st
    - `CEREBRO.md` doesn't exist → legacy format (content duplicated across root files). Suggest `revisar córtex` to migrate.
    - If any root file is still an old-style **pointer** (contains *"leia `Frameworks/CEREBRO.md`"* instead of the full content), flag it: running `npx @aksp/cortex sync --force` recompiles it.
 
-7. **Say what is left in blocks and minutes, never as a percentage.** Count how many of the 4 mandatory pillars (`01`, `02`, `05`, `06`) still have pending items; optional pillars (03/04/07/08/09) don't count. A Córtex set up through the quick path is working as designed — a score of "0%" would tell someone who did everything asked that they failed. Name the blocks left and how long each takes (2 to 5 minutes).
+7. **Check the installation.** Read `.agents/manifest.json` — the list of files the installed Córtex version ships — and confirm that each listed file exists in `.agents/` and is not empty (0 bytes — a file the cloud did not finish downloading — counts as missing); check name and size only, never the contents. Report only what is missing (or the manifest itself, if it is not there). With nothing missing, write no installation line at all — no `🧩` block, no file count. A skill the user edited, or one they created, is theirs: never a problem, never listed. With anything missing, show the `🧩 Instalação` block and make it the suggestion, ahead of everything else — without those files the other suggestions cannot be carried out. The command is the only fix: never rewrite a missing skill file yourself. Show it exactly as written in the format, never as a local path to the CLI.
 
-8. **Generate the report** in the format below.
+8. **Say what is left in blocks and minutes, never as a percentage.** Count how many of the 4 mandatory pillars (`01`, `02`, `05`, `06`) still have pending items; optional pillars (03/04/07/08/09) don't count. A Córtex set up through the quick path is working as designed — a score of "0%" would tell someone who did everything asked that they failed. Name the blocks left and how long each takes (2 to 5 minutes).
+
+9. **Generate the report** in the format below.
 
 ## Output Format
 
@@ -58,12 +60,17 @@ This skill doesn't judge the business's content — it audits the Córtex's **st
 
 🧠 System prompt: [Fonte única (Frameworks/CEREBRO.md) ✅ | Formato antigo — considere migrar]
 
-💡 Sugestão: [próximo passo mais útil — ex: "diga 'continuar onboarding' para completar o que falta, um bloco por vez" ou "está tudo em dia!"]
+🧩 Instalação incompleta (só se faltar algo): [falta 1 arquivo | faltam N arquivos] do próprio Córtex em .agents/
+   • [caminho do arquivo — a habilidade "[nome]", quando for o SKILL.md de uma]
+   Para repor, rode no terminal: npx @aksp/cortex@latest update --force
+   Seus dados não são tocados. Antes de mexer, ele guarda uma cópia de .agents/ em .cortex/backups: uma habilidade que você editou volta ao texto padrão, e a sua versão fica nessa cópia. Só as 3 cópias mais recentes são guardadas: se quiser manter a sua versão, copie o arquivo para outra pasta.
+
+💡 Sugestão: [próximo passo mais útil — ex: "diga 'continuar onboarding' para completar o que falta, um bloco por vez" ou, só quando não há nenhuma pendência nem arquivo faltando, "está tudo em dia!"]
 ```
 
 ## Rules
 
-1. **Don't rewrite anything yourself.** This skill only diagnoses; any fix must go through `registrar`, `continuar onboarding` (to fill gaps) or `revisar córtex` (to migrate or update pillars), never automatically here.
+1. **Don't rewrite anything yourself.** This skill only diagnoses; any fix must go through `registrar`, `continuar onboarding` (to fill gaps) or `revisar córtex` (to migrate or update pillars), never automatically here. The one exception is a missing Córtex file (step 7): its only fix is the terminal command in the `🧩 Instalação` block.
 2. **Be honest about gaps**, but without alarm — the tone is "here's what's left," not "serious error."
 3. **Relative paths.** All paths are relative to the workspace root.
-4. **If everything is complete**, celebrate briefly instead of listing empty "nothing to report" sections.
+4. **If everything is complete** — nothing pending, nothing missing in the installation — celebrate in one or two lines and drop the sections that would only say "Nenhum ✅"; keep the lines that carry information (optional pillars that do not exist, the system prompt). Otherwise keep the full format, and with a `🧩 Instalação` block never write "está tudo em dia" (nor "o resto está em dia").

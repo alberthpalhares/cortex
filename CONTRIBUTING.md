@@ -77,15 +77,15 @@ Com mais de uma dúzia de skills convivendo no mesmo cérebro, a IA precisa sabe
 
 | Skill | Verbo primário | Gatilhos secundários |
 |-------|---------------|---------------------|
-| `radar` | `radar` | `status`, `como estamos?`, `briefing` |
-| `registrar` | `registra` | `nova lição`, `nova pendência`, `decidi que`, `resolvido`, `me lembra de`, `lembrete`, `desfaz`, `corrige o último`, `anota a reunião`, `cliente novo`, `a meta do trimestre é` |
-| `lembrar` | `o que você sabe sobre` | `você lembra de`, `qual era o combinado com`, `o que já decidimos sobre`, `procura na memória` |
+| `radar` | `radar` | `status`, `como estamos?`, `briefing` (sozinho; "briefing da reunião com…" é do `lembrar`) |
+| `registrar` | `registra` | `nova lição`, `nova pendência`, `decidi que`, `estou em dúvida entre`, `resolvido`, `me lembra de`, `lembrete`, `desfaz`, `corrige o último`, `anota a reunião`, `anota isso`, `cliente novo`, `a meta do trimestre é`, `enviei a proposta`, `mandei o orçamento`, `a proposta fechou`, `perdemos a proposta` |
+| `lembrar` | `o que você sabe sobre` | `você lembra de`, `qual era o combinado com`, `o que já decidimos sobre`, `procura na memória`, `preparar reunião com`, `briefing da reunião com` |
 | `semana` | `fechar a semana` | `revisão da semana`, `resumo da semana` |
-| `conteudo` | `cria um post` | `escreve uma legenda`, `mensagem de WhatsApp`, `ideias de conteúdo` |
+| `conteudo` | `cria um post` | `escreve uma legenda`, `mensagem de WhatsApp`, `ideias de conteúdo`, `responde esse cliente`, `como respondo isso?`, `cobra o [cliente]`, `mensagem de cobrança`, `mensagem de retorno` |
 | `cortex-onboarding` | `montar meu córtex` | `criar córtex`, `continuar onboarding` (frase oficial de retomada), `completar meu córtex` |
 | `cortex-revisao` | `revisar córtex` | `revisar pilares` |
 | `saude` | `saúde do córtex` | `diagnóstico do córtex`, `o que falta preencher` |
-| `ajuda` | `ajuda` | `o que você faz?`, `comandos` |
+| `ajuda` | `ajuda` | `o que você faz?`, `comandos`, `tenho uma sugestão para o Córtex`, `deu problema no Córtex`, `falar com o criador` (o recado para o criador: sempre com "Córtex" ou "criador" na frase) |
 | `novidades` | `novidades` | `o que mudou?`, `o que tem de novo?` |
 | `consolidar` | `consolidar memória` | `arquivar memória`, `a memória está grande` |
 | `proposta-comercial` | `gerar proposta` | `monta uma proposta`, `proposta comercial`, `orçamento para`, `cotação para` |
@@ -96,7 +96,7 @@ Com mais de uma dúzia de skills convivendo no mesmo cérebro, a IA precisa sabe
 
 > **Pergunta é consulta, ordem é registro.** "Quais são minhas pendências?" vai para o `radar`; "nova pendência: …" vai para o `registrar`. "Você lembra do combinado com o João?" é do `lembrar`; "me lembra de ligar para o João na sexta" é um lembrete, do `registrar`. Ao escrever um gatilho, prefira a forma de ordem inteira a uma palavra solta.
 >
-> **"Tive uma ideia"** não dispara skill: o cérebro trata como ideia *do negócio* (avalia contra a Estratégia e oferece registrar).
+> **"Tive uma ideia"** não dispara skill: o cérebro trata como ideia *do negócio* (avalia contra a Estratégia e oferece registrar). Já **"estou em dúvida entre A e B"** vai para o `registrar`: ele pesa as duas opções com o que está registrado e só grava quando o dono escolhe, já com o porquê.
 >
 > **Skill só para contribuidores:** `contrib/skills/ideias/SKILL.md` captura ideias de melhoria *do próprio framework* em `IDEIAS.md` (não versionado). Ela não vai no pacote nem é roteada pelo cérebro — para usar, peça à sua IA que leia esse arquivo.
 
@@ -261,7 +261,7 @@ Os testes automáticos conferem o texto das skills, não o que a IA faz com ele.
 | 8 | `quanto cobrar por um trabalho que me custa R$ 1.000?` | Preço mínimo de R$ 1.408,45 e preço-alvo de R$ 1.785,71. Nunca R$ 1.350. |
 | 9 | `anota a reunião:` seguido de 4 linhas com uma decisão, duas pendências (uma sem data) e uma lição | Mostra uma lista só, pede uma confirmação, grava tudo; a pendência sem data sai como `[SEM PRAZO]` com `(desde …)`. |
 | 10 | `desfaz` | Remove todas as linhas do item 9 e lista o que saiu. |
-| 11 | `fechar a semana` | Olhar para trás, duas perguntas (a segunda já diz até que sexta), meta do trimestre; fecha mostrando o prazo de cada prioridade. Um prazo que ainda está no futuro (o vídeo, 20/10) não é alterado, e a linha "aguardando" do Grupo Andradas continua lá, intacta. |
+| 11 | `fechar a semana` | Olhar para trás, duas perguntas (a segunda já diz até que sexta), meta do trimestre; fecha mostrando o prazo de cada prioridade e, no primeiro fechamento da pasta, o bloco 📅 (grava uma linha `Lembretes na agenda` em `05_Registros_Gerais.md`). Um prazo que ainda está no futuro (o vídeo, 20/10) não é alterado, e a linha "aguardando" do Grupo Andradas continua lá, intacta. |
 | 12 | `como está minha margem?` | Responde com as margens do pilar financeiro (Guardião de Margem), sem pedir planilha. |
 
 Anote no PR o que falhou e em qual ferramenta. Falha de roteamento (a frase caiu na skill errada) quase sempre se corrige na tabela do cérebro ou na `description` da skill.

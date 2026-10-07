@@ -16,6 +16,7 @@ Córtex's core promise is saving context: the AI reads `Pilares/` and `Memoria/`
    - (b) on demand, when the user says something like "consolidar memória";
    - (c) on `radar`'s suggestion, when at least 5 lines are eligible for archiving under this protocol (see `radar/SKILL.md`). File size alone is never the trigger.
 5. **Nothing is lost.** Archiving is not deleting. Everything that leaves an active file stays accessible in `Memoria/_Arquivo/`, and `Memoria/META.md` must index that folder as soon as the first archive file is created.
+6. **Re-read before writing.** The folder may be open on two computers, shared with a partner or kept in a cloud-synced folder, so a file can change between the moment the AI read it and the moment it writes. Every skill that writes in `Memoria/` (`registrar`, `semana`, `consolidar`, `cortex-revisao`) reads the target file again immediately before writing, adds or changes only its own lines, and never rewrites a whole file from an earlier read.
 
 ## `Memoria/_Arquivo/AAAA.md` format
 

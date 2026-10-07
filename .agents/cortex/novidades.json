@@ -58,5 +58,35 @@
     "version": "1.6.0",
     "texto": "Antes de ler uma ata, um PDF ou uma planilha eu aviso que o conteúdo é enviado ao fornecedor da ferramenta de IA que você usa: deixe de fora senhas e números de cartão",
     "diga": "anota a reunião"
+  },
+  {
+    "version": "1.7.0",
+    "texto": "Agora eu acompanho as propostas que você envia: aparecem no radar com há quantos dias estão sem resposta, e eu guardo se fechou ou por que não fechou.",
+    "diga": "enviei a proposta"
+  },
+  {
+    "version": "1.7.0",
+    "texto": "Agora eu escrevo a resposta ou a cobrança para um cliente dentro das suas regras, e preparo você para uma reunião com o que já está anotado sobre a pessoa.",
+    "diga": "responde esse cliente"
+  },
+  {
+    "version": "1.7.0",
+    "texto": "Em dúvida entre dois caminhos? Diga \"estou em dúvida entre A e B\": eu peso as duas opções com o que você já decidiu e aprendeu e, quando você escolher, guardo a decisão com o porquê.",
+    "diga": "estou em dúvida entre…"
+  },
+  {
+    "version": "1.7.0",
+    "texto": "Anote no celular e cole depois: mande para você mesmo no WhatsApp o que for acontecendo, cole no chat e cada anotação fica com a data do dia dela.",
+    "diga": "anota isso"
+  },
+  {
+    "version": "1.7.0",
+    "texto": "No seu próximo fechamento de semana eu sugiro, uma vez só, dois compromissos para a sua agenda (radar na segunda, fechamento na sexta), com link pronto para a Google Agenda.",
+    "diga": "resumo da semana"
+  },
+  {
+    "version": "1.7.0",
+    "texto": "Algo não funcionou ou você tem uma ideia para o Córtex? Eu escrevo um recado curto para o criador, sem nenhum dado do seu negócio, e você decide se envia.",
+    "diga": "tenho uma sugestão para o Córtex"
   }
 ]

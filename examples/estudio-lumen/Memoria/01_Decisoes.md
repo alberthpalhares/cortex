@@ -6,7 +6,7 @@
 - **[2025-05-20]** Desconto acima de 10% só é possível com aprovação caso a caso — nunca automático, mesmo para clientes antigos.
 
 ## Posicionamento
-- **[2025-01-15]** Não aceita eventos sociais (casamentos, aniversários, festas) — foco 100% em conteúdo corporativo.
+- **[2025-01-15]** Não aceita eventos sociais (casamentos, aniversários, festas) — porque o foco é 100% em conteúdo corporativo.
 - **[2025-06-01]** Após a pesquisa de concorrência, reforçada a estratégia de competir por prazo (48h) e não por preço.
 
 ## Fornecedores e Ferramentas

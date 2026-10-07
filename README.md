@@ -121,10 +121,15 @@ Se você ainda não sabe a sua margem, ela não trava nem chuta: conduz você a 
 | | `registra que...` | Guarda uma decisão, lição, pendência ou pessoa (errou? `desfaz`) |
 | | `me lembra de...` | Vira uma pendência com data, que aparece no radar (ela não manda aviso no celular) |
 | | `anota a reunião` | Você cola as anotações; ela separa decisões, pendências e lições |
+| | `anota isso` | Você cola o que ditou ou mandou para si mesmo no WhatsApp; cada anotação fica com a data do dia dela |
+| | `estou em dúvida entre A e B` | Pesa as duas opções com o que você já decidiu e aprendeu, e guarda a escolha com o porquê |
 | | `o que você sabe sobre...` | Diz o que já está registrado, com data |
 | | `fechar a semana` | 5 minutos: o que andou, o que ficou e o foco da próxima |
 | **Para vender e comunicar** | `gerar proposta para [cliente]` | Proposta pronta, com seus preços e seu tom |
+| | `enviei a proposta para [cliente]` | Acompanha o retorno no radar; depois, `a proposta fechou` ou `perdemos a proposta` guarda o desfecho e o motivo |
 | | `cria um post sobre...` | Post, legenda ou mensagem de WhatsApp do seu jeito |
+| | `responde esse cliente` ou `cobra o [cliente]` | Mensagem pronta para uma pessoa, dentro das suas regras de preço e pagamento |
+| | `preparar reunião com [pessoa]` | O que está em aberto, o que já foi combinado e até onde você pode ir |
 | | `descobrir minha margem` | Em 5 minutos, com um trabalho seu de verdade, descobrimos quanto sobra de cada venda — não precisa saber nada antes |
 | | `quanto cobrar por...` | A partir do custo, calcula o preço mínimo e o preço-alvo que respeitam a sua margem |
 | | `analisar DRE` | Compara seus números com as suas metas de margem |
@@ -133,9 +138,22 @@ Se você ainda não sabe a sua margem, ela não trava nem chuta: conduz você a 
 | | `saúde do córtex` | Mostra o que ainda está em branco |
 | | `revisar córtex` | A cada 6 meses, confere o que mudou (guarda uma cópia antes de alterar) |
 | | `consolidar memória` | Arquiva o que ficou antigo, sem apagar nada (guarda uma cópia antes de mexer) |
+| | `tenho uma sugestão para o Córtex` ou `deu problema no Córtex` | Ela escreve um recado curto para o criador, sem nenhum dado do seu negócio; quem envia é você |
 | | `ajuda` | Mostra esta lista dentro do chat |
 
 Quer ver um Córtex já preenchido, sem responder nenhuma pergunta? Baixe o [exemplo pronto (ZIP)](https://github.com/alberthpalhares/cortex/releases/latest/download/cortex-exemplo-estudio-lumen.zip), de um estúdio de fotografia fictício, descompacte, abra a pasta na sua ferramenta de IA e diga `radar`. Para só ler os arquivos, veja [`examples/estudio-lumen/`](https://github.com/alberthpalhares/cortex/tree/master/examples/estudio-lumen).
+
+---
+
+## Longe do computador
+
+O Córtex mora na pasta do computador, mas as decisões acontecem na rua, no cliente, no carro. Duas receitas simples, sem instalar nada:
+
+**1. Anote no celular e cole depois.** No WhatsApp, crie um grupo só com você (ou use a conversa "Você") e mande para lá o que for acontecendo, digitando ou ditando pelo microfone do teclado: *"fechei com a Clínica Vértice por R$ 2.500"*, *"cobrar o sinal do João até sexta"*. No computador, abra o WhatsApp Web, selecione as mensagens, copie, cole no chat e escreva `anota isso`. A IA separa decisões, pendências e lições e usa **o dia de cada anotação** (o carimbo do WhatsApp, ou um "ontem", "segunda"), não o dia em que você colou. Antes de gravar, ela mostra a lista e as datas que entendeu.
+
+**2. Dite em vez de digitar.** No computador, o ditado do sistema escreve o que você fala direto no chat: `Win + H` no Windows; no Mac, a tecla do microfone (ou *Ajustes do Sistema → Teclado → Ditado*).
+
+Com franqueza: áudio gravado não é lido (mande texto, ou dite), e a IA não avisa no celular. Para não esquecer dos dois momentos da semana, crie na sua agenda dois compromissos que se repetem: **segunda de manhã, "radar"** e **sexta à tarde, "fechar a semana"**. Na Google Agenda, estes links já abrem cada um preenchido, é só ajustar o horário e salvar (a data de janeiro de 2026 que aparece é só o ponto de partida da repetição: deixe como está): [radar na segunda](https://calendar.google.com/calendar/render?action=TEMPLATE&text=Radar+do+C%C3%B3rtex&details=Abrir+a+pasta+do+neg%C3%B3cio+na+ferramenta+de+IA+e+dizer%3A+radar&dates=20260105T090000/20260105T091500&recur=RRULE%3AFREQ%3DWEEKLY%3BBYDAY%3DMO) · [fechar a semana na sexta](https://calendar.google.com/calendar/render?action=TEMPLATE&text=Fechar+a+semana+no+C%C3%B3rtex&details=Abrir+a+pasta+do+neg%C3%B3cio+na+ferramenta+de+IA+e+dizer%3A+fechar+a+semana&dates=20260109T160000/20260109T161500&recur=RRULE%3AFREQ%3DWEEKLY%3BBYDAY%3DFR). No primeiro `fechar a semana`, a própria IA sugere isso, uma vez só.
 
 ---
 
@@ -151,6 +169,8 @@ O Córtex precisa de uma IA que **leia e escreva arquivos na pasta do seu negóc
 | OpenAI Codex, OpenCode e outras | Leem o arquivo `AGENTS.md` | Quem já usa uma delas |
 
 **"Abrir a pasta" quer dizer:** no aplicativo ou editor, escolher *Abrir pasta* e apontar para a pasta do negócio; nas ferramentas de terminal, abrir o terminal *dentro* da pasta e digitar o nome da ferramenta (`claude`, `gemini`).
+
+**Qual modelo usar:** dentro da ferramenta, prefira o modelo padrão ou o mais capaz, não o menor e mais barato. Nos nossos testes de conversa, os modelos menores erram datas, inventam detalhes e às vezes não seguem as regras do Córtex.
 
 **Quanto custa:** o Córtex é gratuito e de código aberto. A ferramenta de IA é à parte — algumas têm uso gratuito com limite, outras exigem assinatura. Os planos mudam com frequência; confira no site de cada uma antes de decidir.
 
@@ -195,7 +215,7 @@ npx @aksp/cortex init --targets=.cursorrules
 
 **Quero conferir se está tudo certo, sem gastar com IA** — rode `npx @aksp/cortex doctor` no terminal.
 
-**Tem outra dúvida?** Abra uma [issue no GitHub](https://github.com/alberthpalhares/cortex/issues).
+**Algo não funcionou, ou tem uma sugestão?** Diga no chat `deu problema no Córtex` ou `tenho uma sugestão para o Córtex`: a IA escreve um recado curto, sem nenhum dado do seu negócio, e você decide se envia. O recado (ou qualquer outra dúvida) vai numa [issue no GitHub](https://github.com/alberthpalhares/cortex/issues/new), que pede uma conta gratuita. Atenção: essa página é pública, qualquer pessoa na internet pode ler o que você colar lá; a IA avisa disso antes de você copiar. O Córtex não coleta nada sozinho: o criador só fica sabendo do que você contar.
 
 ---
 
@@ -245,7 +265,7 @@ O framework (`.agents/`) e os dados do seu negócio são camadas separadas — a
 | `npx @aksp/cortex@latest update` | Traz habilidades novas e correções. Mostra o que vai mudar, pede confirmação e faz backup antes. **Nunca toca** em `Pilares/`, `Memoria/`, `Ativos/` nem nos dados do negócio dentro do `CEREBRO.md`. No fim, diz onde ficou o backup e mostra como voltar à versão anterior, caso algo fique estranho. |
 | `npx @aksp/cortex sync` | Regera os arquivos que a IA lê (`AGENTS.md`, `CLAUDE.md`, `GEMINI.md`) depois que você editar o `Frameworks/CEREBRO.md` à mão. Com `--targets=` você escolhe para quais ferramentas gerar: liste **todas** as que usa (ex.: `--targets=AGENTS.md,CLAUDE.md,GEMINI.md`), porque a lista substitui a anterior. |
 | `npx @aksp/cortex@latest backup` | Guarda uma cópia dos dados do negócio (`Pilares/`, `Memoria/`, `Ativos/` e o `CEREBRO.md`) em `.cortex/backups/dados-<data>`. Não altera nada, e essas cópias nunca são apagadas sozinhas. Atalhos para outras pastas não são seguidos: a cópia avisa quais ficaram de fora. |
-| `npx @aksp/cortex doctor` | Confere a estrutura no terminal, sem usar IA: o que falta preencher, número de margem ou preço escrito de um jeito que muda o valor (como `1.500` ou `30%`), se o cérebro está em ordem e se existe versão nova. |
+| `npx @aksp/cortex doctor` | Confere a estrutura no terminal, sem usar IA: o que falta preencher, número de margem ou preço escrito de um jeito que muda o valor (como `1.500` ou `30%`), se o cérebro está em ordem, se falta algum arquivo do próprio Córtex na pasta `.agents/` (uma habilidade apagada por engano, por exemplo, com o comando que repõe) e se existe versão nova. |
 
 **Se quem roda o comando é a sua IA:** peça para ela acrescentar `--force` (por exemplo, `npx @aksp/cortex@latest update --force`). Sem terminal para confirmar, o comando só mostra o que faria e não altera nada.
 

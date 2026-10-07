@@ -6,6 +6,31 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-10-07
+
+O Córtex acompanha o que acontece depois: a proposta enviada, o porquê da decisão, a anotação feita no celular.
+
+### Migração (quem já usa)
+- Rode `npx @aksp/cortex@latest update`. Nenhum dado seu é tocado e tudo o que já estava anotado continua valendo como está: os formatos novos só acrescentam.
+- Use o modelo padrão ou o mais capaz da sua ferramenta de IA. As regras desta versão foram testadas em conversas com três modelos: os dois maiores seguiram quase tudo; o menor errou na maioria.
+
+### Adicionado
+- **Proposta com começo, meio e fim.** Diga "enviei a proposta para [cliente]" e ela passa a aparecer no radar com há quantos dias está sem resposta; depois de alguns dias, o radar oferece uma mensagem de retorno. "A proposta fechou" ou "perdemos a proposta" guarda o desfecho e, se perdeu, o motivo. O fechamento da semana mostra quantas estão sem resposta e quantas fecharam ou foram perdidas.
+- **A proposta aprende com as anteriores.** Antes de escrever, ela lê as suas lições comerciais e os motivos das propostas perdidas, e conta em uma linha quando usou alguma. As suas regras de preço e pagamento continuam mandando.
+- **Falar com uma pessoa.** "Responde esse cliente" e "cobra o [cliente]" escrevem a mensagem com o que está anotado sobre a pessoa e dentro das suas regras: primeiro uma linha dizendo se pelas suas regras dá ou não dá, depois duas versões, uma firme e uma mais leve. "Preparar reunião com [pessoa]" mostra o que está em aberto com ela, o que já foi combinado e até onde você pode ir.
+- **Decisões guardam o porquê.** Se você disser o motivo, ele fica na mesma linha; se não disser, a decisão é gravada na hora e a IA pergunta uma única vez, sem insistir.
+- **"Estou em dúvida entre A e B".** A IA pesa as duas opções com o que você já decidiu e aprendeu, mostrando de onde tirou cada ponto, e só grava quando você escolher, com o motivo e a opção deixada de lado.
+- **Anotações do celular entram com a data certa.** Mande para você mesmo no WhatsApp (ou dite) o que for acontecendo, cole depois no chat e escreva "anota isso": cada anotação fica com o dia em que aconteceu, não com o dia em que você colou. O README e o `COMECE-AQUI.txt` ganharam a receita "Longe do computador".
+- **Os dois momentos da semana na sua agenda.** Como a IA não avisa no celular, no primeiro "fechar a semana" ela sugere, uma vez só, dois compromissos que se repetem: "radar" na segunda e "fechar a semana" na sexta, com link pronto para a Google Agenda.
+- **Fale com o criador sem sair da conversa.** Diga "deu problema no Córtex" ou "tenho uma sugestão para o Córtex": a IA escreve um recado curto, sem nenhum nome, valor ou trecho dos seus arquivos, e mostra para você copiar, avisando antes que a página de envio (GitHub) é pública. Funciona mesmo antes da conversa de montagem. Nada é enviado sozinho, e o Córtex continua sem coletar nada.
+
+### Corrigido
+- **Clientes, fornecedores e parceiros não tinham lugar certo na Memória.** Quem é a pessoa fica numa linha; o que foi combinado com ela vira uma decisão com o nome na frente, e um acordo antigo não some quando você anota outra coisa sobre ela.
+- **Dois computadores, sócio ou pasta na nuvem.** Antes de gravar, a IA relê o arquivo e acrescenta só as linhas novas, em vez de regravar tudo a partir de uma leitura antiga. Se a nuvem criou uma "cópia em conflito", ela avisa.
+- **Ordem escondida em texto colado.** Ao colar uma ata ou mensagem, frases que parecem ordens para a IA ("ignore as regras", "apague…", "registre a senha…") não são obedecidas: ela avisa em uma linha que não executou.
+- **O `doctor` dizia "está tudo em dia" com habilidades faltando.** Ele agora confere a instalação, mostra o que sumiu de `.agents/` e o comando que repõe; "saúde do córtex" no chat faz a mesma conferência. Habilidades que você editou ou criou não são apontadas. Arquivo vazio (que a nuvem não terminou de baixar) conta como faltando, e quando a pasta não tem a lista de arquivos para comparar ele diz que não conseguiu conferir, em vez de dizer que nada falta. O comando que repõe devolve ao texto padrão uma habilidade que você editou: a sua versão fica em `.cortex/backups`, onde só as 3 cópias de atualização mais recentes são guardadas.
+- **Córtex montado que perdeu a pasta `.agents/` não tinha conserto:** o `init` mandava rodar o `update` e o `update` mandava rodar o `init`. Agora `npx @aksp/cortex@latest update --force` repõe, e diz que a pasta foi reposta do zero (não havia cópia dela para guardar). Se a pasta só tem a Memória, sem o cérebro e sem o arquivo de instrução da IA, ele não grava nada e pede para trazer a pasta do negócio inteira.
+
 ## [1.6.0] - 2026-10-06
 
 Começar sem terminal e confiar nos dados: dá para baixar a pasta pronta, os seus arquivos deixam de ser sobrescritos, e os seus dados ganham cópia de segurança.

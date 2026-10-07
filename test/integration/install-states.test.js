@@ -51,6 +51,10 @@ test('a dica do init funciona: init e depois init --targets=.cursorrules acresce
   assert.equal(r.status, 0, r.stdout + r.stderr);
   assert.ok(r.stdout.includes('já está instalado'), r.stdout);
   assert.ok(read(dir, '.cursorrules').includes('cortex-onboarding'), '.cursorrules deve receber o texto de inicialização');
+  // Antes da montagem, "deu problema no Córtex" precisa ter para onde ir: a seção citada veio junto.
+  for (const f of ['AGENTS.md', 'GEMINI.md', '.cursorrules']) assert.ok(read(dir, f).includes('"deu problema no Córtex"'), f);
+  assert.ok(read(dir, '.agents/skills/ajuda/SKILL.md').includes('## A Note to the Maker'));
+  assert.ok(cli.isCortexOwnedFile(read(dir, 'AGENTS.md')), 'o texto de inicialização continua reconhecido como do Córtex');
   assert.equal(read(dir, 'AGENTS.md'), agentsBefore, 'arquivos que já existiam não são reescritos');
 });
 
@@ -173,6 +177,268 @@ test('pasta instalada que perdeu a .agents/: o doctor explica e o init repõe', 
   assert.ok(fs.existsSync(path.join(dir, '.agents', 'skills', 'cortex-onboarding', 'SKILL.md')));
   assert.ok(r.stdout.includes('estava faltando'), r.stdout);
   assert.equal(cli.readVersionFile(dir).version, cli.VERSION, 'o framework reposto é o desta versão');
+});
+
+// ── O doctor confere a instalação (.agents/) ──────────────────────
+
+// O exemplo do repositório com o framework atual: um Córtex montado e completo.
+function mountedExample() {
+  const dir = mkTmpDir();
+  cli.copyRecursiveSync(path.join(ROOT, 'examples', 'estudio-lumen'), dir);
+  cli.copyRecursiveSync(path.join(ROOT, '.agents'), path.join(dir, '.agents'));
+  cli.writeVersionFile(dir, cli.VERSION);
+  return dir;
+}
+
+// O comando que o doctor manda rodar, do jeito que ele imprime (sem o "npx @aksp/cortex@latest").
+function fixCommand(stdout) {
+  const m = stdout.match(/^\s+npx @aksp\/cortex@latest (update.*--force)$/m);
+  assert.ok(m, 'o doctor deve mostrar o comando que repõe, numa linha só dele:\n' + stdout);
+  return m[1].split(' ').map((a) => a.replace(/^"|"$/g, ''));
+}
+
+test('doctor: instalação inteira não acusa nada, nem skill editada, nem skill criada pelo dono', () => {
+  const dir = mountedExample();
+  fs.appendFileSync(path.join(dir, '.agents', 'skills', 'ajuda', 'SKILL.md'), '\nUma regra minha.\n');
+  fs.mkdirSync(path.join(dir, '.agents', 'skills', 'minha-skill'));
+  fs.writeFileSync(path.join(dir, '.agents', 'skills', 'minha-skill', 'SKILL.md'), '# minha\n');
+
+  const r = run(['doctor', '.'], dir);
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.ok(r.stdout.includes('Instalação: nenhum arquivo do Córtex faltando'), r.stdout);
+  assert.ok(!r.stdout.includes('Instalação incompleta'), r.stdout);
+  assert.ok(r.stdout.includes('Está tudo em dia'), 'ponto de partida do teste seguinte: ' + r.stdout);
+  assert.deepEqual(cli.findMissingFrameworkFiles(dir, ROOT), { wholeFolder: false, missing: [] });
+});
+
+test('doctor acusa skill apagada ou vazia, não diz "tudo em dia", e o comando que ele mostra repõe', () => {
+  const dir = mountedExample();
+  const ajuda = path.join(dir, '.agents', 'skills', 'ajuda', 'SKILL.md');
+  fs.appendFileSync(ajuda, '\nUma regra minha.\n');
+  fs.rmSync(path.join(dir, '.agents', 'skills', 'radar'), { recursive: true });
+  fs.writeFileSync(path.join(dir, '.agents', 'skills', 'semana', 'SKILL.md'), ''); // a nuvem deixou o arquivo vazio
+  const decisoes = read(dir, path.join('Memoria', '01_Decisoes.md'));
+
+  let r = run(['doctor', '.'], dir);
+  assert.equal(r.status, 0, 'achado num Córtex montado é relatório, como as outras seções: ' + r.stderr);
+  assert.ok(r.stdout.includes('Instalação incompleta'), r.stdout);
+  assert.ok(r.stdout.includes('faltam 2 arquivos'), r.stdout);
+  assert.ok(r.stdout.includes('.agents/skills/radar/SKILL.md') && r.stdout.includes('a habilidade "radar"'), r.stdout);
+  assert.ok(r.stdout.includes('.agents/skills/semana/SKILL.md'), 'arquivo vazio conta como faltando');
+  assert.ok(!r.stdout.includes('skills/ajuda/SKILL.md'), 'skill editada pelo dono não é problema');
+  assert.ok(!r.stdout.includes('Está tudo em dia'), r.stdout);
+  assert.ok(/Sugestão:.*Primeiro reponha o que falta na instalação.*update --force/.test(r.stdout), r.stdout);
+  assert.ok(r.stdout.includes('.cortex/backups'), 'avisa onde fica a versão editada: ' + r.stdout);
+
+  // O update simples, na mesma versão, não repõe: por isso o doctor manda o --force.
+  r = run(['update', '.'], dir);
+  assert.equal(fs.existsSync(path.join(dir, '.agents', 'skills', 'radar', 'SKILL.md')), false);
+
+  r = run(fixCommand(run(['doctor', '.'], dir).stdout), dir);
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.equal(read(dir, path.join('.agents', 'skills', 'radar', 'SKILL.md')), read(ROOT, path.join('.agents', 'skills', 'radar', 'SKILL.md')));
+  assert.ok(read(dir, path.join('.agents', 'skills', 'semana', 'SKILL.md')).length > 0);
+  assert.equal(read(dir, path.join('Memoria', '01_Decisoes.md')), decisoes, 'os dados não são tocados');
+  // A versão editada pelo dono ficou na cópia, como o doctor avisou.
+  const backups = path.join(dir, '.cortex', 'backups');
+  const kept = fs.readdirSync(backups).map((b) => path.join(backups, b, 'agents', 'skills', 'ajuda', 'SKILL.md')).filter((f) => fs.existsSync(f));
+  assert.ok(kept.some((f) => fs.readFileSync(f, 'utf8').includes('Uma regra minha.')));
+
+  r = run(['doctor', '.'], dir);
+  assert.ok(r.stdout.includes('Instalação: nenhum arquivo do Córtex faltando'), r.stdout);
+  assert.ok(r.stdout.includes('Está tudo em dia'), r.stdout);
+});
+
+test('Córtex montado que perdeu a pasta .agents/ inteira: o doctor acusa e o update --force repõe (o init se recusa)', () => {
+  const dir = mountedExample();
+  fs.rmSync(path.join(dir, '.agents'), { recursive: true });
+  const cerebro = read(dir, path.join('Frameworks', 'CEREBRO.md'));
+
+  let r = run(['doctor', '.'], dir);
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.ok(r.stdout.includes('falta a pasta .agents/ inteira'), r.stdout);
+  assert.ok(!r.stdout.includes('Está tudo em dia'), r.stdout);
+  const fix = fixCommand(r.stdout);
+
+  assert.equal(run(['init', '.'], dir).status, 1, 'o init não roda por cima de um Córtex montado');
+  assert.equal(fs.existsSync(path.join(dir, '.agents')), false);
+
+  // Sem --force e sem terminal: mostra o que vai repor e não grava nada.
+  r = run(['update', '.'], dir);
+  assert.equal(r.status, cli.EXIT_NEEDS_CONFIRMATION, r.stdout + r.stderr);
+  assert.ok(!r.stdout.includes('Nada a fazer'), r.stdout);
+  assert.equal(fs.existsSync(path.join(dir, '.agents')), false);
+
+  r = run(fix, dir);
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.deepEqual(cli.findMissingFrameworkFiles(dir, ROOT), { wholeFolder: false, missing: [] });
+  assert.equal(read(dir, path.join('Frameworks', 'CEREBRO.md')), cerebro, 'o cérebro já estava em dia e fica como estava');
+  assert.ok(run(['doctor', '.'], dir).stdout.includes('Está tudo em dia'));
+});
+
+test('pasta só instalada com .agents/ pela metade: o doctor manda o update --force (o init não mexe numa pasta que existe)', () => {
+  const dir = installed();
+  const molde = path.join(dir, '.agents', 'skills', 'cortex-onboarding', 'templates', 'Pilares', '01_Estrategia.md');
+  fs.rmSync(molde);
+
+  let r = run(['doctor', '.'], dir);
+  assert.notEqual(r.status, 0, 'pasta ainda não montada continua saindo com erro');
+  assert.ok(r.stdout.includes('ainda não foi montado'), r.stdout);
+  assert.ok(r.stdout.includes('falta 1 arquivo') && r.stdout.includes('templates/Pilares/01_Estrategia.md'), r.stdout);
+  assert.equal(run(['init', '.'], dir).status, 0);
+  assert.equal(fs.existsSync(molde), false, 'o init não repõe arquivo dentro de uma .agents/ que existe');
+  assert.equal(run(fixCommand(r.stdout), dir).status, 0);
+  assert.ok(fs.existsSync(molde));
+  assert.ok(!run(['doctor', '.'], dir).stdout.includes('Instalação incompleta'));
+
+  // Sem a própria habilidade de montagem: antes o doctor mandava rodar o init, que não resolvia.
+  fs.rmSync(path.join(dir, '.agents', 'skills', 'cortex-onboarding'), { recursive: true });
+  r = run(['doctor', '.'], dir);
+  assert.notEqual(r.status, 0);
+  assert.ok(r.stdout.includes('Instalação incompleta') && !r.stdout.includes('cortex init'), r.stdout);
+  assert.equal(run(fixCommand(r.stdout), dir).status, 0);
+  assert.ok(run(['doctor', '.'], dir).stdout.includes('Falta só a conversa'));
+});
+
+test('doctor: o comando de conserto leva a pasta quando o diagnóstico foi pedido de fora dela', () => {
+  const parent = mkTmpDir();
+  cli.copyRecursiveSync(mountedExample(), path.join(parent, 'Minha Empresa'));
+  fs.rmSync(path.join(parent, 'Minha Empresa', '.agents', 'skills', 'radar', 'SKILL.md'));
+
+  const r = run(['doctor', 'Minha Empresa'], parent);
+  assert.ok(r.stdout.includes('npx @aksp/cortex@latest update "Minha Empresa" --force'), r.stdout);
+  assert.ok(r.stdout.includes('falta 1 arquivo'), r.stdout);
+});
+
+test('findMissingFrameworkFiles: compara com o manifesto instalado e não inventa lista quando não há uma', () => {
+  // Instalado numa versão anterior com menos arquivos: o que a versão do comando trouxe de novo não é "faltando".
+  const dir = mountedExample();
+  const manifestPath = path.join(dir, '.agents', 'manifest.json');
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  const semRadar = manifest.files.filter((f) => !f.startsWith('.agents/skills/radar/'));
+  fs.writeFileSync(manifestPath, JSON.stringify({ version: '1.0.0', files: semRadar.concat('.agents/../Memoria/META.md') }));
+  fs.rmSync(path.join(dir, '.agents', 'skills', 'radar'), { recursive: true });
+  assert.deepEqual(cli.findMissingFrameworkFiles(dir, ROOT).missing, []);
+
+  // Sem manifesto, na mesma versão do comando: o manifesto falta, e a lista do pacote serve de referência.
+  fs.rmSync(manifestPath);
+  assert.deepEqual(cli.findMissingFrameworkFiles(dir, ROOT).missing, ['.agents/manifest.json', '.agents/skills/radar/SKILL.md']);
+
+  // Sem manifesto, noutra versão: só dá para afirmar que o manifesto falta.
+  setVersion(dir, '1.2.0');
+  assert.deepEqual(cli.findMissingFrameworkFiles(dir, ROOT).missing, ['.agents/manifest.json']);
+
+  // Instalação de antes do manifesto existir (ou sem registro de versão): nada a comparar, nada a acusar
+  // — e o resultado diz que não houve conferência, para ninguém ler isso como "nada faltando".
+  setVersion(dir, '0.9.0');
+  assert.deepEqual(cli.findMissingFrameworkFiles(dir, ROOT), { wholeFolder: false, missing: [], unverified: true });
+  fs.rmSync(path.join(dir, '.cortex', 'version.json'));
+  assert.deepEqual(cli.findMissingFrameworkFiles(dir, ROOT), { wholeFolder: false, missing: [], unverified: true });
+
+  fs.rmSync(path.join(dir, '.agents'), { recursive: true });
+  assert.deepEqual(cli.findMissingFrameworkFiles(dir, ROOT), { wholeFolder: true, missing: [] });
+});
+
+test('doctor sem manifesto e sem registro de versão legível: diz que não conferiu, nunca "nada faltando" nem "tudo em dia"', () => {
+  for (const versionFile of [null, '', '{']) {
+    const dir = mountedExample();
+    fs.rmSync(path.join(dir, '.agents', 'manifest.json'));
+    fs.rmSync(path.join(dir, '.agents', 'skills', 'radar'), { recursive: true });
+    const versionPath = path.join(dir, '.cortex', 'version.json');
+    if (versionFile === null) fs.rmSync(versionPath); else fs.writeFileSync(versionPath, versionFile);
+
+    let r = run(['doctor', '.'], dir);
+    assert.equal(r.status, 0, r.stdout + r.stderr);
+    assert.ok(r.stdout.includes('Instalação: não consegui conferir'), r.stdout);
+    assert.ok(!r.stdout.includes('nenhum arquivo do Córtex faltando'), r.stdout);
+    assert.ok(!r.stdout.includes('Está tudo em dia'), r.stdout);
+    assert.ok(/Sugestão:.*não deu para conferir.*update --force/.test(r.stdout), r.stdout);
+
+    // O comando indicado repõe a habilidade e o manifesto; aí o doctor volta a conferir de verdade.
+    assert.equal(run(fixCommand(r.stdout), dir).status, 0);
+    assert.ok(fs.existsSync(path.join(dir, '.agents', 'skills', 'radar', 'SKILL.md')));
+    r = run(['doctor', '.'], dir);
+    assert.ok(r.stdout.includes('Instalação: nenhum arquivo do Córtex faltando'), r.stdout);
+  }
+});
+
+test('update que repõe a .agents/ inteira não afirma que guardou uma cópia dela nem ensina a copiar uma pasta que não existe', () => {
+  // De uma versão anterior à 1.6.0 — a que, com .agents/ presente, receberia os passos manuais de volta.
+  const dir = mountedExample();
+  fs.rmSync(path.join(dir, '.agents'), { recursive: true });
+  setVersion(dir, '1.5.0');
+
+  const r = run(['update', '.', '--force'], dir);
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  const backups = path.join(dir, '.cortex', 'backups');
+  const backup = path.join(backups, fs.readdirSync(backups).filter((n) => n.startsWith('update-'))[0]);
+  assert.equal(fs.existsSync(path.join(backup, 'agents')), false, 'não havia .agents/ para copiar');
+  assert.ok(fs.existsSync(path.join(backup, 'CEREBRO.md')));
+
+  assert.ok(r.stdout.includes('A pasta .agents/ não estava aqui e foi reposta do zero; o seu cérebro como estava ficou guardado em .cortex/backups/update-'), r.stdout);
+  assert.ok(!r.stdout.includes('a sua versão está lá'), r.stdout);
+  assert.ok(!r.stdout.includes('a pasta .agents/ e o cérebro'), r.stdout);
+  assert.ok(!r.stdout.includes('Copie tudo o que há dentro da pasta'), 'o passo manual pede uma pasta que o backup não tem: ' + r.stdout);
+  assert.ok(!r.stdout.includes('Algo ficou estranho'), r.stdout);
+  assert.deepEqual(cli.findMissingFrameworkFiles(dir, ROOT), { wholeFolder: false, missing: [] });
+
+  // A pergunta de confirmação também não promete o backup de uma pasta que não existe.
+  const source = read(ROOT, path.join('bin', 'cli.js'));
+  assert.ok(source.includes('A pasta .agents/ será reposta; o cérebro, se existir, é guardado antes. (s/N): '));
+
+  // Com a .agents/ no lugar, a frase e os passos de sempre continuam (o backup tem a pasta agents).
+  const full = mountedExample();
+  setVersion(full, '1.5.0');
+  fs.appendFileSync(path.join(full, '.agents', 'skills', 'ajuda', 'SKILL.md'), '\nUma regra minha.\n');
+  const r2 = run(['update', '.', '--force'], full);
+  assert.equal(r2.status, 0, r2.stdout + r2.stderr);
+  assert.ok(r2.stdout.includes('a sua versão está lá') && r2.stdout.includes('Copie tudo o que há dentro da pasta'), r2.stdout);
+});
+
+test('pasta que só tem Memoria/META.md: o update não instala meio Córtex e o doctor não manda um comando que não resolve', () => {
+  const dir = mkTmpDir();
+  fs.mkdirSync(path.join(dir, 'Memoria'));
+  fs.writeFileSync(path.join(dir, 'Memoria', 'META.md'), '# META\n');
+  assert.equal(cli.hasBrainEntry(dir), false);
+
+  let r = run(['doctor', '.'], dir);
+  assert.ok(r.stdout.includes('Instalação incompleta'), r.stdout);
+  assert.ok(!r.stdout.includes('update'), 'o update recusa esta pasta: ' + r.stdout);
+  assert.ok(r.stdout.includes('Traga a pasta do negócio inteira'), r.stdout);
+  assert.ok(/Sugestão:.*traga de volta a pasta do negócio inteira/.test(r.stdout), r.stdout);
+  assert.ok(!r.stdout.includes('Está tudo em dia'), r.stdout);
+
+  r = run(['update', '.', '--force'], dir);
+  assert.equal(r.status, 1, r.stdout + r.stderr);
+  assert.ok(r.stdout.includes('Nenhum arquivo foi alterado') && r.stdout.includes('Traga a pasta do negócio inteira'), r.stdout);
+  assert.ok(!r.stdout.includes('Framework atualizado'), r.stdout);
+  assert.deepEqual(fs.readdirSync(dir), ['Memoria'], 'nada é gravado');
+
+  // Córtex antigo: o arquivo de instrução na raiz é por onde a IA começa — aí a reposição vale.
+  fs.writeFileSync(path.join(dir, 'AGENTS.md'), 'CÉREBRO ANTIGO ESCRITO À MÃO');
+  assert.equal(cli.hasBrainEntry(dir), true);
+  r = run(fixCommand(run(['doctor', '.'], dir).stdout), dir);
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.ok(fs.existsSync(path.join(dir, '.agents', 'skills', 'radar', 'SKILL.md')));
+  assert.equal(read(dir, 'AGENTS.md'), 'CÉREBRO ANTIGO ESCRITO À MÃO');
+  assert.ok(r.stdout.includes('A pasta .agents/ não estava aqui e foi reposta do zero.'), r.stdout);
+  assert.ok(!r.stdout.includes('ficou guardado em'), 'sem .agents/ e sem cérebro não havia o que guardar: ' + r.stdout);
+  assert.ok(!r.stdout.includes('Backup salvo em'), r.stdout);
+});
+
+test('pasta só instalada sem a .agents/: o doctor e o update mandam o init com @latest e com a pasta', () => {
+  const parent = mkTmpDir();
+  const dir = path.join(parent, 'Minha Empresa');
+  cli.copyRecursiveSync(installed(), dir);
+  fs.rmSync(path.join(dir, '.agents'), { recursive: true });
+
+  let r = run(['doctor', 'Minha Empresa'], parent);
+  assert.ok(r.stdout.includes('npx @aksp/cortex@latest init "Minha Empresa"'), r.stdout);
+  r = run(['update', 'Minha Empresa', '--force'], parent);
+  assert.equal(r.status, 1);
+  assert.ok(r.stdout.includes('npx @aksp/cortex@latest init "Minha Empresa"'), r.stdout);
+  assert.equal(run(['init', 'Minha Empresa'], parent).status, 0);
+  assert.ok(fs.existsSync(path.join(dir, '.agents', 'skills', 'radar', 'SKILL.md')));
 });
 
 test('a dica do init leva a pasta quando o Córtex foi instalado numa subpasta', () => {
@@ -611,4 +877,16 @@ test('GEMINI.md por padrão vale para instalação nova; quem já escolheu as fe
     }
     assert.deepEqual(JSON.parse(read(dir, path.join('.cortex', 'targets.json'))).targets, ['AGENTS.md', 'CLAUDE.md']);
   }
+});
+
+test('pasta só com a Memória: o init não manda rodar o update, que a recusaria', () => {
+  const dir = mkTmpDir();
+  fs.mkdirSync(path.join(dir, 'Memoria'));
+  fs.writeFileSync(path.join(dir, 'Memoria', 'META.md'), '# META\n');
+  const r = run(['init', '.', '--force'], dir);
+  assert.equal(r.status, 1, r.stdout + r.stderr);
+  assert.ok(r.stdout.includes('Achei a Memória do negócio'), r.stdout);
+  assert.ok(r.stdout.includes('Nenhum arquivo foi alterado'), r.stdout);
+  assert.ok(!/cortex@latest update/.test(r.stdout), 'não pode indicar um comando que recusa esta pasta');
+  assert.deepEqual(fs.readdirSync(dir), ['Memoria']);
 });

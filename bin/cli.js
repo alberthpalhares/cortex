@@ -949,7 +949,7 @@ ${bold}COMANDOS:${reset}
                   Frameworks/CEREBRO.md) em .cortex/backups/dados-<data>/. Não altera nada e
                   essas cópias nunca são apagadas sozinhas. Atalhos para outras pastas não são
                   seguidos: a cópia avisa quais ficaram de fora.
-  ${green}doctor [pasta]${reset} Audita a estrutura do Córtex sem depender de IA: pilares faltando,
+  ${green}doctor [pasta]${reset} Audita a estrutura do Córtex sem depender de IA: pilares faltando, habilidades faltando em .agents/,
                   marcadores REVISAR pendentes, frontmatter incompleto, número de margem ou
                   preço escrito de um jeito que muda o valor (ex.: 1.500, 30%), saúde do cérebro.
                   Avisa se existe versão nova (consulta só o número da versão no npm).
@@ -1224,6 +1224,81 @@ function readManifestFiles(rootDir) {
   }
 }
 
+// O que o doctor confere da instalação: arquivos do framework que deveriam
+// estar em .agents/ e não estão (ou estão vazios, como fica um arquivo que a
+// nuvem não terminou de baixar). A lista esperada é o manifesto INSTALADO na
+// pasta (o da versão que o dono tem), não o do comando que está rodando.
+// Skill editada pelo dono é legítima e nunca aparece aqui: só conta o que falta.
+// Retorna { wholeFolder, missing } — `missing` no formato ".agents/skills/x/SKILL.md" —
+// e `unverified: true` quando não havia lista com que comparar.
+function findMissingFrameworkFiles(targetDir, templateDir) {
+  if (!fs.existsSync(path.join(targetDir, '.agents'))) return { wholeFolder: true, missing: [] };
+
+  const missing = [];
+  let expected = readManifestFiles(targetDir);
+  if (!expected) {
+    // Sem manifesto legível. Numa instalação anterior à v0.10.0 (ou sem registro
+    // de versão) isso é normal e não há lista para comparar. Nas demais, o
+    // próprio manifesto é um arquivo que falta; a lista do pacote só serve de
+    // referência quando a pasta está na mesma versão deste comando.
+    const installed = readVersionFile(targetDir);
+    if (!installed || !installed.version || compareVersions(String(installed.version), '0.10.0') < 0) {
+      // `unverified`: nada foi conferido — não é o mesmo que "nada faltando".
+      return { wholeFolder: false, missing, unverified: true };
+    }
+    missing.push(toPosix(MANIFEST_REL_PATH));
+    expected = installed.version === VERSION ? readManifestFiles(templateDir) : null;
+  }
+
+  for (const rel of Array.from(expected || []).sort()) {
+    if (typeof rel !== 'string' || !rel.startsWith('.agents/') || rel.split('/').includes('..')) continue;
+    let size = -1;
+    try {
+      const stats = fs.statSync(path.join(targetDir, rel));
+      size = stats.isFile() ? stats.size : -1;
+    } catch (e) {}
+    if (size <= 0) missing.push(rel);
+  }
+  return { wholeFolder: false, missing };
+}
+
+// O bloco que o doctor mostra quando falta arquivo do framework, com o único
+// comando que repõe. Em pasta montada (ou com .agents/ pela metade) é o
+// `update --force`: o `update` simples responde "nada a fazer" quando a versão
+// é a mesma, e o `init` não mexe numa pasta .agents/ que existe.
+const INSTALL_LIST_LIMIT = 8;
+function printInstallProblem(install, targetArg, targetDir) {
+  const fixCommand = `npx @aksp/cortex@latest update${folderHint(targetArg)} --force`;
+  if (install.wholeFolder && targetDir && !hasBrainEntry(targetDir)) {
+    // O update recusa esta pasta (ver hasBrainEntry): não se mostra um comando que não resolve.
+    console.log(`${red}🧩 Instalação incompleta:${reset} esta pasta tem a Memória do negócio, mas não a pasta .agents/ (as habilidades do Córtex),`);
+    console.log(`   nem o cérebro (${toPosix(CEREBRO_PATH)}), nem o arquivo de instrução que a IA lê (AGENTS.md).`);
+    console.log(`   ${BRAINLESS_ADVICE}`);
+    console.log(`   Seus dados (Pilares/, Memoria/, Ativos/) estão aqui e não são tocados.`);
+    return '';
+  }
+  if (install.wholeFolder) {
+    console.log(`${red}🧩 Instalação incompleta:${reset} falta a pasta .agents/ inteira — é nela que ficam as habilidades do Córtex (radar, registrar, proposta…).`);
+    console.log(`   Sem ela a IA não tem como fazer o que você pede. Seus dados (Pilares/, Memoria/, Ativos/) estão aqui e não são tocados.`);
+  } else {
+    const n = install.missing.length;
+    console.log(`${red}🧩 Instalação incompleta:${reset} ${n === 1 ? 'falta 1 arquivo' : `faltam ${n} arquivos`} do próprio Córtex em .agents/ (as habilidades que a IA usa):`);
+    for (const f of install.missing.slice(0, INSTALL_LIST_LIMIT)) {
+      const skill = f.match(/^\.agents\/skills\/([^/]+)\/SKILL\.md$/);
+      console.log(`   • ${f}${skill ? ` ${dim}— a habilidade "${skill[1]}"${reset}` : ''}`);
+    }
+    if (n > INSTALL_LIST_LIMIT) console.log(`   ${dim}… e mais ${n - INSTALL_LIST_LIMIT}${reset}`);
+    console.log(`   Sem ${n === 1 ? 'ele' : 'eles'}, a IA não consegue fazer o que ${n === 1 ? 'esse arquivo ensina' : 'esses arquivos ensinam'}. Seus dados (Pilares/, Memoria/, Ativos/) não são tocados.`);
+  }
+  console.log(`   Para repor, rode:`);
+  console.log(`     ${cyan}${fixCommand}${reset}`);
+  if (!install.wholeFolder) {
+    console.log(`   ${dim}Antes de mexer, ele guarda uma cópia de .agents/ em ${toPosix(BACKUPS_REL)}: se você editou alguma habilidade, ela volta ao texto padrão e a sua versão fica nessa cópia.${reset}`);
+    console.log(`   ${dim}Só as ${BACKUPS_TO_KEEP} cópias mais recentes são guardadas: se quiser manter a sua versão, copie o arquivo para outra pasta.${reset}`);
+  }
+  return fixCommand;
+}
+
 // Lista recursivamente todos os arquivos (caminhos relativos) dentro de um diretório.
 function listFilesRecursive(dir, base) {
   base = base || dir;
@@ -1424,6 +1499,19 @@ function isCortexMounted(targetDir) {
   );
 }
 
+// Há por onde a IA começar: o cérebro, ou um arquivo de instrução na raiz (o
+// Córtex antigo só tinha esse). Uma pasta só com Memoria/META.md — os dados
+// copiados sem o resto — não tem nenhum dos dois: repor a .agents/ ali deixaria
+// um Córtex que nenhuma ferramenta de IA carrega, e o init não roda nela.
+function hasBrainEntry(targetDir) {
+  return (
+    fs.existsSync(path.join(targetDir, CEREBRO_PATH)) ||
+    Object.keys(KNOWN_TARGETS).some((t) => fs.existsSync(path.join(targetDir, t)))
+  );
+}
+
+const BRAINLESS_ADVICE = 'Traga a pasta do negócio inteira, de onde ela foi copiada ou de um backup seu — incluindo a pasta Frameworks/ e o AGENTS.md — e rode este comando de novo.';
+
 // "Instalado" = o init já rodou nesta pasta (montado ou não).
 function isCortexInstalled(targetDir) {
   return fs.existsSync(path.join(targetDir, CORTEX_META_DIR, CORTEX_VERSION_FILE));
@@ -1593,6 +1681,14 @@ async function runInit() {
   if (!fs.existsSync(targetDir)) {
     fs.mkdirSync(targetDir, { recursive: true });
     console.log(`  ${dim}Criada pasta:${reset} ${targetDir}`);
+  }
+
+  if (isCortexMounted(targetDir) && !hasBrainEntry(targetDir)) {
+    // Só a Memória veio para cá: mandar rodar o update seria um beco sem saída (ele recusa esta pasta).
+    console.log(`${red}Achei a Memória do negócio nesta pasta, mas não o cérebro (${toPosix(CEREBRO_PATH)}) nem o arquivo de instrução que a IA lê (AGENTS.md).${reset}`);
+    console.log(`O \`init\` não instala por cima de dados que já existem. ${BRAINLESS_ADVICE}`);
+    console.log(`Nenhum arquivo foi alterado.\n`);
+    process.exit(1);
   }
 
   if (isCortexMounted(targetDir)) {
@@ -1823,9 +1919,21 @@ async function runUpdate() {
   const fromVersion = installed && installed.version ? String(installed.version) : '';
   const hasFramework = fs.existsSync(path.join(targetDir, '.agents'));
 
-  if (!hasFramework) {
+  // Córtex montado que perdeu a pasta .agents/ (apagada por engano, ou a pasta
+  // do negócio copiada sem ela): o init se recusa a rodar por cima de um cérebro
+  // que existe, então é aqui que ela é reposta — todos os arquivos entram como novos.
+  const restoringFramework = !hasFramework && isCortexMounted(targetDir);
+
+  if (!hasFramework && !restoringFramework) {
     console.log(`${red}Não encontrei uma pasta .agents/ aqui.${reset} Este comando atualiza um Córtex já inicializado.`);
-    console.log(`Rode ${cyan}npx @aksp/cortex init${reset} primeiro.\n`);
+    console.log(`Rode ${cyan}npx @aksp/cortex@latest init${folderHint(targetArg)}${reset} primeiro.\n`);
+    process.exit(1);
+  }
+
+  if (restoringFramework && !hasBrainEntry(targetDir)) {
+    console.log(`${red}Achei a Memória do negócio nesta pasta, mas não o cérebro (${toPosix(CEREBRO_PATH)}) nem o arquivo de instrução que a IA lê (AGENTS.md).${reset}`);
+    console.log(`Sem um dos dois, repor a pasta .agents/ deixaria um Córtex que a sua IA não carrega. ${BRAINLESS_ADVICE}`);
+    console.log(`Nenhum arquivo foi alterado.\n`);
     process.exit(1);
   }
 
@@ -1839,7 +1947,7 @@ async function runUpdate() {
   if (!installed) {
     console.log(`  ${yellow}⚠️ Não encontrei ${CORTEX_META_DIR}/${CORTEX_VERSION_FILE}${reset} — este Córtex foi instalado antes do comando update existir.`);
     console.log(`  Vou tratar a versão atual como desconhecida e comparar diretamente os arquivos.\n`);
-  } else if (installed.version === VERSION && !isForce) {
+  } else if (installed.version === VERSION && !isForce && !restoringFramework) {
     const latest = await fetchLatestVersion();
     if (latest && compareVersions(latest, VERSION) > 0) {
       console.log(`  ${yellow}Este projeto está na v${VERSION}, mas já existe a v${latest}.${reset}`);
@@ -1953,7 +2061,10 @@ async function runUpdate() {
   }
 
   if (!isForce) {
-    const confirmed = await askConfirmation(`  Aplicar essas mudanças? Um backup de .agents/ será criado antes. (s/N): `);
+    // Sem .agents/ não há o que copiar dela: só o cérebro (quando existe) é guardado.
+    const confirmed = await askConfirmation(restoringFramework
+      ? `  Aplicar essas mudanças? A pasta .agents/ será reposta; o cérebro, se existir, é guardado antes. (s/N): `
+      : `  Aplicar essas mudanças? Um backup de .agents/ será criado antes. (s/N): `);
     if (!confirmed) {
       console.log(`\n${red}Atualização cancelada. Nenhum arquivo foi alterado.${reset}\n`);
       return;
@@ -1971,13 +2082,15 @@ async function runUpdate() {
     console.log(`  ${dim}Backup da tentativa anterior reaproveitado:${reset} ${toPosix(path.relative(targetDir, backupDir))}`);
   } else {
     backupDir = makeBackupDir(targetDir, 'update');
-    copyRecursiveSync(path.join(targetDir, '.agents'), path.join(backupDir, 'agents'));
+    if (hasFramework) copyRecursiveSync(path.join(targetDir, '.agents'), path.join(backupDir, 'agents'));
     if (fs.existsSync(cerebroPath)) {
       fs.copyFileSync(cerebroPath, path.join(backupDir, 'CEREBRO.md'));
     }
     // A marca só entra com a cópia completa, e só sai quando a atualização termina.
     fs.writeFileSync(path.join(backupDir, UPDATE_PENDING_FILE), fromVersion + '\n');
-    console.log(`  ${dim}Backup salvo em:${reset} ${toPosix(path.relative(targetDir, backupDir))}`);
+    if (hasFramework || fs.existsSync(cerebroPath)) {
+      console.log(`  ${dim}Backup salvo em:${reset} ${toPosix(path.relative(targetDir, backupDir))}`);
+    }
   }
 
   if (hasPruneWork) {
@@ -2052,22 +2165,31 @@ async function runUpdate() {
   fs.rmSync(path.join(backupDir, UPDATE_PENDING_FILE), { force: true });
 
   const backupRel = toPosix(path.relative(targetDir, backupDir));
+  // O que a cópia guarda de fato. Quando a .agents/ não existia (foi reposta),
+  // não há pasta `agents` nela — salvo num backup reaproveitado de uma tentativa
+  // anterior. As frases abaixo só prometem o que está lá.
+  const temAgents = fs.existsSync(path.join(backupDir, 'agents'));
+  const temCerebro = fs.existsSync(path.join(backupDir, 'CEREBRO.md'));
+  const guardado = temAgents
+    ? `Como estava antes (a pasta .agents/ e o cérebro) ficou guardado em ${backupRel} — se você tinha personalizado alguma habilidade, a sua versão está lá.`
+    : `A pasta .agents/ não estava aqui e foi reposta do zero${temCerebro ? `; o seu cérebro como estava ficou guardado em ${backupRel}` : ''}.`;
   console.log(`
 ${bold}${green}🎉 Framework atualizado para v${VERSION}!${reset}
 
 ${dim}Pilares/, Memoria/, Ativos/ e a área CORTEX:BUSINESS do seu cérebro não foram tocados.${reset}
-${dim}Como estava antes (a pasta .agents/ e o cérebro) ficou guardado em ${backupRel} — se você tinha personalizado alguma habilidade, a sua versão está lá.${reset}
+${dim}${guardado}${reset}
 `);
 
   // Caminho de volta. Uma versão que já protege os arquivos do usuário volta
   // pelo próprio comando dela; para as anteriores, a volta é à mão, a partir do
-  // backup acima (ver ROLLBACK_BY_COMMAND_SINCE).
-  const rollback = rollbackAdvice(fromVersion, VERSION);
+  // backup acima (ver ROLLBACK_BY_COMMAND_SINCE) — e só existe quando a cópia
+  // tem a pasta `agents`: sem ela não há estado anterior para onde voltar.
+  let rollback = rollbackAdvice(fromVersion, VERSION);
+  if (rollback === 'manual' && !temAgents) rollback = null;
   if (rollback === 'comando') {
     console.log(`${bold}Algo ficou estranho depois de atualizar?${reset} Para voltar à v${fromVersion}, rode:`);
     console.log(`  ${cyan}npx @aksp/cortex@${fromVersion} update${folderHint(targetArg)} --force${reset}\n`);
   } else if (rollback === 'manual') {
-    const temCerebro = fs.existsSync(path.join(backupDir, 'CEREBRO.md'));
     console.log(`${bold}Algo ficou estranho depois de atualizar?${reset} Dá para voltar à v${fromVersion} copiando de volta o que ficou guardado:`);
     console.log(`  1. Abra a pasta ${backupRel} ${dim}(fica dentro da pasta do negócio)${reset}.`);
     console.log(`  2. Copie tudo o que há dentro da pasta ${bold}agents${reset} para dentro da pasta ${bold}.agents${reset} do negócio, substituindo os arquivos.`);
@@ -2270,9 +2392,24 @@ async function runDoctor() {
       console.log(`${yellow}O Córtex está instalado nesta pasta, mas ainda não foi montado.${reset}`);
       console.log(`Falta só a conversa: abra esta pasta na sua ferramenta de IA e escreva ${cyan}"Quero montar meu Córtex"${reset}.`);
       console.log(`${dim}Depois dela, rode este diagnóstico de novo.${reset}\n`);
+      // A conversa de montagem usa os moldes e as outras habilidades: se algum
+      // arquivo do framework sumiu, é isso que se resolve primeiro.
+      const install = findMissingFrameworkFiles(targetDir, path.resolve(__dirname, '..'));
+      if (install.missing.length > 0) {
+        printInstallProblem(install, targetArg);
+        console.log('');
+        console.log(`${bold}💡 Sugestão:${reset} Primeiro rode o comando acima; depois faça a conversa de montagem.\n`);
+      }
+    } else if (isCortexInstalled(targetDir) && fs.existsSync(path.join(targetDir, '.agents'))) {
+      // A pasta .agents/ existe, mas sem a habilidade de montagem: o init não
+      // mexe numa pasta que já existe; quem repõe arquivo por arquivo é o update.
+      const install = findMissingFrameworkFiles(targetDir, path.resolve(__dirname, '..'));
+      if (install.missing.length === 0) install.missing.push('.agents/skills/cortex-onboarding/SKILL.md');
+      printInstallProblem(install, targetArg);
+      console.log('');
     } else if (isCortexInstalled(targetDir)) {
       console.log(`${red}A instalação do Córtex nesta pasta está incompleta: falta a pasta .agents/.${reset}`);
-      console.log(`Rode ${cyan}npx @aksp/cortex init${reset} nesta pasta: ele repõe o que falta e não sobrescreve nada seu.\n`);
+      console.log(`Rode ${cyan}npx @aksp/cortex@latest init${folderHint(targetArg)}${reset}: ele repõe o que falta e não sobrescreve nada seu.\n`);
     } else {
       console.log(`${red}Não encontrei um Córtex nesta pasta.${reset} Confira se você está na pasta do seu negócio.`);
       console.log(`Para instalar aqui, rode ${cyan}npx @aksp/cortex init${reset} e depois peça para a IA ${cyan}"montar meu córtex"${reset}.\n`);
@@ -2483,7 +2620,26 @@ async function runDoctor() {
     console.log(`  ${dim}Frameworks/${legacyProtocols.join(' e Frameworks/')}: cópia antiga, não é mais usada (os protocolos agora vêm em .agents/cortex/). Pode apagar.${reset}`);
   }
 
-  // --- 7. Versão ---
+  // --- 7. Instalação ---
+  // Só o que FALTA em .agents/. Skill editada pelo dono não é problema, e o que
+  // sobrou de versões antigas é assunto do update (--prune).
+  const install = findMissingFrameworkFiles(targetDir, path.resolve(__dirname, '..'));
+  const installBroken = install.wholeFolder || install.missing.length > 0;
+  let installFix = '';
+  console.log('');
+  const unverifiedFix = `npx @aksp/cortex@latest update${folderHint(targetArg)} --force`;
+  if (installBroken) {
+    installFix = printInstallProblem(install, targetArg, targetDir);
+  } else if (install.unverified) {
+    // Sem lista não houve conferência: dizer "nada faltando" seria um falso verde.
+    console.log(`${yellow}🧩 Instalação: não consegui conferir${reset} — esta pasta não tem a lista de arquivos do Córtex (.agents/manifest.json) nem um registro de versão que diga qual lista usar.`);
+    console.log(`   Para repor o que estiver faltando, sem tocar nos seus dados, rode:`);
+    console.log(`     ${cyan}${unverifiedFix}${reset}`);
+  } else {
+    console.log(`${green}🧩 Instalação: nenhum arquivo do Córtex faltando em .agents/ ✅${reset}`);
+  }
+
+  // --- 8. Versão ---
   const installedVersion = readVersionFile(targetDir);
   const latest = await fetchLatestVersion();
   if (installedVersion && installedVersion.version) {
@@ -2498,8 +2654,12 @@ async function runDoctor() {
     }
   }
 
-  // --- 8. Sugestão ---
+  // --- 9. Sugestão ---
   console.log(`\n${bold}💡 Sugestão:${reset}`, (() => {
+    // Vem primeiro: as outras sugestões mandam "dizer no chat", e sem as
+    // habilidades na pasta a IA não tem como atender.
+    if (installBroken && !installFix) return `Primeiro traga de volta a pasta do negócio inteira (veja "Instalação incompleta" acima). Depois rode este diagnóstico de novo.`;
+    if (installBroken) return `Primeiro reponha o que falta na instalação — rode "${installFix}". Depois rode este diagnóstico de novo.`;
     if (mandatoryMissing.length > 0) return `Crie os pilares obrigatórios faltantes — diga "revisar córtex" no chat.`;
     if (withNumberIssues.length > 0) {
       return withPendencies.some((p) => p.revisarCount > 0 || p.blankSections > 0 || p.nullFields.length > 0)
@@ -2512,6 +2672,7 @@ async function runDoctor() {
     if (latest && installedVersion && compareVersions(latest, installedVersion.version) > 0) {
       return `A estrutura está em ordem. Falta só atualizar — rode "npx @aksp/cortex@latest update".`;
     }
+    if (install.unverified) return `A estrutura está em ordem, mas não deu para conferir os arquivos do próprio Córtex — rode "${unverifiedFix}".`;
     return `Está tudo em dia! 🎉`;
   })() + '\n');
 }
@@ -2565,6 +2726,8 @@ module.exports = {
   pruneBackups,
   makeBackupDir,
   isCortexMounted,
+  hasBrainEntry,
+  BACKUPS_TO_KEEP,
   isCortexInstalled,
   addMissingBootstrapTargets,
   ensureGitignore,
@@ -2629,6 +2792,7 @@ module.exports = {
   readManifestFiles,
   listFilesRecursive,
   diffFrameworkLayer,
+  findMissingFrameworkFiles,
   classifyPreserved,
   applyFrameworkUpdate,
   pruneDeprecatedFiles

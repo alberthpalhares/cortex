@@ -21,7 +21,7 @@ This skill executes `.agents/cortex/PROTOCOLO_MEMORIA.md`. It keeps `Memoria/` l
 
    Age is always counted from the `**[YYYY-MM-DD]**` stamp at the start of the line. A line with no stamp (older versions wrote resolved items without one) has an unknown age: never estimate it and never use a leftover `[DEADLINE …]` date as if it were the resolution date. Show such lines as their own entry in the batch summary — *"[N] pendências resolvidas sem data — arquivo também?"* — and archive them only if the user says yes. A decision that is still in force is never archived, however old: in `01_Decisoes.md` only `[REVOGADA …]` lines are candidates.
 
-4. **Identify duplicates, conservatively.** Within each file, look for items that say the same thing (the same decision restated, the same lesson repeated). Two lines that differ in a number, a proper name or a condition (10% vs 15%, client A vs client B, "always" vs "only with a contract") are NOT duplicates. When in doubt, do not merge.
+4. **Identify duplicates, conservatively.** Within each file, look for items that say the same thing (the same decision restated, the same lesson repeated). Two lines that differ in a number, a proper name or a condition (10% vs 15%, client A vs client B, "always" vs "only with a contract") are NOT duplicates. When in doubt, do not merge. A merged line keeps the reason (`— porque …`) of whichever original had one.
 
 5. **Assemble a batch summary** — never apply item by item without showing the whole set first. For every merge, show the exact text that will remain:
 
@@ -40,7 +40,7 @@ This skill executes `.agents/cortex/PROTOCOLO_MEMORIA.md`. It keeps `Memoria/` l
    Isso move esses itens para Memoria/_Arquivo/AAAA.md — nada é apagado, só sai dos arquivos ativos. As linhas fundidas também ficam guardadas lá, como estavam. Posso aplicar?
    ```
 
-6. **Only after the user confirms**, apply it in this order:
+6. **Only after the user confirms**, re-read each file you are about to change — it may have changed while the summary was on screen (another computer, a partner, a cloud-synced folder) — and leave out, saying so, any line of the batch that is no longer there or reads differently; never write a whole file back from the earlier read. Then apply it in this order:
    1. **Make a safety copy first.** Run `npx @aksp/cortex@latest backup` (it only copies `Pilares/`, `Memoria/`, `Ativos/` and the brain into `.cortex/backups/dados-<timestamp>/`, changes nothing and asks nothing). If the command cannot run or does not end by naming the folder it saved (no terminal, no Node.js, no network, an answer such as "Comando não reconhecido", any other error), copy each `Memoria/` file you are about to change, as it is, into `.cortex/backups/dados-[YYYY-MM-DD]/Memoria/` with your file tools. Use a folder that does not exist yet: if `dados-[YYYY-MM-DD]` is already there (an earlier copy from today), name this one `dados-[YYYY-MM-DD]-2` (then `-3`…). Never save over a file that is already inside a copy folder: the older copy is the one that holds how things were. Do not touch any file before one of the two copies exists; one copy per conversation is enough.
    2. Create (or update) `Memoria/_Arquivo/AAAA.md` for each year needed, following the format described in `.agents/cortex/PROTOCOLO_MEMORIA.md`, and copy there every line that is going to be archived.
    3. For each merge, copy the original lines **word for word** into that same archive file, under a `## Fundidas em [YYYY-MM-DD]` heading.
