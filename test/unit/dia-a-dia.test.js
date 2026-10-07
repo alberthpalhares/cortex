@@ -14,7 +14,7 @@ const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
 const skill = (name) => read(`.agents/skills/${name}/SKILL.md`);
 // O registrar é um núcleo (SKILL.md, lido sempre) mais arquivos de apoio na mesma
 // pasta, lidos só quando o caso pede. As regras dele são conferidas no conjunto.
-const REGISTRAR_SUPPORT = ['lote.md', 'propostas.md', 'decisoes.md'];
+const REGISTRAR_SUPPORT = ['lote.md', 'propostas.md', 'rotinas.md', 'decisoes.md'];
 const registrarFile = (file) => read(`.agents/skills/registrar/${file}`);
 const registrar = () => [skill('registrar'), ...REGISTRAR_SUPPORT.map(registrarFile)].join('\n');
 const countWords = (text) => text.split(/\s+/).filter(Boolean).length;
@@ -146,7 +146,7 @@ test('desfaz vale para a operação inteira, e atualizações no lugar mostram a
   assert.ok(/undoes the last \*\*operation\*\*/.test(reg));
   assert.ok(reg.includes('every line it wrote and every part below that applies'), 'desfaz cobre a operação mista (pessoa atualizada + decisão nova)');
   assert.ok(reg.includes('remove the line or lines it wrote (a person + what was agreed are two, in two files)'), 'um registro que gravou duas linhas é desfeito inteiro');
-  assert.ok(reg.includes('the formatted line (or lines) that was inserted'));
+  assert.ok(reg.includes('the formatted line (or lines) inserted'));
   assert.ok(reg.includes('Before writing, ask only where this skill says to'), 'as perguntas previstas nas seções não contradizem o "grava na hora"');
   assert.ok(!reg.includes('The only question allowed before writing'));
   assert.ok(reg.includes('"fechar a semana"') && reg.includes('"anota a reunião"'));
@@ -172,7 +172,7 @@ test('registrar é leve de carregar: núcleo dentro do teto e apoio lido só qua
   const words = countWords(core);
   assert.ok(words <= CORE_CAP, `o núcleo do registrar tem ${words} palavras (teto: ${CORE_CAP}); ele é lido até num registro de uma linha — leve o detalhe para um arquivo de apoio`);
   const dir = path.join(ROOT, '.agents', 'skills', 'registrar');
-  assert.deepEqual(fs.readdirSync(dir).sort(), ['SKILL.md', ...REGISTRAR_SUPPORT].sort(), 'um núcleo e no máximo três arquivos de apoio, na mesma pasta');
+  assert.deepEqual(fs.readdirSync(dir).sort(), ['SKILL.md', ...REGISTRAR_SUPPORT].sort(), 'um núcleo e quatro arquivos de apoio, na mesma pasta');
   for (const file of REGISTRAR_SUPPORT) {
     const text = registrarFile(file);
     assert.ok(core.includes(`\`${file}\``), `o núcleo aponta para ${file} pelo nome exato`);
@@ -182,7 +182,7 @@ test('registrar é leve de carregar: núcleo dentro do teto e apoio lido só qua
     assert.ok(!text.includes('\r'), `${file} usa fim de linha LF`);
   }
   assert.ok(!core.includes('\r'), 'o núcleo usa fim de linha LF');
-  assert.ok(countWords(registrar()) < 5200, 'o conjunto não cresce sem controle');
+  assert.ok(countWords(registrar()) < 6000, 'o conjunto não cresce sem controle');
 });
 
 test('registrar: o bloco de despacho vem no topo, cita os gatilhos e diz quando o núcleo basta', () => {
@@ -192,22 +192,23 @@ test('registrar: o bloco de despacho vem no topo, cita os gatilhos e diz quando 
   assert.ok(start !== -1 && end !== -1, 'o bloco de despacho existe');
   assert.equal(core.slice(0, start).split('\n').filter((l) => l.startsWith('## ')).length, 0, 'é a primeira seção do núcleo');
   const dispatch = core.slice(start, end);
-  assert.ok(dispatch.includes('This file alone is NOT enough for the three cases below'), 'o núcleo sozinho não basta nesses casos');
+  assert.ok(dispatch.includes('This file alone is NOT enough for the four cases below'), 'o núcleo sozinho não basta nesses casos');
   assert.ok(dispatch.includes('STOP: read the named file') && dispatch.includes('before doing anything else, then follow it together with this file'));
   assert.ok(dispatch.includes('`.agents/skills/registrar/`'), 'diz onde os arquivos de apoio ficam');
   for (const file of REGISTRAR_SUPPORT) assert.ok(dispatch.includes(`read \`${file}\``), `o despacho manda ler ${file}`);
   // Toda frase da linha do registrar na tabela do cérebro aparece no despacho.
   const phrases = [...routingRow('registrar').split('|')[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
-  assert.ok(phrases.length >= 17, 'a linha do cérebro foi lida');
+  assert.ok(phrases.length >= 19, 'a linha do cérebro foi lida');
   for (const phrase of phrases) assert.ok(dispatch.includes(`"${phrase}`), `o despacho cita o gatilho "${phrase}"`);
   const line = (file) => dispatch.split('\n').find((l) => l.includes(`read \`${file}\``));
   for (const phrase of ['"anota a reunião"', '"anota isso" with more than one thing', 'pasted, dictated']) assert.ok(line('lote.md').includes(phrase), `lote: ${phrase}`);
   for (const phrase of ['"enviei a proposta"', '"mandei o orçamento"', '"a proposta fechou"', '"perdemos a proposta"']) assert.ok(line('propostas.md').includes(phrase), `propostas: ${phrase}`);
+  for (const phrase of ['"todo dia 20…"', '"toda segunda…"', '"feito", "paguei…" or "resolvido" when the matching line starts with 🔁', 'never moved to "resolved"']) assert.ok(line('rotinas.md').includes(phrase), `rotinas: ${phrase}`);
   for (const phrase of ['"decidi que"', '"estou em dúvida entre…"', 'writes or changes a line in `Memoria/01_Decisoes.md`']) assert.ok(line('decisoes.md').includes(phrase), `decisões: ${phrase}`);
   assert.ok(dispatch.includes('More than one can apply'));
   const enough = dispatch.split('\n').find((l) => l.startsWith('This file is enough for everything else:'));
   assert.ok(enough, 'diz o que NÃO precisa de arquivo de apoio');
-  for (const phrase of ['one plain record', '"nova lição"', '"nova pendência"', 'a reminder ("me lembra de…")', '"resolvido"', '"cliente novo"', '"a meta do trimestre é…"', '"desfaz"', '"corrige o último"']) {
+  for (const phrase of ['one plain record', '"nova lição"', '"nova pendência"', 'a reminder ("me lembra de…")', '"resolvido" (not about a proposal or a 🔁 routine)', '"cliente novo"', '"a meta do trimestre é…"', '"desfaz"', '"corrige o último"']) {
     assert.ok(enough.includes(phrase), `o núcleo basta para ${phrase}`);
   }
 });
@@ -222,6 +223,7 @@ test('registrar: cada regra mora num arquivo só, e ninguém aponta para número
   const only = {
     'lote.md': ['📋 **Encontrei [N] itens nessa anotação:**', 'Privacy line, once per conversation', "**Each note keeps the date of its own day, not today's.**"],
     'propostas.md': ['Resposta da proposta — [o que foi proposto]', 'Proposta fechada — [Cliente]', 'Proposta perdida — [Cliente]', '**Which line.**'],
+    'rotinas.md': ['## Routines: What Repeats', '**[QUANDO]** [Texto] *(desde YYYY-MM-DD · próxima YYYY-MM-DD)*', '[TODA SEMANA: segunda]', 'Rotina encerrada — [Texto, sem o ponto]'],
     'decisoes.md': ['## Price and Discount Decisions', '## The Why of a Decision', '## A Decision Still in the Making', '## Revoking a Decision', '[REVOGADA em YYYY-MM-DD: motivo/nova decisão]', '## An Agreement That Changed'],
   };
   for (const [file, rules] of Object.entries(only)) {
@@ -244,6 +246,203 @@ test('registrar: cada regra mora num arquivo só, e ninguém aponta para número
   const manifest = JSON.parse(read('.agents/manifest.json')).files;
   for (const file of REGISTRAR_SUPPORT) assert.ok(manifest.includes(`.agents/skills/registrar/${file}`), `${file} está no manifesto: o update instala e o doctor acusa se faltar`);
   assert.ok(read('CONTRACTS.md').includes('arquivos de apoio'), 'o contrato diz que uma skill pode ter arquivos de apoio');
+});
+
+// ── Rotinas ───────────────────────────────────────────────────────
+
+test('rotina: o que se repete é uma linha só, que nunca vai embora, e o radar só compara a próxima data', () => {
+  const reg = registrar();
+  const rot = registrarFile('rotinas.md');
+  // Forma da linha e vocabulário fechado.
+  assert.ok(rot.includes('`- 🔁 **[QUANDO]** [Texto] *(desde YYYY-MM-DD · próxima YYYY-MM-DD)*`'));
+  for (const when of ['`[TODO MÊS: dia 20]`', '`[TODA SEMANA: segunda]`', '`[TODO ANO: 15/03]`', '`[TODO ANO: março]`']) assert.ok(rot.includes(when), `vocabulário: ${when}`);
+  assert.ok(rot.includes('is one of these four, and nothing else'), 'a repetição tem vocabulário fechado');
+  assert.ok(rot.includes('in a shorter month, its last day'), 'dia 31 em mês de 30');
+  assert.ok(rot.includes('("todo mês de março", "todo março" are this one, not a monthly routine)'), '"todo mês de março" é anual');
+  assert.ok(rot.includes('do not bend it and write nothing yet') && rot.includes('Qual fica mais perto?'), 'o que não cabe no vocabulário é perguntado, não adaptado');
+  assert.ok(rot.includes('*"Em que dia?"*'), 'rotina sem dia pergunta o dia, em uma linha');
+  assert.ok(rot.includes('If the file has no `## Rotinas` section, create it right above `## Pendências Resolvidas`'), 'arquivo antigo ganha a seção na primeira rotina');
+  // Rotina, lembrete ou decisão.
+  assert.ok(rot.includes('"todo", "toda", "todos os", "cada", "sempre no dia"'));
+  assert.ok(rot.includes('One date only ("me lembra de ligar sexta", "o seguro vence em março") is the core\'s reminder or dated pending item, never a routine'), 'lembrete de uma data só continua como é');
+  assert.ok(rot.includes('A rule with no day to act on ("todo cliente paga 50% de sinal") is a Decision'));
+  // Datas: calculadas na gravação, com a ferramenta de data, e mostradas ao dono.
+  assert.ok(rot.includes('Compute `próxima` with the date tool and check its weekday with it') && rot.includes('never in your head'));
+  assert.ok(rot.includes('*"Próxima: terça, 20/10."*'), 'a próxima data é confirmada com o dia da semana');
+  assert.ok(rot.includes('eu não mando aviso no celular'), 'a rotina não promete notificação');
+  assert.ok(rot.includes('The missing-deadline question of the Write Flow does not apply here'));
+  // "Feito" não resolve: carimba e espera a próxima.
+  assert.ok(rot.includes('never move a routine to "Pendências Resolvidas"'));
+  assert.ok(rot.includes('`*(feito em YYYY-MM-DD · próxima YYYY-MM-DD)*`'));
+  assert.ok(rot.includes('the new `próxima` is the first date after today — or, when the old `próxima` was still ahead (done early), the first date after that old `próxima`'), 'feito adiantado não faz a mesma data voltar ao radar');
+  assert.ok(rot.includes('One "feito" settles every date that went by unmarked'));
+  // "Feito" repetido ou longe da data não pula uma ocorrência; "feito" solto não carimba a rotina errada.
+  assert.ok(rot.includes('**Done early has a limit.** Stamp without asking only when the old `próxima` has passed or `radar` is showing it') && rot.includes('the line is not already stamped `feito em` today'), 'feito adiantado tem limite');
+  assert.ok(rot.includes('write nothing and ask in ONE line') && rot.includes('Foi essa que você adiantou?') && rot.includes('skip that date only on a yes'), 'rotina em dia: pergunta antes de pular uma data');
+  assert.ok(rot.includes('A "feito" that names none: one routine past or due this week → that one') && rot.includes('(ou "todas")') && rot.includes('none → ask what was done'), 'feito sem nome, com mais de uma rotina vencida, pergunta qual');
+  assert.ok(rot.includes('update `[QUANDO]` and `próxima` in that same line, with the same ✏️ reply'), 'rotina que mudou de data é atualizada no lugar, como o cérebro e o núcleo dizem');
+  assert.ok(reg.includes('a day, a routine or a proposal you cannot tell'), 'o núcleo prevê a pergunta da rotina');
+  assert.ok(rot.includes('An active pending item and a routine both match → ask which one'));
+  assert.ok(rot.includes('Reply with `✏️ Antes: ... → Agora: ...`'), 'a mudança no lugar aparece com antes e depois');
+  assert.ok(BRAIN.includes("(a person's note, a routine done or re-dated, a goal's progress"), 'a política de escrita do cérebro abre a exceção');
+  // Encerrar, desfazer, lote.
+  assert.ok(rot.includes('`- 🚫 **[YYYY-MM-DD]** Rotina encerrada — [Texto, sem o ponto] — [todo mês, dia 5].`') && rot.includes('A routine line is never deleted'));
+  assert.ok(rot.includes('a "feito" gets the previous stamp back') && rot.includes('together with the `## Rotinas` heading, if this entry created it'), 'desfaz devolve o arquivo ao que era');
+  assert.ok(rot.includes('is listed under **Pendências** in the line form above') && registrarFile('lote.md').includes('Read `rotinas.md` when a note says something repeats'));
+  assert.ok(rot.includes('A routine line with no `próxima` (written by hand) stays valid'));
+  assert.ok(rot.includes('with no stamp at all, its next date from today on, today included') && skill('radar').includes('with no stamp at all, its next date from today on (today included)') && skill('radar').includes('never as overdue'), 'rotina à mão sem carimbo: registrar e radar dizem o mesmo');
+  assert.ok(read('CONTRACTS.md').includes('sem carimbo nenhum, a próxima data a partir de hoje (hoje incluso)') && read('CONTRACTS.md').includes('não é gravado sem uma pergunta, para não pular uma data'));
+  assert.ok(rot.includes('A question ("quando vence o DAS?") records nothing'));
+  assert.ok(reg.includes('routines that repeat'));
+
+  // Gatilhos: cérebro, descrição, ajuda, README e CONTRIBUTING dizem o mesmo.
+  // "feito" é o que o radar, a ajuda e o README mandam dizer: tem de rotear.
+  for (const phrase of ['"todo ano em…"', '"feito"', '"paguei…"']) assert.ok(routingRow('registrar').includes(phrase), `o cérebro roteia ${phrase}`);
+  for (const phrase of ['todo ano em', 'feito', 'paguei']) {
+    assert.ok(description('registrar').includes(`'${phrase}'`), `a descrição do registrar cita "${phrase}"`);
+    assert.ok(read('CONTRIBUTING.md').includes(`\`${phrase}\``), `"${phrase}" está na tabela de gatilhos do CONTRIBUTING`);
+  }
+  for (const doc of [skill('ajuda'), read('README.md'), skill('radar')]) assert.ok(/[`"]feito[`"]/.test(doc), 'a ajuda, o README e o radar mandam dizer "feito"');
+  assert.ok(reg.includes('"feito" or "resolvido" (not about a proposal or a 🔁 routine)') && reg.includes('- **Resolved:** ("resolvido", "feito", "paguei…") move the line'), '"feito" sem rotina é a pendência resolvida de sempre');
+  for (const phrase of ['todo dia 20', 'toda segunda']) {
+    assert.ok(routingRow('registrar').includes(`"${phrase}…"`), `o cérebro roteia "${phrase}…"`);
+    assert.ok(description('registrar').includes(`'${phrase}'`), `a descrição do registrar cita "${phrase}"`);
+    for (const doc of [skill('ajuda'), read('README.md'), read('CONTRIBUTING.md')]) assert.ok(doc.includes(phrase), `"${phrase}" está na ajuda, no README e no CONTRIBUTING`);
+  }
+
+  // Radar: compara a próxima data, uma linha por rotina, poucas linhas.
+  const radar = skill('radar');
+  assert.ok(radar.includes('including its `## Rotinas` section when it has one'));
+  assert.ok(radar.includes('a file without that section has none'), 'arquivo antigo, sem a seção, não quebra o radar');
+  assert.ok(radar.includes('are not pending items: never "Aguardando", never counted in "Sem prazo"'), 'a rotina não é lida como pendência');
+  assert.ok(radar.includes('later than this Sunday → it is not shown at all'), 'rotina só aparece na semana dela ou atrasada');
+  assert.ok(radar.includes('One line per routine, however many dates went by unmarked') && radar.includes('with the latest date it fell on before today') && radar.includes('shows `venceu em 20/09`'), 'só a última data perdida conta');
+  assert.ok(reg.includes('a proposal line, a routine done or re-dated, a reason added to a decision'), 'o núcleo lista a rotina feita entre as atualizações no lugar');
+  assert.ok(radar.includes('At most 4 routine lines in the whole radar') && radar.includes('… e mais N rotinas'));
+  assert.ok(radar.includes('never count toward the 5-line limit of overdue items'));
+  assert.ok(radar.includes('• 🔁 [Rotina que cai hoje ou ainda nesta semana] (todo mês | toda semana | todo ano)'), 'a rotina aparece marcada como coisa que se repete');
+  assert.ok(radar.includes('no routine to show and no active project'), 'radar com rotina na semana não é radar vazio');
+  assert.ok(radar.includes('`(feito em …)`') && radar.includes('(deadlines, `próxima`, the next review)'), 'a data futura da rotina não conta como anotação recente');
+  assert.ok(radar.includes('This skill only reads: it never changes a file'));
+
+  // Quem lê o arquivo de pendências entende a seção nova.
+  const semana = skill('semana');
+  assert.ok(semana.includes('a `🔁` routine is never part of this question'), 'a limpeza de vencidos não pergunta por rotina');
+  assert.ok(semana.includes('may be a candidate too') && semana.includes('is not written again and its line is not touched'), 'rotina escolhida como prioridade não vira pendência duplicada');
+  assert.ok(skill('consolidar').includes('A `🔁` line under `## Rotinas` is never a candidate, however old its dates, and is never merged'));
+  assert.ok(read('.agents/cortex/PROTOCOLO_MEMORIA.md').includes('A routine (a `🔁` line under `## Rotinas`) is never archived while it is there'));
+  assert.ok(skill('lembrar').includes('is a routine, something that repeats') && skill('lembrar').includes('never as a pending item or a decision'));
+  assert.ok(skill('lembrar').includes('a `🔁` routine that names them'));
+  assert.ok(skill('cortex-revisao').includes('Alguma dessas rotinas acabou ou mudou de data?') && skill('cortex-revisao').includes('never move one to "Pendências Resolvidas" as done'));
+
+  // Moldes, contrato e exemplo.
+  const template = read('.agents/skills/cortex-onboarding/templates/Memoria/04_Pessoas_Pendencias.md');
+  assert.ok(template.indexOf('## Pendências Ativas') < template.indexOf('## Rotinas') && template.indexOf('## Rotinas') < template.indexOf('## Pendências Resolvidas'), 'a seção fica entre as ativas e as resolvidas');
+  for (const form of ['🔁 **[TODO MÊS: dia 20]**', '🔁 **[TODA SEMANA: segunda]**', '**[TODO ANO: 15/03]**', '**[TODO ANO: março]**', '*(desde YYYY-MM-DD · próxima YYYY-MM-DD)*', '*(feito em YYYY-MM-DD · próxima YYYY-MM-DD)*', 'Rotina encerrada —']) {
+    assert.ok(template.includes(form), `o molde documenta "${form}"`);
+  }
+  assert.ok(!/^- 🔁/m.test(template), 'o molde só traz exemplos em comentário: uma instalação nova não nasce com rotina inventada');
+  assert.ok(read('.agents/skills/cortex-onboarding/templates/Memoria/META.md').includes('| `Memoria/04_Pessoas_Pendencias.md` | `## Rotinas` |'), 'o índice aponta para a seção');
+  const contracts = read('CONTRACTS.md');
+  assert.ok(contracts.includes('**Rotinas (') && contracts.includes('`- 🔁 **[QUANDO]** [Texto] *(desde AAAA-MM-DD · próxima AAAA-MM-DD)*`'));
+  assert.ok(contracts.includes('Arquivo sem a seção `## Rotinas` simplesmente não tem rotinas') && contracts.includes('linha de rotina sem `próxima` (escrita à mão) continua válida'));
+  const example = read('examples/estudio-lumen/Memoria/04_Pessoas_Pendencias.md');
+  const routines = example.split('\n').filter((l) => l.startsWith('- 🔁 '));
+  assert.equal(routines.length, 2, 'o exemplo traz no máximo duas rotinas');
+  for (const l of routines) assert.ok(/^- 🔁 \*\*\[(TODO MÊS: dia \d{1,2}|TODA SEMANA: [a-zçáã]+|TODO ANO: (\d{2}\/\d{2}|[a-zç]+))\]\*\* .+\. \*\((desde|feito em) \d{4}-\d{2}-\d{2} · próxima \d{4}-\d{2}-\d{2}\)\*$/.test(l), `linha de rotina fora da forma: ${l}`);
+  // As datas do exemplo são fixas: a "próxima" de cada linha é mesmo uma data da repetição dela.
+  const next = (l) => new Date(l.match(/próxima (\d{4}-\d{2}-\d{2})/)[1] + 'T00:00:00Z');
+  const monthly = routines.find((l) => l.includes('[TODO MÊS: dia 10]'));
+  assert.equal(next(monthly).getUTCDate(), 10);
+  const yearly = routines.find((l) => l.includes('[TODO ANO: junho]'));
+  assert.equal(next(yearly).toISOString().slice(5, 10), '06-30', 'mês inteiro: a data é o último dia do mês');
+  assert.ok(example.includes('- 🔴 **[DEADLINE 2026-10-20]**') && example.includes('- ✅ **[2026-06-01]** Renovação do seguro de equipamento.'), 'as linhas antigas do exemplo ficam como estavam');
+  assert.ok(read('examples/estudio-lumen/README.md').includes('a rotina de todo dia 10'), 'o README do exemplo diz o que o radar vai mostrar');
+});
+
+// ── Resultado mês a mês ───────────────────────────────────────────
+
+test('resultado mês a mês: uma linha por mês, só com números do dono, e as perguntas saem do que está guardado', () => {
+  const dre = skill('analisador-dre');
+  const form = '`- 📊 **[YYYY-MM]** Receita R$ 42.000 · Custos e despesas R$ 33.600 · Resultado R$ 8.400 · Margem líquida 20% *(analisado em YYYY-MM-DD)*`';
+  assert.ok(dre.includes(form), 'a forma da linha');
+  assert.ok(dre.includes('ONE line in `Memoria/05_Registros_Gerais.md`, under `## Resultado Mês a Mês`, newest month first'), 'seção nova num arquivo que já existe');
+  assert.ok(dre.includes('If the file has no `## Resultado Mês a Mês` section, create it at the end of the file'), 'arquivo antigo ganha a seção no primeiro mês');
+  // O mês e os números: nunca deduzidos.
+  assert.ok(dre.includes('never from today\'s date, never a guess'));
+  assert.ok(dre.includes('A month said with no year ("os números de setembro") is the latest month of that name already over (date tool)') && dre.includes('today\'s date settles only the year, never the month'), 'mês dito sem ano: o ano sai da data, o mês nunca');
+  assert.ok(dre.includes('De que mês são esses números?') && dre.includes('ONE question and write nothing yet') && dre.includes('If the user does not know, keep nothing'), 'sem mês: uma pergunta, ou nada gravado');
+  assert.ok(dre.includes('Only numbers the material brings or that follow from them by arithmetic'));
+  assert.ok(dre.includes('with less, keep nothing and say what is missing') && dre.includes('Never an estimate, never a number taken from the pillar'));
+  assert.ok(dre.includes('a period that is not one month (a quarter, the year\'s total) and the month still running today'), 'trimestre e mês em andamento não viram linha');
+  assert.ok(dre.includes('`Resultado -R$ 1.200 · Margem líquida -4%`'), 'prejuízo tem forma');
+  // Política de escrita: novo grava na hora; o mesmo mês troca no lugar.
+  assert.ok(dre.includes('write it at once, no confirmation, and show it') && dre.includes('(Errou? Diga "desfaz".)'));
+  assert.ok(dre.includes('replace that same line, never a second line for one month') && dre.includes('`✏️ Antes: [linha antiga] → Agora: [linha nova]`'));
+  assert.ok(dre.includes('same numbers** → write nothing'));
+  assert.ok(dre.includes('Re-read the file right before writing and add or change only this line'), 'relê antes de gravar, como todo mundo que escreve');
+  assert.ok(dre.includes('Never touch another month\'s line'));
+  assert.ok(BRAIN.includes('`semana` re-dating an overdue priority and `analisador-dre` updating a month, which show before → after'), 'a política de escrita do cérebro abre a exceção');
+  assert.ok(BRAIN.includes('new entries in `Memoria/` and documents you generate'), 'entrada nova na Memória grava na hora, seja qual for a skill');
+  assert.ok(skill('registrar').includes('(or `semana`, or `analisador-dre`) wrote in this conversation'), 'o desfaz alcança a linha do mês');
+  assert.ok(read('.agents/cortex/PROTOCOLO_MEMORIA.md').includes('`cortex-revisao`, `analisador-dre`)'), 'a lista de quem relê antes de gravar inclui a skill');
+  // Comparação: só quando há com o que comparar.
+  assert.ok(dre.includes('**the closest earlier month kept**') && dre.includes('**the same month of the year before**'));
+  assert.ok(dre.includes('no block at all, and no remark about it'), 'primeiro mês não ganha bloco vazio');
+  assert.ok(dre.includes('The block is only for a month that is kept, just now or before: never for the month still running') && dre.includes('only after the answer, with the ✅'), 'mês em andamento ou ainda sem nome não é comparado');
+  assert.ok(dre.includes('the block for the newest one only, and the ✅ lists every line written') && dre.includes('[a linha gravada — uma por mês, quando forem vários]'), 'vários meses: um bloco, todas as linhas mostradas');
+  assert.ok(dre.includes('📅 Comparando com o que está guardado:') && dre.includes('A margin difference is in "pontos", never in "%"'));
+  // Perguntas sem dados novos.
+  assert.ok(dre.includes('## Answer From What Is Kept') && dre.includes('This mode writes nothing and needs no privacy line'));
+  assert.ok(dre.includes('never ask for a spreadsheet first'), 'pergunta sobre um mês guardado não pede planilha');
+  assert.ok(dre.includes('never the average of the monthly margins'), 'a margem do ano sai dos totais');
+  assert.ok(dre.includes('always say month and year') && dre.includes('Setembro/2026 eu não tenho; o último setembro guardado é o de 2025:'), 'setembro do ano passado não é lido como o mês que acabou');
+  assert.ok(dre.includes('never answer with the pillar\'s margins as if they were the month\'s result') && dre.includes('Traga a planilha ou os números desse mês'), 'mês que não está guardado não é inventado');
+  // Duas margens diferentes, cada uma no seu lugar.
+  assert.ok(dre.includes('Essa é a margem líquida do mês inteiro, depois de todos os custos. A margem de cada trabalho é outra conta: pergunte \'como está minha margem?\'.'));
+  assert.ok(read('.agents/cortex/PROTOCOLO_AUTONOMIA.md').includes('O resultado do mês inteiro, depois de todos os custos, é outra conta: pergunte \'como foi [mês]?\'.'), 'o Guardião aponta para o resultado do mês');
+  assert.ok(!routingRow('analisador-dre').includes('margem'), '"como está minha margem?" continua só na linha do Guardião');
+  // O que a skill já prometia continua lá.
+  assert.ok(dre.includes('**is not an ERP and doesn\'t do accounting**') && dre.includes('**Not financial consultancy.**'));
+
+  // Gatilhos: cérebro, descrição, ajuda, README e CONTRIBUTING dizem o mesmo.
+  for (const phrase of ['"como foi [mês]?"', '"como está o ano?"', '"analisar DRE"']) assert.ok(routingRow('analisador-dre').includes(phrase), `o cérebro roteia ${phrase}`);
+  for (const phrase of ['como foi setembro?', 'como está o ano?']) {
+    assert.ok(description('analisador-dre').includes(`'${phrase}'`), `a descrição cita "${phrase}"`);
+    for (const doc of [skill('ajuda'), read('README.md'), read('CONTRIBUTING.md')]) assert.ok(doc.includes(phrase), `"${phrase}" está na ajuda, no README e no CONTRIBUTING`);
+  }
+  assert.ok(description('analisador-dre').includes("'compara setembro com agosto'") && read('CONTRIBUTING.md').includes('compara setembro com agosto'));
+
+  // Quem lê a Memória entende a linha nova e não a leva embora.
+  assert.ok(skill('consolidar').includes('A `📊` line under `## Resultado Mês a Mês` of `Memoria/05_Registros_Gerais.md`') && skill('consolidar').includes('is never a candidate and is never merged, however old'));
+  assert.ok(read('.agents/cortex/PROTOCOLO_MEMORIA.md').includes('A month\'s result (a `📊` line under `## Resultado Mês a Mês`) is never archived or merged'));
+  assert.ok(skill('lembrar').includes('is the result of one month') && skill('lembrar').includes('never as a decision or a lesson, never recomputed'));
+  assert.ok(skill('radar').includes('`(analisado em …)`'), 'analisar um mês conta como anotação recente');
+  assert.ok(!skill('radar').includes('Resultado Mês a Mês') && !skill('semana').includes('Resultado Mês a Mês'), 'radar e fechamento da semana não mostram essas linhas');
+
+  // Moldes, contrato e exemplo.
+  const template = read('.agents/skills/cortex-onboarding/templates/Memoria/05_Registros_Gerais.md');
+  assert.ok(template.includes('## Resultado Mês a Mês') && template.includes('📊 **[YYYY-MM]** Receita R$ 42.000 · Custos e despesas R$ 33.600 · Resultado R$ 8.400 · Margem líquida 20% *(analisado em YYYY-MM-DD)*'));
+  assert.ok(!/^- 📊/m.test(template), 'o molde só traz o exemplo em comentário: uma instalação nova não nasce com mês inventado');
+  assert.ok(read('.agents/skills/cortex-onboarding/templates/Memoria/META.md').includes('| `Memoria/05_Registros_Gerais.md` | `## Resultado Mês a Mês` |'), 'o índice aponta para a seção');
+  const contracts = read('CONTRACTS.md');
+  assert.ok(contracts.includes('**Resultado mês a mês (') && contracts.includes('`- 📊 **[AAAA-MM]** Receita R$ 42.000 · Custos e despesas R$ 33.600 · Resultado R$ 8.400 · Margem líquida 20% *(analisado em AAAA-MM-DD)*`'));
+  assert.ok(contracts.includes('nunca há duas linhas do mesmo mês') && contracts.includes('Arquivo sem a seção simplesmente não tem meses guardados') && contracts.includes('nunca são arquivadas nem fundidas'));
+  const example = read('examples/estudio-lumen/Memoria/05_Registros_Gerais.md');
+  const months = example.split('\n').filter((l) => l.startsWith('- 📊 '));
+  assert.equal(months.length, 2, 'o exemplo traz no máximo dois meses');
+  const num = (s) => Number(s.replace(/\./g, '').replace(',', '.'));
+  for (const l of months) {
+    const m = l.match(/^- 📊 \*\*\[(\d{4}-\d{2})\]\*\* Receita R\$ ([\d.]+) · Custos e despesas R\$ ([\d.]+) · Resultado (-?)R\$ ([\d.]+) · Margem líquida (-?[\d,]+)% \*\(analisado em (\d{4}-\d{2}-\d{2})\)\*$/);
+    assert.ok(m, `linha de mês fora da forma: ${l}`);
+    // A conta do exemplo fecha: resultado = receita − custos, margem = resultado ÷ receita.
+    assert.equal(num(m[2]) - num(m[3]), num(m[5]));
+    assert.equal(Math.round((num(m[5]) / num(m[2])) * 1000) / 10, num(m[6]));
+    assert.ok(m[7].slice(0, 7) > m[1], 'o mês foi analisado depois de fechar');
+  }
+  assert.deepEqual(months.map((l) => l.match(/\[(\d{4}-\d{2})\]/)[1]), ['2026-08', '2026-07'], 'o mais novo em cima');
+  assert.ok(example.includes('- Meses de dezembro e janeiro são tradicionalmente mais fracos'), 'as linhas antigas do exemplo ficam como estavam');
+  assert.ok(read('examples/estudio-lumen/README.md').includes('como foi agosto?'));
 });
 
 // ── Comercial e pessoas ───────────────────────────────────────────
@@ -291,7 +490,7 @@ test('proposta: do "enviei" ao "fechou ou perdeu", numa linha de espera que vers
   assert.ok(semana.includes('the 🧾 line always has both halves, with `0` where there is none'), 'a linha das propostas sai inteira');
   assert.ok(semana.includes('leave the line untouched, date included, and omit the 🎯 line in the close. If the answer brings anything new, even with the same number'), 'meta sem novidade não ganha data nova');
   assert.ok(skill('cortex-revisao').includes("close it as the `registrar` skill's `propostas.md` describes"), 'a revisão fecha proposta com desfecho, não como item resolvido comum');
-  assert.ok(read('.agents/cortex/PROTOCOLO_MEMORIA.md').includes('(`registrar`, `semana`, `consolidar`, `cortex-revisao`)'), 'a revisão também relê antes de gravar');
+  assert.ok(read('.agents/cortex/PROTOCOLO_MEMORIA.md').includes('(`registrar`, `semana`, `consolidar`, `cortex-revisao`, `analisador-dre`)'), 'a revisão também relê antes de gravar');
 
   const template = read('.agents/skills/cortex-onboarding/templates/Memoria/04_Pessoas_Pendencias.md');
   for (const form of ['Resposta da proposta —', 'Proposta fechada —', 'Proposta perdida —', '— motivo:']) {

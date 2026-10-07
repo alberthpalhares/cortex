@@ -88,5 +88,15 @@
     "version": "1.7.0",
     "texto": "Algo não funcionou ou você tem uma ideia para o Córtex? Eu escrevo um recado curto para o criador, sem nenhum dado do seu negócio, e você decide se envia.",
     "diga": "tenho uma sugestão para o Córtex"
+  },
+  {
+    "version": "1.8.0",
+    "texto": "Agora eu guardo o que se repete: diga uma vez \"todo dia 20 pago o DAS\" (ou \"toda segunda…\", \"todo ano em março…\") e isso volta ao seu radar na semana de cada data. Quando fizer, diga \"feito\" e eu passo a esperar a próxima",
+    "diga": "todo dia 20…"
+  },
+  {
+    "version": "1.8.0",
+    "texto": "Agora eu guardo o resultado de cada mês que você me traz (receita, custos, resultado e margem) e comparo com o mês anterior e com o mesmo mês do ano passado. Depois é só perguntar",
+    "diga": "como foi setembro?"
   }
 ]

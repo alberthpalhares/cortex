@@ -1,11 +1,13 @@
 ---
 name: analisador-dre
-description: "Reads a DRE or spreadsheet the user provides and cross-references it against the Financial pillar's margin targets. Trigger with: 'analisar DRE', 'analisa essa planilha', 'analisa esses números'. Needs data the user brings: a bare 'como está minha margem?' with no spreadsheet is a Margin Guardian question, not this skill."
+description: "Reads a DRE or spreadsheet the user provides, cross-references it against the Financial pillar's margin targets and keeps one line per month, so months can be compared. Trigger with: 'analisar DRE', 'analisa essa planilha', 'analisa esses números'. With no new data, answers from the months already kept: 'como foi setembro?', 'compara setembro com agosto', 'como está o ano?'. A bare 'como está minha margem?' with no spreadsheet is a Margin Guardian question (margin per job), not this skill."
 ---
 
 # Skill: Analisador de DRE
 
 This skill **is not an ERP and doesn't do accounting**. It only analyzes the data the user brings (spreadsheet, screenshot, pasted text) and cross-references it against the targets already registered in the Córtex — it never computes cash flow or projections on its own without real numbers in hand.
+
+**Which case is this?** New data (a file, a screenshot, numbers pasted or typed), or a request to analyse → the Step by Step, then "Keep the Month". A question about a month, two months or the year with no new data ("como foi setembro?", "compara setembro com agosto", "como está o ano?") → only "Answer From What Is Kept": never ask for a spreadsheet first.
 
 ## Step by Step
 
@@ -28,6 +30,8 @@ This skill **is not an ERP and doesn't do accounting**. It only analyzes the dat
 
 5. **Generate the diagnosis** in the format below. If some required data wasn't in the material (e.g. only revenue, no costs), say exactly what's missing instead of estimating it.
 
+6. **Then "Keep the Month"**, below: the comparison block and the record close the same reply.
+
 ## Output Format
 
 ```
@@ -45,7 +49,54 @@ This skill **is not an ERP and doesn't do accounting**. It only analyzes the dat
 [📉/📈 Tendência, se houver mais de um período]
 
 💡 Observação: [1-2 linhas objetivas — nunca conselho financeiro genérico, só o que os números mostram]
+
+[📅 Comparando com o que está guardado — SOMENTE se houver outro mês guardado]
+
+[✅ Guardei o resultado de … | ✏️ Antes: … → Agora: … | a pergunta do mês]
 ```
+
+## Keep the Month
+
+Each month analysed is ONE line in `Memoria/05_Registros_Gerais.md`, under `## Resultado Mês a Mês`, newest month first:
+
+`- 📊 **[YYYY-MM]** Receita R$ 42.000 · Custos e despesas R$ 33.600 · Resultado R$ 8.400 · Margem líquida 20% *(analisado em YYYY-MM-DD)*`
+
+1. **Which month.** It comes from the material (a title, a date column, the file name) or from what the user said — never from today's date, never a guess. A month said with no year ("os números de setembro") is the latest month of that name already over (date tool): today's date settles only the year, never the month, and the ✅ shows it ("setembro/2026"). If nothing says it, end the diagnosis with ONE question and write nothing yet: *"De que mês são esses números? Assim eu guardo para comparar com os próximos."* If the user does not know, keep nothing. Material with several months → one line for each month that has its own numbers. Not kept, and said in one line (*"Só guardo mês fechado, um por linha."*): a period that is not one month (a quarter, the year's total) and the month still running today (date tool).
+2. **Which numbers.** Only numbers the material brings or that follow from them by arithmetic (result = revenue − costs; margin = result ÷ revenue × 100, at most one decimal). The minimum is revenue plus either the total of costs and expenses or the result; with less, keep nothing and say what is missing. Never an estimate, never a number taken from the pillar. A loss carries a minus sign: `Resultado -R$ 1.200 · Margem líquida -4%`. Values in the Brazilian form, with cents only when the material has them.
+3. **Write.** Get today's date from the date tool. Re-read the file right before writing and add or change only this line — never write the whole file back from an earlier read. If the file has no `## Resultado Mês a Mês` section, create it at the end of the file.
+   - **Month not there yet** → a new entry: write it at once, no confirmation, and show it:
+
+     ```
+     ✅ Guardei o resultado de [setembro/2026]:
+     [a linha gravada — uma por mês, quando forem vários]
+     (Errou? Diga "desfaz".)
+     ```
+   - **Month already there, different numbers** → replace that same line, never a second line for one month, and show `✏️ Antes: [linha antiga] → Agora: [linha nova]` with the same "desfaz" hint.
+   - **Month already there, same numbers** → write nothing; say it was already kept.
+4. **"Desfaz"** removes the line this skill just wrote (or puts the previous one back), together with the heading if this record created it, leaving the file exactly as it was.
+5. Never touch another month's line, and never write these numbers anywhere else — not in the pillar, not as a decision.
+
+## Compare With Earlier Months
+
+When the section holds other months, the diagnosis ends — before the ✅ / ✏️ — with one line against **the closest earlier month kept** and, if it is there, one against **the same month of the year before**. Nothing else to compare with → no block at all, and no remark about it. The block is only for a month that is kept, just now or before: never for the month still running or a period that is not one month, and, when the month had to be asked, only after the answer, with the ✅. Material with several months → the block for the newest one only, and the ✅ lists every line written.
+
+```
+📅 Comparando com o que está guardado:
+   • Agosto/2026 → setembro/2026: receita R$ 38.000 → R$ 42.000 (+R$ 4.000, +10,5%) · resultado R$ 6.080 → R$ 8.400 (+R$ 2.320) · margem líquida 16% → 20% (+4 pontos)
+   • Setembro/2025 → setembro/2026: [o mesmo]
+```
+
+A margin difference is in "pontos", never in "%". Compute each difference from the two lines, then check it by adding it back to the earlier number. A kept line that lacks a number (written by hand) is compared only on what it has.
+
+## Answer From What Is Kept
+
+No new data: read only the `## Resultado Mês a Mês` section and answer from its lines. This mode writes nothing and needs no privacy line.
+
+- **One month** ("como foi setembro?") → that month in plain words (receita, custos e despesas, resultado, margem líquida, and *"números que você me trouxe em DD/MM/AAAA"*), then the 📅 block above. A month said without a year is the most recent one kept with that name; always say month and year. When the latest month of that name already over (date tool) is not the one kept, say so first — *"Setembro/2026 eu não tenho; o último setembro guardado é o de 2025:"* — and end with the invitation below.
+- **Two months** ("compara setembro com agosto") → one 📅 line, earlier → later.
+- **The year** ("como está o ano?") → the months kept for the current year (date tool), one short line each, then the total: revenue, costs and result summed, and the year's margin = summed result ÷ summed revenue × 100 — never the average of the monthly margins. Say which months already over are not kept (*"Faltam janeiro a junho."*); never fill them in.
+- **The month, or the whole section, is not there** → say so, name the months that are kept, and add: *"Traga a planilha ou os números desse mês e diga 'analisar DRE' que eu guardo."* Never estimate it, and never answer with the pillar's margins as if they were the month's result.
+- **The word "margem" is in the question** ("como foi a margem de setembro?") → answer, then one line: *"Essa é a margem líquida do mês inteiro, depois de todos os custos. A margem de cada trabalho é outra conta: pergunte 'como está minha margem?'."*
 
 ## Rules
 
@@ -54,3 +105,4 @@ This skill **is not an ERP and doesn't do accounting**. It only analyzes the dat
 3. **Never decides on its own to update the Financial pillar.** If the diagnosis suggests revisiting `margem_alvo` or `margem_minima`, ask before editing the frontmatter.
 4. **Relative paths.** All paths are relative to the workspace root.
 5. **Suggest registering it.** If the diagnosis reveals something important (e.g. margin consistently below the minimum), suggest `registra que...` to leave a documented decision or lesson.
+6. **A month line is not a decision, a lesson or a pending item**, and it is never archived: the same month of other years is what makes the comparison possible.

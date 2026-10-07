@@ -120,6 +120,7 @@ Se você ainda não sabe a sua margem, ela não trava nem chuta: conduz você a 
 | **No dia a dia** | `radar` | O que está atrasado, parado e em que focar hoje |
 | | `registra que...` | Guarda uma decisão, lição, pendência ou pessoa (errou? `desfaz`) |
 | | `me lembra de...` | Vira uma pendência com data, que aparece no radar (ela não manda aviso no celular) |
+| | `todo dia 20...` ou `toda segunda...` | Guarda o que se repete (imposto, aluguel, relatório, renovação anual): volta ao radar na semana de cada data, e `feito` só marca a vez e espera a próxima |
 | | `anota a reunião` | Você cola as anotações; ela separa decisões, pendências e lições |
 | | `anota isso` | Você cola o que ditou ou mandou para si mesmo no WhatsApp; cada anotação fica com a data do dia dela |
 | | `estou em dúvida entre A e B` | Pesa as duas opções com o que você já decidiu e aprendeu, e guarda a escolha com o porquê |
@@ -132,7 +133,8 @@ Se você ainda não sabe a sua margem, ela não trava nem chuta: conduz você a 
 | | `preparar reunião com [pessoa]` | O que está em aberto, o que já foi combinado e até onde você pode ir |
 | | `descobrir minha margem` | Em 5 minutos, com um trabalho seu de verdade, descobrimos quanto sobra de cada venda — não precisa saber nada antes |
 | | `quanto cobrar por...` | A partir do custo, calcula o preço mínimo e o preço-alvo que respeitam a sua margem |
-| | `analisar DRE` | Compara seus números com as suas metas de margem |
+| | `analisar DRE` | Compara seus números com as suas metas de margem e guarda o resultado do mês (receita, custos, resultado e margem) |
+| | `como foi setembro?` ou `como está o ano?` | Compara os meses que você já trouxe: com o mês anterior, com o mesmo mês do ano passado e o acumulado do ano |
 | | `pesquisar concorrência` | Quem são, quanto cobram, onde você se diferencia |
 | **Para cuidar do Córtex** | `continuar onboarding` | Completa o que ficou faltando, um bloco de 2–5 minutos por vez |
 | | `saúde do córtex` | Mostra o que ainda está em branco |

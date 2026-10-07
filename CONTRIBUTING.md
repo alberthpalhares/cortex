@@ -45,7 +45,7 @@ Segurança é um requisito inegociável no Córtex. Ao submeter qualquer código
 
 Skills são o principal formato de contribuição no Córtex. Elas devem ser salvas na pasta `.agents/skills/<nome-da-skill>/SKILL.md`.
 
-Uma skill que cresceu demais pode ter **arquivos de apoio** na mesma pasta, lidos só quando o caso pede. O `registrar` é o exemplo: o `SKILL.md` é o núcleo (no máximo 2.000 palavras, conferido em `test/unit/dia-a-dia.test.js`) e manda ler `lote.md`, `propostas.md` ou `decisoes.md` conforme a frase do usuário. Cada regra mora em um arquivo só, e as referências entre arquivos usam o título da seção ou o nome do arquivo, nunca o número da seção.
+Uma skill que cresceu demais pode ter **arquivos de apoio** na mesma pasta, lidos só quando o caso pede. O `registrar` é o exemplo: o `SKILL.md` é o núcleo (no máximo 2.000 palavras, conferido em `test/unit/dia-a-dia.test.js`) e manda ler `lote.md`, `propostas.md`, `rotinas.md` ou `decisoes.md` conforme a frase do usuário. Cada regra mora em um arquivo só, e as referências entre arquivos usam o título da seção ou o nome do arquivo, nunca o número da seção.
 
 ### Estrutura obrigatória de uma Skill:
 
@@ -80,7 +80,7 @@ Com mais de uma dúzia de skills convivendo no mesmo cérebro, a IA precisa sabe
 | Skill | Verbo primário | Gatilhos secundários |
 |-------|---------------|---------------------|
 | `radar` | `radar` | `status`, `como estamos?`, `briefing` (sozinho; "briefing da reunião com…" é do `lembrar`) |
-| `registrar` | `registra` | `nova lição`, `nova pendência`, `decidi que`, `estou em dúvida entre`, `resolvido`, `me lembra de`, `lembrete`, `desfaz`, `corrige o último`, `anota a reunião`, `anota isso`, `cliente novo`, `a meta do trimestre é`, `enviei a proposta`, `mandei o orçamento`, `a proposta fechou`, `perdemos a proposta` |
+| `registrar` | `registra` | `nova lição`, `nova pendência`, `decidi que`, `estou em dúvida entre`, `resolvido`, `me lembra de`, `lembrete`, `todo dia 20`, `toda segunda`, `todo ano em`, `feito`, `paguei`, `desfaz`, `corrige o último`, `anota a reunião`, `anota isso`, `cliente novo`, `a meta do trimestre é`, `enviei a proposta`, `mandei o orçamento`, `a proposta fechou`, `perdemos a proposta` |
 | `lembrar` | `o que você sabe sobre` | `você lembra de`, `qual era o combinado com`, `o que já decidimos sobre`, `procura na memória`, `preparar reunião com`, `briefing da reunião com` |
 | `semana` | `fechar a semana` | `revisão da semana`, `resumo da semana` |
 | `conteudo` | `cria um post` | `escreve uma legenda`, `mensagem de WhatsApp`, `ideias de conteúdo`, `responde esse cliente`, `como respondo isso?`, `cobra o [cliente]`, `mensagem de cobrança`, `mensagem de retorno` |
@@ -92,7 +92,7 @@ Com mais de uma dúzia de skills convivendo no mesmo cérebro, a IA precisa sabe
 | `consolidar` | `consolidar memória` | `arquivar memória`, `a memória está grande` |
 | `proposta-comercial` | `gerar proposta` | `monta uma proposta`, `proposta comercial`, `orçamento para`, `cotação para` |
 | *(modo do protocolo)* Guardião de Margem | `descobrir minha margem` | `posso dar desconto?`, `quanto cobrar por`, `como está minha margem?`, `vale a pena?` |
-| `analisador-dre` | `analisar DRE` | `analisa essa planilha`, `analisa esses números` (sempre com dados que o usuário traz) |
+| `analisador-dre` | `analisar DRE` | `analisa essa planilha`, `analisa esses números` (sempre com dados que o usuário traz); sem dados novos, responde pelos meses já guardados: `como foi setembro?`, `compara setembro com agosto`, `como está o ano?` |
 | `pesquisa-mercado` | `pesquisar concorrência` | `mapear concorrentes`, `quem são meus concorrentes` |
 | `cortex doctor` (CLI) | `cortex doctor` | `npx @aksp/cortex doctor` |
 
@@ -253,7 +253,7 @@ Os testes automáticos conferem o texto das skills, não o que a IA faz com ele.
 
 | # | Você diz | O que tem de acontecer |
 |---|---|---|
-| 1 | `radar` | Mostra o item aguardando com o nome de quem se espera e "há N dias". A pendência com prazo aparece em "Atrasados / urgentes" se já venceu ou vence nesta semana; se vence mais adiante, aparece pelo nome, com a data, em "Depois / sem prazo", junto de "Sem prazo: 1 item". No máximo uma sugestão. Nenhum arquivo muda. |
+| 1 | `radar` | Mostra o item aguardando com o nome de quem se espera e "há N dias". A pendência com prazo aparece em "Atrasados / urgentes" se já venceu ou vence nesta semana; se vence mais adiante, aparece pelo nome, com a data, em "Depois / sem prazo", junto de "Sem prazo: 1 item". A rotina de todo dia 10 (as notas para o contador) aparece com 🔁 em "Atrasados / urgentes" quando a data dela cai na semana ou já passou; a rotina anual do seguro não aparece. No máximo uma sugestão. Nenhum arquivo muda. |
 | 2 | `quais são minhas pendências?` | Responde como consulta (radar), citando as três pendências ativas pelo nome. Nada é gravado. |
 | 3 | `me lembra de ligar para o Rafael na sexta` | Grava uma pendência com a data da próxima sexta, confirma com dia da semana e diz que aparece no radar, sem prometer aviso no celular. |
 | 4 | `desfaz` | Remove exatamente a linha do item 3. O arquivo volta a ser igual ao da cópia intocada. |
@@ -265,6 +265,10 @@ Os testes automáticos conferem o texto das skills, não o que a IA faz com ele.
 | 10 | `desfaz` (depois do `pode gravar` do item 9) | Remove todas as linhas do item 9 e lista o que saiu. |
 | 11 | `fechar a semana`, e **responda cada pergunta** que ela fizer (a lição, as 3 prioridades, como vai a meta) | Olhar para trás, duas perguntas (a segunda já diz até que sexta), meta do trimestre; fecha mostrando o prazo de cada prioridade e, no primeiro fechamento da pasta, o bloco 📅 (grava uma linha `Lembretes na agenda` em `05_Registros_Gerais.md`). Um prazo que ainda está no futuro (o vídeo, 20/10) não é alterado, e a linha "aguardando" do Grupo Andradas continua lá, intacta. Se parar na primeira pergunta, o resto do fechamento não é testado. |
 | 12 | `como está minha margem?` | Responde com as margens do pilar financeiro (Guardião de Margem), sem pedir planilha. |
+| 13 | `todo dia 5 pago o aluguel do estúdio` | Uma linha nova com 🔁 e `[TODO MÊS: dia 5]` na seção `## Rotinas`, com a próxima data confirmada com o dia da semana. Nenhuma pendência com prazo é criada e nada é perguntado. |
+| 14 | `já mandei as notas pro contador` | A linha da rotina continua em `## Rotinas`: só o carimbo do fim muda (`feito em` com a data de hoje e `próxima` no dia 10 seguinte), mostrado como ✏️ Antes → Agora. Nada vai para "Pendências Resolvidas". |
+| 15 | `como foi agosto?` | Responde com a linha de agosto/2026 guardada em `## Resultado Mês a Mês` (receita de R$ 18.000, resultado de R$ 4.500, margem líquida de 25%) e compara com julho (+R$ 2.800 de receita, +5 pontos de margem). Não pede planilha, não grava nada e não responde com as margens do pilar. |
+| 16 | `analisa esses números de setembro: faturei 21.400 e gastei 14.980 no total` | Diagnóstico, comparação com agosto e UMA linha nova `📊 **[2026-09]**` no topo da seção (resultado de R$ 6.420, margem líquida de 30%), mostrada com a dica do `desfaz`. Repetir com outro valor troca a mesma linha (✏️ Antes → Agora), sem criar a segunda. |
 
 Anote no PR o que falhou e em qual ferramenta. Falha de roteamento (a frase caiu na skill errada) quase sempre se corrige na tabela do cérebro ou na `description` da skill.
 

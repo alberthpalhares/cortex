@@ -1,0 +1,25 @@
+Read this when the user says something repeats ("todo dia 20 pago o DAS", "toda segunda mando o relatório"), says a routine was done ("feito", "paguei o DAS"), or changes or ends one. The core (`SKILL.md`, in this folder) still holds: its write flow (real date, re-read before writing, the step 7 reply), its undo rules and what never goes in.
+
+## Routines: What Repeats
+A routine is something the user has to do again every time a date comes back. It is ONE line that never goes away: `radar` shows it in the week of each date. It is a memory aid, not a payment control: no history of each time, no amounts paid.
+
+- **Routine, reminder or decision?** A repeating word tied to a day — "todo", "toda", "todos os", "cada", "sempre no dia", "mensal", "anual" — is a routine, even after "me lembra" ("me lembra todo dia 20 de…"). One date only ("me lembra de ligar sexta", "o seguro vence em março") is the core's reminder or dated pending item, never a routine. A rule with no day to act on ("todo cliente paga 50% de sinal") is a Decision.
+- **Line** → `Memoria/04_Pessoas_Pendencias.md`, section `## Rotinas`: `- 🔁 **[QUANDO]** [Texto] *(desde YYYY-MM-DD · próxima YYYY-MM-DD)*`. `[Texto]` is what has to be done, with a capital letter and a period ("Pagar o DAS."). If the file has no `## Rotinas` section, create it right above `## Pendências Resolvidas`.
+- **`[QUANDO]` is one of these four, and nothing else:**
+  - `[TODO MÊS: dia 20]` — a day from 1 to 31; in a shorter month, its last day
+  - `[TODA SEMANA: segunda]` — segunda, terça, quarta, quinta, sexta, sábado or domingo
+  - `[TODO ANO: 15/03]` — a day and a month
+  - `[TODO ANO: março]` — a month with no day ("todo mês de março", "todo março" are this one, not a monthly routine): its date is the last day of that month
+
+  When the day is missing ("todo mês pago o contador"), ask in ONE line: *"Em que dia?"* When it fits none of the four (every day, every two weeks, every quarter, "quinto dia útil"), do not bend it and write nothing yet: *"Consigo repetir toda semana (num dia da semana), todo mês (num dia) ou todo ano (numa data ou num mês). Qual fica mais perto?"*
+- **`próxima`** is the next date the routine falls on; when creating, the first one after today. `desde` is today. Compute `próxima` with the date tool and check its weekday with it, as in the core's Reminders — never in your head. The missing-deadline question of the Write Flow does not apply here.
+- **Reply:** the step 7 reply plus one line between the ✅ and the "desfaz" hint: *"Próxima: terça, 20/10."* The first time in a conversation, that line goes on: *"Aparece no seu radar na semana de cada data — eu não mando aviso no celular. Quando fizer, diga "feito"."*
+- **Done** ("feito", "paguei o DAS", "resolvido" about a 🔁 line): never move a routine to "Pendências Resolvidas". Replace its final stamp, in place, with `*(feito em YYYY-MM-DD · próxima YYYY-MM-DD)*`: `feito em` is today, or the day the user says; the new `próxima` is the first date after today — or, when the old `próxima` was still ahead (done early), the first date after that old `próxima`. One "feito" settles every date that went by unmarked. Reply with `✏️ Antes: ... → Agora: ...` and the *"Próxima: …"* line.
+  - **Done early has a limit.** Stamp without asking only when the old `próxima` has passed or `radar` is showing it (up to this Sunday; for `[TODO ANO: mês]`, its month) and the line is not already stamped `feito em` today. Otherwise write nothing and ask in ONE line — *"Essa já está em dia: a próxima é só em 20/10. Foi essa que você adiantou?"* — and skip that date only on a yes.
+  - **Which routine.** A "feito" that names none: one routine past or due this week → that one; more than one → ask, *"Qual delas: [texto] ou [texto]? (ou "todas")"*; none → ask what was done. An active pending item and a routine both match → ask which one.
+- **Changed** ("o DAS agora vence dia 25") → update `[QUANDO]` and `próxima` in that same line, with the same ✏️ reply.
+- **Ended** ("não pago mais o aluguel", "encerra a rotina do relatório") → move the line to "Pendências Resolvidas" as `- 🚫 **[YYYY-MM-DD]** Rotina encerrada — [Texto, sem o ponto] — [todo mês, dia 5].`, dated today, and show it with the ✅. A routine line is never deleted.
+- **Undo** is the core's: a routine just created is removed (together with the `## Rotinas` heading, if this entry created it), a "feito" gets the previous stamp back, an ended routine returns to `## Rotinas` as it was.
+- **In a batch** (`lote.md`): a routine found in the notes is listed under **Pendências** in the line form above; a routine the notes say was done is not listed — offer it in ONE line after the ✅: *"Quer que eu marque a rotina "[texto]" como feita?"*
+- A routine line with no `próxima` (written by hand) stays valid: its `próxima` is the first date after the date in its stamp — with no stamp at all, its next date from today on, today included — and it is written in the next time the routine is marked done.
+- A question ("quando vence o DAS?") records nothing.

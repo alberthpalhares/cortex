@@ -27,4 +27,4 @@ O ZIP traz estes mesmos dados e mais as habilidades da IA (a pasta `.agents/`, c
 
 **Nesta pasta do repositório ficam só os dados** do negócio de exemplo: a pasta `.agents/` não é copiada para cá, para não duplicar o framework. Por isso, abrir esta pasta direto do repositório não basta: sem as habilidades, a IA não tem as instruções para seguir. O ZIP é montado a cada versão por `npm run build:zip`, que junta as duas partes.
 
-As datas do exemplo são fixas (o único prazo é 20/10/2026): o que o radar mostra como atrasado depende do dia em que você abre.
+As datas do exemplo são fixas (o único prazo é 20/10/2026, e a rotina de todo dia 10 está em aberto a partir de 10/10/2026): o que o radar mostra como atrasado depende do dia em que você abre. Há também dois meses de resultado guardados (julho e agosto de 2026): pergunte `como foi agosto?`.

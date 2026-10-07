@@ -59,7 +59,9 @@
 | Meta do trimestre | `Memoria/03_Projetos.md` | `## Metas do Trimestre` |
 | Pessoas-chave: clientes, fornecedores, parceiros, equipe | `Memoria/04_Pessoas_Pendencias.md` | `## Stakeholders (Pessoas-Chave)` |
 | Pendências ativas e propostas sem resposta | `Memoria/04_Pessoas_Pendencias.md` | `## Pendências Ativas` |
+| Rotinas: o que se repete todo mês, toda semana ou todo ano | `Memoria/04_Pessoas_Pendencias.md` | `## Rotinas` |
 | Onde ficam os acessos, anotações diversas | `Memoria/05_Registros_Gerais.md` | — |
+| Resultado mês a mês: receita, custos, resultado e margem líquida de cada mês | `Memoria/05_Registros_Gerais.md` | `## Resultado Mês a Mês` |
 <!-- Include a line for Memoria/_Arquivo/ (with the available year(s)) ONLY after the "consolidar" skill creates the first file there -->
 
 ## Pilares Customizados

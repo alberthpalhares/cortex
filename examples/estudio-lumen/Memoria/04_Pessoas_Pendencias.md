@@ -9,6 +9,10 @@
 - ⏳ **[AGUARDANDO: Grupo Andradas]** Enviar contrato de recorrência assim que confirmarem o sinal. *(desde 2026-09-28)*
 - ⏳ **[SEM PRAZO]** Pesquisar um seguro de equipamento mais barato para a próxima renovação. *(desde 2026-09-15)*
 
+## Rotinas
+- 🔁 **[TODO MÊS: dia 10]** Enviar as notas fiscais do mês ao contador (Rafael Costa). *(desde 2026-09-15 · próxima 2026-10-10)*
+- 🔁 **[TODO ANO: junho]** Renovar o seguro de equipamento. *(feito em 2026-06-01 · próxima 2027-06-30)*
+
 ## Pendências Resolvidas
 - ✅ **[2026-06-01]** Renovação do seguro de equipamento.
 - ✅ **[2026-07-05]** Atualização do portfólio no site com os projetos do primeiro semestre.

@@ -33,7 +33,9 @@
 | Projetos ativos e pipeline | `Memoria/03_Projetos.md` | — |
 | Stakeholders (pessoas-chave) | `Memoria/04_Pessoas_Pendencias.md` | `## Stakeholders (Pessoas-Chave)` |
 | Pendências ativas | `Memoria/04_Pessoas_Pendencias.md` | `## Pendências Ativas` |
+| Rotinas: o que se repete todo mês, toda semana ou todo ano | `Memoria/04_Pessoas_Pendencias.md` | `## Rotinas` |
 | Anotações diversas | `Memoria/05_Registros_Gerais.md` | — |
+| Resultado mês a mês: receita, custos, resultado e margem líquida de cada mês | `Memoria/05_Registros_Gerais.md` | `## Resultado Mês a Mês` |
 
 ## Pilares Customizados
 

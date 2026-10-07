@@ -172,7 +172,7 @@ const EXAMPLE_ZIP_README = [
   '',
   'A IA não reagiu? Confira se você abriu esta pasta (e não a pasta de cima) e escreva no chat: "Leia o arquivo AGENTS.md e siga as instruções."',
   '',
-  'As datas do exemplo são fixas (o único prazo é 20/10/2026): o que o radar mostra como atrasado depende do dia em que você abre.',
+  'As datas do exemplo são fixas (o único prazo é 20/10/2026, e a rotina de todo dia 10 está em aberto a partir de 10/10/2026): o que o radar mostra como atrasado depende do dia em que você abre. Há também dois meses de resultado guardados (julho e agosto de 2026): pergunte `como foi agosto?`.',
   '',
   'Para montar o Córtex do seu negócio: https://github.com/alberthpalhares/cortex',
   '',

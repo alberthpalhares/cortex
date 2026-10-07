@@ -58,7 +58,7 @@ After going through the existing pillars:
 
 1. Read `Memoria/04_Pessoas_Pendencias.md`
 2. Show the active pending items and ask: *"Alguma dessas já foi resolvida ou pode ser removida?"*
-3. Move resolved ones to the "Pendências Resolvidas" section in the `registrar` skill's "Resolved" format, stamped with today's real date. A `Resposta da proposta` line is a proposal: ask *"Fechou ou não fechou?"* in one line and close it as the `registrar` skill's `propostas.md` describes ("Proposals: Sent, Won, Lost") (`Proposta fechada` / `Proposta perdida … — motivo:`)
+3. Move resolved ones to the "Pendências Resolvidas" section in the `registrar` skill's "Resolved" format, stamped with today's real date. A `Resposta da proposta` line is a proposal: ask *"Fechou ou não fechou?"* in one line and close it as the `registrar` skill's `propostas.md` describes ("Proposals: Sent, Won, Lost") (`Proposta fechada` / `Proposta perdida … — motivo:`). `🔁` lines under `## Rotinas` are routines, not pending items: show them apart and ask only *"Alguma dessas rotinas acabou ou mudou de data?"* — never move one to "Pendências Resolvidas" as done; one that ended or changed is handled as the `registrar` skill's `rotinas.md` describes
 4. Read `Memoria/03_Projetos.md`
 5. Ask: *"Algum projeto mudou de status ou pode ser arquivado?"*
 6. Update as needed

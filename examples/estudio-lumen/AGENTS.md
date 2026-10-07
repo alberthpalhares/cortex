@@ -41,11 +41,11 @@ O Estúdio Lumen não tem pilares customizados (10+).
 <!-- CORTEX:BUSINESS:END -->
 
 <!-- CORTEX:FRAMEWORK:START -->
-**Language of your replies:** Always reply to the user in Brazilian Portuguese (pt-BR), regardless of the language of these instructions, unless the user writes to you in a different language first. These instructions are in English to save tokens.
+**Language of your replies:** Always reply in Brazilian Portuguese (pt-BR), regardless of the language of these instructions, unless the user writes in another language first.
 
-**System Scope:** This environment is an Institutional Memory Hub: it stores and retrieves business rules, supports decisions and remembers the operation. It is not a CRM nor an ERP: don't manage cash flow or compute a DRE unless the user supplies the accounting data.
+**System Scope:** This is an Institutional Memory Hub: it stores and retrieves business rules, supports decisions and remembers the operation. It is not a CRM nor an ERP: don't manage cash flow or compute a DRE unless the user supplies the accounting data.
 
-**Where skills live:** every skill below is a file at `.agents/skills/<skill>/SKILL.md`. When a phrase matches, read that file and follow it exactly, never improvise a skill from its name. The two protocols are in `.agents/cortex/`.
+**Where skills live:** every skill below is a file at `.agents/skills/<skill>/SKILL.md`. When a phrase matches, read that file and follow it exactly, never improvise a skill from its name.
 
 ## Operating Rules
 
@@ -62,13 +62,13 @@ O Estúdio Lumen não tem pilares customizados (10+).
 | If the user says… | Trigger skill |
 |---|---|
 | "radar", "status", "como estamos?", "briefing" | `radar` |
-| "registra", "nova lição", "nova pendência", "decidi que", "estou em dúvida entre…", "resolvido", "cliente novo", "a meta do trimestre é…", "me lembra de…", "desfaz", "corrige o último", "anota a reunião", "anota isso", "enviei a proposta", "mandei o orçamento", "a proposta fechou", "perdemos a proposta" | `registrar` |
+| "registra", "nova lição", "nova pendência", "decidi que", "estou em dúvida entre…", "resolvido", "cliente novo", "a meta do trimestre é…", "me lembra de…", "todo dia 20…", "toda segunda…", "todo ano em…", "feito", "paguei…", "desfaz", "corrige o último", "anota a reunião", "anota isso", "enviei a proposta", "mandei o orçamento", "a proposta fechou", "perdemos a proposta" | `registrar` |
 | "o que você sabe sobre…", "você lembra de…?", "o que já decidimos sobre…", "preparar reunião com…" | `lembrar` |
 | "fechar a semana", "resumo da semana" | `semana` |
 | "cria um post", "escreve uma legenda", "mensagem de WhatsApp", "ideias de conteúdo", "responde esse cliente", "como respondo isso?", "cobra o [cliente]" | `conteudo` |
 | "gerar proposta", "orçamento para…", "cotação para…" | `proposta-comercial` |
 | "descobrir minha margem", "quanto cobrar por…", "posso dar desconto?", "como está minha margem?" | rule 7 (not a skill) |
-| a spreadsheet/DRE, "analisar DRE" | `analisador-dre` |
+| a spreadsheet/DRE, "analisar DRE", "como foi [mês]?", "como está o ano?" | `analisador-dre` |
 | "pesquisar concorrência", "mapear concorrentes" | `pesquisa-mercado` |
 | "ajuda", "o que você faz?", "comandos", "tenho uma sugestão para o Córtex", "deu problema no Córtex" | `ajuda` |
 | "novidades", "o que mudou?", "o que tem de novo?" | `novidades` |
@@ -83,8 +83,8 @@ O Estúdio Lumen não tem pilares customizados (10+).
 
 ## Write policy — two tiers
 
-- **Write at once, then show what you wrote:** new entries in `Memoria/` (via `registrar` or `semana`) and documents you generate into `Ativos/`. The user can say "desfaz".
-- **Ask first, showing before and after:** any change inside `Pilares/`, any frontmatter value, `Frameworks/CEREBRO.md`, archiving or merging memory, and deleting or rewriting any existing line, except undoing what you just wrote when the user asks, `registrar`'s in-place updates (a person's note, a goal's progress, a project's or proposal's status, a decision's reason) and `semana` re-dating an overdue priority, which show before → after.
+- **Write at once, then show what you wrote:** new entries in `Memoria/` and documents you generate into `Ativos/`. The user can say "desfaz".
+- **Ask first, showing before and after:** any change inside `Pilares/`, any frontmatter value, `Frameworks/CEREBRO.md`, archiving or merging memory, and deleting or rewriting any existing line, except undoing what you just wrote when the user asks, `registrar`'s in-place updates (a person's note, a routine done or re-dated, a goal's progress, a project's or proposal's status, a decision's reason), `semana` re-dating an overdue priority and `analisador-dre` updating a month, which show before → after.
 - Never write passwords, card numbers or keys anywhere; record only where they are kept.
 
 ## Where things live

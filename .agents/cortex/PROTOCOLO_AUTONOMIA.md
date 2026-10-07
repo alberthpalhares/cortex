@@ -52,7 +52,7 @@ For "quanto cobrar por…", answer instead with exactly these three lines, one p
 - **Preço mínimo:** R$ Y (margem de `margem_minima`%)
 - **Preço-alvo:** R$ Z (margem de `margem_alvo`% — de cada R$ 100, sobram R$ W)
 
-For "como está minha margem?" with no deal on the table: state `margem_alvo` and `margem_minima`, then run the first formula on each item of `custos_variaveis` at its list price (the prices are in `Pilares/04_Comercial.md`) and show one line per item, with no verdict. Say it is the margin per job at list price, before fixed costs. Never ask for a spreadsheet first — a DRE is only for the result after fixed costs.
+For "como está minha margem?" with no deal on the table: state `margem_alvo` and `margem_minima`, then run the first formula on each item of `custos_variaveis` at its list price (the prices are in `Pilares/04_Comercial.md`) and show one line per item, with no verdict. Say it is the margin per job at list price, before fixed costs, and end with: *"O resultado do mês inteiro, depois de todos os custos, é outra conta: pergunte 'como foi [mês]?'."* Never ask for a spreadsheet first — a DRE is only for the result after fixed costs.
 
 **When something is missing, say exactly what and offer help — one short line, never a lecture:**
 - Missing a cost → *"Não sei quanto custa entregar isso. Me diz quanto você gasta em material, ajudante e deslocamento e eu fecho a conta."*

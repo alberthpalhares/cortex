@@ -1,5 +1,5 @@
 {
-  "version": "1.7.0",
+  "version": "1.8.0",
   "files": [
     ".agents/cortex/COMECE-AQUI.txt",
     ".agents/cortex/PROTOCOLO_AUTONOMIA.md",
@@ -38,6 +38,7 @@
     ".agents/skills/registrar/decisoes.md",
     ".agents/skills/registrar/lote.md",
     ".agents/skills/registrar/propostas.md",
+    ".agents/skills/registrar/rotinas.md",
     ".agents/skills/saude/SKILL.md",
     ".agents/skills/semana/SKILL.md"
   ]

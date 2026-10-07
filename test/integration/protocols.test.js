@@ -243,3 +243,76 @@ test('doctor continua acusando o arquivo morto que está no mapa e sumiu do disc
   r = run(['doctor', '.', '--offline'], semPasta);
   assert.ok(r.stdout.includes('Quebrado') && r.stdout.includes('Memoria/_Arquivo/'), r.stdout);
 });
+
+test('doctor não acusa a seção de rotinas nem as linhas 🔁, com ou sem a linha dela no índice', () => {
+  const pend = path.join('Memoria', '04_Pessoas_Pendencias.md');
+  const meta = path.join('Memoria', 'META.md');
+  const check = (dir, label) => {
+    const before = read(dir, pend);
+    const r = run(['doctor', dir, '--offline'], ROOT);
+    assert.equal(r.status, 0, r.stdout + r.stderr);
+    assert.ok(r.stdout.includes('META.md: sem inconsistências'), `${label}: ${r.stdout}`);
+    assert.ok(r.stdout.includes('Pilares com pendências: Nenhum'), `${label}: a seção nova não é pendência de preenchimento`);
+    for (const word of ['Quebrado', 'Não indexado', 'Rotinas', '🔁']) assert.ok(!r.stdout.includes(word), `${label}: o doctor não deveria falar de "${word}"`);
+    assert.equal(read(dir, pend), before, 'o doctor só relata');
+  };
+
+  // O exemplo: seção com duas rotinas e a linha "## Rotinas" no índice.
+  const withRow = mkTmpDir();
+  cli.copyRecursiveSync(path.join(ROOT, 'examples', 'estudio-lumen'), withRow);
+  assert.ok(read(withRow, pend).includes('## Rotinas\n- 🔁 **[TODO MÊS: dia 10]**') && read(withRow, meta).includes('`## Rotinas`'));
+  check(withRow, 'com a linha no índice');
+
+  // Instalação antiga: o registrar criou a seção, o índice continua sem a linha dela.
+  const oldIndex = mkTmpDir();
+  cli.copyRecursiveSync(path.join(ROOT, 'examples', 'estudio-lumen'), oldIndex);
+  fs.writeFileSync(path.join(oldIndex, meta), read(oldIndex, meta).split('\n').filter((l) => !l.includes('## Rotinas')).join('\n'));
+  check(oldIndex, 'sem a linha no índice');
+
+  // E um arquivo que ainda não tem a seção continua sem nada a apontar.
+  const noSection = mkTmpDir();
+  cli.copyRecursiveSync(path.join(ROOT, 'examples', 'estudio-lumen'), noSection);
+  fs.writeFileSync(path.join(noSection, pend), read(noSection, pend).replace(/## Rotinas\n(- 🔁 .*\n)+\n/, ''));
+  assert.ok(!read(noSection, pend).includes('Rotinas'));
+  check(noSection, 'sem a seção');
+});
+
+test('doctor não acusa a seção de resultado mês a mês nem as linhas 📊, com ou sem a linha dela no índice', () => {
+  const gerais = path.join('Memoria', '05_Registros_Gerais.md');
+  const meta = path.join('Memoria', 'META.md');
+  const check = (dir, label) => {
+    const before = read(dir, gerais);
+    const r = run(['doctor', dir, '--offline'], ROOT);
+    assert.equal(r.status, 0, r.stdout + r.stderr);
+    assert.ok(r.stdout.includes('META.md: sem inconsistências'), `${label}: ${r.stdout}`);
+    assert.ok(r.stdout.includes('Pilares com pendências: Nenhum'), `${label}: a seção nova não é pendência de preenchimento`);
+    for (const word of ['Quebrado', 'Não indexado', 'Resultado Mês', 'Receita R$']) assert.ok(!r.stdout.includes(word), `${label}: o doctor não deveria falar de "${word}"`);
+    assert.equal(read(dir, gerais), before, 'o doctor só relata');
+  };
+  const copy = () => {
+    const dir = mkTmpDir();
+    cli.copyRecursiveSync(path.join(ROOT, 'examples', 'estudio-lumen'), dir);
+    return dir;
+  };
+
+  // O exemplo: seção com dois meses e a linha dela no índice.
+  const withRow = copy();
+  assert.ok(read(withRow, gerais).includes('## Resultado Mês a Mês\n- 📊 **[2026-08]**') && read(withRow, meta).includes('`## Resultado Mês a Mês`'));
+  check(withRow, 'com a linha no índice');
+
+  // Instalação antiga: a skill criou a seção, o índice continua sem a linha dela.
+  const oldIndex = copy();
+  fs.writeFileSync(path.join(oldIndex, meta), read(oldIndex, meta).split('\n').filter((l) => !l.includes('## Resultado Mês a Mês')).join('\n'));
+  check(oldIndex, 'sem a linha no índice');
+
+  // Índice novo (o molde já traz a linha) e arquivo que ainda não tem a seção.
+  const noSection = copy();
+  fs.writeFileSync(path.join(noSection, gerais), read(noSection, gerais).replace(/\n## Resultado Mês a Mês\n(- 📊 .*\n)+/, ''));
+  assert.ok(!read(noSection, gerais).includes('Resultado'));
+  check(noSection, 'sem a seção');
+
+  // Um mês com prejuízo e um escrito à mão, incompleto, também não são problema.
+  const odd = copy();
+  fs.appendFileSync(path.join(odd, gerais), '- 📊 **[2026-06]** Receita R$ 9.000 · Custos e despesas R$ 10.200 · Resultado -R$ 1.200 · Margem líquida -13,3% *(analisado em 2026-07-03)*\n- 📊 **[2026-05]** Receita R$ 12.000\n');
+  check(odd, 'prejuízo e linha escrita à mão');
+});

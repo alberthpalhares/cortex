@@ -23,6 +23,7 @@ This skill quickly answers "what can I do here" without requiring the user to me
 📡 `radar` — o que está atrasado, o que está parado e em que focar hoje
 📝 `registra que...` — guardo uma decisão, lição, pendência ou pessoa (errou? diga `desfaz`)
 ⏰ `me lembra de...` — anoto com data e mostro no radar (não mando aviso no celular)
+🔁 `todo dia 20...` ou `toda segunda...` — o que se repete (imposto, aluguel, relatório) volta sozinho ao radar na semana de cada data; quando fizer, diga `feito`
 📋 `anota a reunião` — cole suas anotações e eu separo decisões, pendências e lições
 📱 `anota isso` — cole o que você ditou ou mandou para si mesmo no WhatsApp; cada anotação fica com a data do dia dela
 ⚖️ `estou em dúvida entre A e B` — peso as duas opções com o que você já decidiu e aprendeu, e guardo a escolha com o porquê
@@ -37,7 +38,8 @@ This skill quickly answers "what can I do here" without requiring the user to me
 🤝 `preparar reunião com [pessoa]` — o que está em aberto, o que já foi combinado e até onde você pode ir
 💰 `descobrir minha margem` — em 5 minutos descobrimos quanto sobra de verdade nos seus trabalhos
 💵 `quanto cobrar por...` — do custo ao preço mínimo e ao preço-alvo, respeitando a sua margem
-📊 `analisar DRE` — comparo seus números com as suas metas de margem
+📊 `analisar DRE` — comparo seus números com as suas metas de margem e guardo o resultado do mês
+📅 `como foi setembro?` ou `como está o ano?` — comparo os meses que você já me trouxe: receita, resultado e margem do mês
 🔍 `pesquisar concorrência` — quem são, quanto cobram e onde você se diferencia
 
 **Para cuidar do Córtex**

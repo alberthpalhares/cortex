@@ -6,6 +6,24 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-10-07
+
+O que se repete e o que passou: as rotinas voltam sozinhas ao radar, e o resultado de cada mês fica guardado para comparar.
+
+### Migração (quem já usa)
+- Rode `npx @aksp/cortex@latest update`. Nenhum dado seu é tocado: as seções novas ("Rotinas" e "Resultado Mês a Mês") só aparecem quando você usar, e pastas antigas continuam funcionando como estão.
+
+### Adicionado
+- **Rotinas.** Diga uma vez o que se repete ("todo dia 20 pago o DAS", "toda segunda mando o relatório", "o seguro vence todo ano em março") e isso volta ao radar na semana de cada data, marcado com 🔁. Quando fizer, diga "feito" ou "paguei o DAS": a rotina não some, só anota a última vez e passa a esperar a próxima data. Se ficou para trás, o radar mostra uma linha só, com a última data perdida.
+- **Mudar ou encerrar uma rotina.** "O DAS agora vence dia 25" troca a data; "não pago mais o aluguel" encerra sem apagar o histórico. O "desfaz" vale para tudo isso.
+- **Resultado mês a mês.** Depois de analisar a planilha ou os números que você traz, o Córtex guarda uma linha com o resultado daquele mês (receita, custos e despesas, resultado e margem líquida). Analisou o mesmo mês de novo? A linha é atualizada, mostrando antes e depois. Só entram números que você trouxe: nada é estimado, e o mês que ainda não fechou não é guardado.
+- **Comparação.** Quando já existem meses guardados, o diagnóstico termina comparando com o mês anterior e com o mesmo mês do ano passado. Depois é só perguntar: "como foi setembro?", "compara setembro com agosto", "como está o ano?".
+
+### Alterado
+- **Duas margens, cada uma no seu lugar.** "Como está minha margem?" continua sendo a margem de cada trabalho, antes dos custos fixos; "como foi setembro?" é o resultado do mês inteiro, depois de todos os custos. Cada resposta aponta para a outra.
+- O fechamento da semana, a busca na memória, a revisão e a consolidação entendem as rotinas e as linhas de resultado: nenhuma delas é arquivada nem tratada como pendência vencida.
+- O roteiro de conversa do `CONTRIBUTING.md` diz o que responder na ata e no fechamento da semana, e ganhou dois passos para as rotinas.
+
 ## [1.7.0] - 2026-10-07
 
 O Córtex acompanha o que acontece depois: a proposta enviada, o porquê da decisão, a anotação feita no celular.
